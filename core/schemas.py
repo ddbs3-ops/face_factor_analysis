@@ -12,3 +12,15 @@ class  FrontalityResult:
     pose: HeadPose
     reasons: tuple[str,...] #reasons는 문자열이 0개 이상 들어가는 튜플이다.
     messages: tuple[str,...]
+
+@dataclass
+class Point3D:
+    x : float
+    y : float
+    z : float
+
+@dataclass
+class RawFace:
+    points : tuple[Point3D, ...]
+    image_width : int
+    image_height : int
