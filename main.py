@@ -5,7 +5,7 @@ import mediapipe as mp
 
 from core.frontality import evaluate_frontality
 from core.mediapipe_tasks import launch_facelandmark, launch_segment_selfie, prepare_mp_image
-from core.hairline import detect_hairline_y, estimate_hairline_y, calculate_vertical_face_lengths
+from core.hairline import detect_hairline_y, estimate_hairline_y ,get_vertical_landmark_y
 from scipy.spatial.transform import Rotation
 from core.face_features import ratio_calculate
 
@@ -18,9 +18,10 @@ launch_facelandmark_model_path = 'models/face_landmarker.task'
 
 def main():
 
-    img_path = "data/raw/test_face1.jpg"
+    img_path = "data/raw/test_face4.jpg"
+    img = cv2.imread(img_path)
     mp_image, img_height, img_width = prepare_mp_image(img_path)    #image 불러오기 type(img) == numpy.ndarray
-    
+
     face_landmarker_result = launch_facelandmark(launch_facelandmark_model_path, mp_image)
     segmented_masks_result = launch_segment_selfie(selfiemulticlass_model_path, mp_image)
 
@@ -58,14 +59,16 @@ def main():
     category_mask = segmented_masks_result.category_mask.numpy_view()
     category_mask_2d = np.squeeze(category_mask)
 
+    vertical_facepoints = get_vertical_landmark_y(raw_face)
     detected_hairline = detect_hairline_y(raw_face, category_mask_2d)
-    estimated_hairline = estimate_hairline_y(raw_face)
+    estimated_hairline = estimate_hairline_y(raw_face, vertical_facepoints)
 
 
 
     if detected_hairline is None:
         hairline_y = estimate_hairline_y(
-            raw_face
+            raw_face,
+            vertical_facepoints
         )
     else:
         difference = abs(detected_hairline - estimated_hairline)
@@ -73,20 +76,43 @@ def main():
 
         if difference > allowed_difference:
             hairline_y = estimated_hairline
+            print("앞머리로 인한 추정치 입니다.")
         else:
             hairline_y = detected_hairline
+            print("영역분리 기준 헤어 라인")
 
     #----------------------요소 검출
 
-    Upper_floor_ratio, middle_floor_ratio, lower_floor_ratio = ratio_calculate(raw_face, hairline_y)
+    face_ratios = ratio_calculate(hairline_y, vertical_facepoints)
       
-    print(Upper_floor_ratio, middle_floor_ratio, lower_floor_ratio)
-    
+    print(face_ratios.upper, face_ratios.middle, face_ratios.lower)
+
+    show_img_third(img,hairline_y,raw_face)
+
     
     
 
-    # 가로새로 종횡비
+    
+def show_img_third(
+        img,
+        hairline_y,
+        raw_face 
+):  
+    
+    cv2.line(img, (0, int(hairline_y)), (raw_face.image_width-1, int(hairline_y)), (0,0,255),2)
 
+    glabella_y = int(((raw_face.points[8].y+raw_face.points[9].y)/2)*raw_face.image_height)
+    subnose_y = int(raw_face.points[94].y*raw_face.image_height)
+    chin_y = int(raw_face.points[152].y*raw_face.image_height)
+    cv2.line(img, (0, glabella_y), (raw_face.image_width-1, glabella_y), (0,0,255),2)
+    cv2.line(img, (0, subnose_y), (raw_face.image_width-1, subnose_y), (0,0,255),2)
+    cv2.line(img, (0, chin_y), (raw_face.image_width-1, chin_y), (0,0,255),2)
+
+    cv2.imshow("Image",img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    
+    
     
     
     

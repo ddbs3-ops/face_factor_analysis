@@ -1,12 +1,12 @@
 import numpy as np  # 마스크 배열에서 중앙값을 계산하기 위해 numpy를 가져옵니다.
 
-from core.schemas import RawFace  # 얼굴 랜드마크와 이미지 크기를 담은 RawFace 타입을 가져옵니다.
-from core.geometric import calculate_distance
+from core.schemas import RawFace,VerticalFacePoints  # 얼굴 랜드마크와 이미지 크기를 담은 RawFace 타입을 가져옵니다.
+
 def detect_hairline_y(  
     raw_face: RawFace,  
     category_mask_2d: np.ndarray,  
     hair_class_id: int = 1,  
-) -> int | None:  
+) -> float | None:  
     left_cheek = raw_face.points[234]  
     right_cheek = raw_face.points[454]  
     forehead_top = raw_face.points[10]  
@@ -47,44 +47,54 @@ def detect_hairline_y(
     return hairline_y  # 최종 헤어라인 y 픽셀 좌표를 반환합니다.
 
 def estimate_hairline_y(
-    raw_face: RawFace
+    raw_face: RawFace,
+    vertical_facepoints : VerticalFacePoints
 ):
-    glabella = 8
-    subnose = 94
-    chin = 152
+    middle_face_length = (
+        vertical_facepoints.subnasale_y
+        - vertical_facepoints.glabella_y
+    )
 
-    middle_floor_y ,lower_floor_y = calculate_vertical_face_lengths(raw_face)
+    lower_face_length = (
+        vertical_facepoints.chin_y
+        - vertical_facepoints.subnasale_y
+    )
 
-    upper_floor_distance = (middle_floor_y + lower_floor_y) / 2
+    estimated_upper_face_length = (
+        middle_face_length + lower_face_length
+    ) / 2
 
-    hairline_y = raw_face.points[glabella].y  * raw_face.image_height - upper_floor_distance
+    hairline_y = (
+        vertical_facepoints.glabella_y
+        - estimated_upper_face_length
+    )
 
     return max(0, hairline_y)
 
     
-def calculate_vertical_face_lengths(
+
+def get_vertical_landmark_y(
     raw_face: RawFace,
-) -> tuple[float, float]:
-    glabella_index = 8
-    subnose_index = 94
-    chin_index = 152
+) -> tuple[float, float, float]:
 
-    middle_face_length = (
-        abs(
-            raw_face.points[glabella_index].y
-            - raw_face.points[subnose_index].y
-        )
+    glabella_y = (
+        raw_face.points[8].y
+        + raw_face.points[9].y
+    ) / 2 * raw_face.image_height
+
+    subnasale_y = (
+        raw_face.points[94].y
         * raw_face.image_height
     )
 
-    lower_face_length = (
-        abs(
-            raw_face.points[subnose_index].y
-            - raw_face.points[chin_index].y
-        )
+    chin_y = (
+        raw_face.points[152].y
         * raw_face.image_height
     )
 
-    return middle_face_length, lower_face_length
-    
+    return VerticalFacePoints(
+        glabella_y=glabella_y,
+        subnasale_y=subnasale_y,
+        chin_y=chin_y
+    )
 

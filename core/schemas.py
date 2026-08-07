@@ -24,3 +24,15 @@ class RawFace:
     points : tuple[Point3D, ...]
     image_width : int
     image_height : int
+
+@dataclass
+class VerticalFacePoints:
+    glabella_y: float
+    subnasale_y: float
+    chin_y: float
+
+@dataclass
+class VerticalFaceRatios:
+    upper : float
+    middle : float
+    lower : float
