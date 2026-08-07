@@ -30,7 +30,7 @@ def calculate_face_width_height_ratio(
     face_height = abs(hairlne_y - chin.y)
     face_width = abs(right_cheekbone.x - left_cheekbone.x)
 
-    return round(face_height / face_width, 4)
+    return round(face_width / face_height , 4)
 
 def calculate_face_widths(
         raw_face : RawFace
