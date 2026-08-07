@@ -7,9 +7,9 @@ from core.frontality import evaluate_frontality
 from core.mediapipe_tasks import launch_facelandmark, launch_segment_selfie, prepare_mp_image
 from core.hairline import detect_hairline_y, estimate_hairline_y ,get_vertical_landmark_y
 from scipy.spatial.transform import Rotation
-from core.face_features import ratio_calculate
+from core.face_features import *
 
-from core.schemas import HeadPose, FrontalityResult, Point3D, RawFace
+from core.schemas import *
 
 selfiemulticlass_model_path = 'models/selfie_multiclass_256x256.tflite'
 launch_facelandmark_model_path = 'models/face_landmarker.task' 
@@ -18,7 +18,7 @@ launch_facelandmark_model_path = 'models/face_landmarker.task'
 
 def main():
 
-    img_path = "data/raw/test_face4.jpg"
+    img_path = "data/raw/output_3439369483.jpg"
     img = cv2.imread(img_path)
     mp_image, img_height, img_width = prepare_mp_image(img_path)    #image 불러오기 type(img) == numpy.ndarray
 
@@ -65,6 +65,7 @@ def main():
 
 
 
+
     if detected_hairline is None:
         hairline_y = estimate_hairline_y(
             raw_face,
@@ -80,15 +81,24 @@ def main():
         else:
             hairline_y = detected_hairline
             print("영역분리 기준 헤어 라인")
+    hairline_result = HairlineResult(
+        detected_y=detected_hairline,
+        estimated_y=estimated_hairline,
+        final_y=hairline_y,
+    )
 
     #----------------------요소 검출
 
-    face_ratios = ratio_calculate(hairline_y, vertical_facepoints)
+    face_ratios = calculate_vertical_face_ratios(hairline_y, vertical_facepoints)
       
     print(face_ratios.upper, face_ratios.middle, face_ratios.lower)
 
-    show_img_third(img,hairline_y,raw_face)
+    show_img_third(img = img,hairline_y=hairline_result.final_y,detected_y=hairline_result.detected_y,
+                   estimated_y=hairline_result.estimated_y, raw_face=raw_face)
 
+    face_width_height_ratio = calculate_face_width_height_ratio(hairline_result.final_y, raw_face)
+    print(face_width_height_ratio)
+    print(calculate_face_widths(raw_face))
     
     
 
@@ -96,11 +106,15 @@ def main():
 def show_img_third(
         img,
         hairline_y,
+        detected_y,
+        estimated_y,
         raw_face 
 ):  
     
-    cv2.line(img, (0, int(hairline_y)), (raw_face.image_width-1, int(hairline_y)), (0,0,255),2)
-
+    cv2.line(img, (0, int(hairline_y)), (raw_face.image_width-1, int(hairline_y)), (0,0,255),3)
+    cv2.line(img, (0, int(detected_y)), (raw_face.image_width-1, int(detected_y)), (0,255,0),2)
+    cv2.line(img, (0, int(estimated_y)), (raw_face.image_width-1, int(estimated_y)), (255,0,0),2)
+    
     glabella_y = int(((raw_face.points[8].y+raw_face.points[9].y)/2)*raw_face.image_height)
     subnose_y = int(raw_face.points[94].y*raw_face.image_height)
     chin_y = int(raw_face.points[152].y*raw_face.image_height)
@@ -108,12 +122,31 @@ def show_img_third(
     cv2.line(img, (0, subnose_y), (raw_face.image_width-1, subnose_y), (0,0,255),2)
     cv2.line(img, (0, chin_y), (raw_face.image_width-1, chin_y), (0,0,255),2)
 
+    left_zygion = raw_face.points[234]
+    right_zygion = raw_face.points[454]
+
+    cv2.line(
+        img,
+        (
+        int(left_zygion.x * raw_face.image_width),
+        int(left_zygion.y * raw_face.image_height),
+        ),
+        (
+        int(right_zygion.x * raw_face.image_width),
+        int(right_zygion.y * raw_face.image_height),
+        ),
+        (0, 255, 255),
+        2,
+    )
+    
+
     cv2.imshow("Image",img)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     
     
-    
+
+
     
     
 

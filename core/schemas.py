@@ -20,6 +20,11 @@ class Point3D:
     z : float
 
 @dataclass
+class Point2D:
+    x:float
+    y:float
+
+@dataclass
 class RawFace:
     points : tuple[Point3D, ...]
     image_width : int
@@ -36,3 +41,10 @@ class VerticalFaceRatios:
     upper : float
     middle : float
     lower : float
+
+@dataclass
+class HairlineResult:
+    detected_y : float | None
+    estimated_y : float
+    final_y : float | None
+
