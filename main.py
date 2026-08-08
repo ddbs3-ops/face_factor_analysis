@@ -18,7 +18,7 @@ launch_facelandmark_model_path = 'models/face_landmarker.task'
 
 def main():
 
-    img_path = "data/raw/output_3439369483.jpg"
+    img_path = "data/raw/KakaoTalk_20251009_130640777.jpg"
     img = cv2.imread(img_path)
     mp_image, img_height, img_width = prepare_mp_image(img_path)    #image 불러오기 type(img) == numpy.ndarray
 
@@ -99,9 +99,23 @@ def main():
     face_width_height_ratio = calculate_face_width_height_ratio(hairline_result.final_y, raw_face)
     print(face_width_height_ratio)
     print(calculate_face_widths(raw_face))
-    
-    
 
+    landmarks = (132, 58, 172, 136, 150)
+
+    test = calculate_face_contour_local_angles(landmarks, raw_face)
+    print(test)
+    
+    chin_left_index = (150,149,176,148,152)
+    chin_right_index = (379,378,400,377,152)
+
+    get_chin_left_slope = fit_line_to_points(raw_face,chin_left_index)
+    get_chin_right_slope = fit_line_to_points(raw_face, chin_right_index)
+
+    chin_left_vector = slope_to_vector(get_chin_left_slope[0])
+    chin_right_vector = slope_to_vector(get_chin_right_slope[0])
+    
+    print("벡터", chin_left_vector, chin_right_vector)
+    print(calculate_angle_between_vector(chin_left_vector,chin_right_vector))
     
 def show_img_third(
         img,
