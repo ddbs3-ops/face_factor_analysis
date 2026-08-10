@@ -33,7 +33,7 @@ def calculate_face_width_height_ratio(
 
     return round(face_width / face_height , 4)
 
-def calculate_face_widths(
+def calculate_jaw_to_cheekbone_width_ratio(
         raw_face : RawFace
 ):
     left_cheekbone = get_pixel_point(raw_face, 234)
@@ -102,8 +102,8 @@ def calculate_face_contour_local_angles(
     return tuple(angles)
 
 def fit_line_to_points(
+    landmarks_number : tuple[int, ...],
     raw_face : RawFace,
-    landmarks_number : tuple[int, ...]
 ):
     
     points = []
@@ -146,6 +146,27 @@ def calculate_angle_between_vector(
 
     return round(math.degrees(theta), 2)
 
+def calculate_angle_between_landmark_lines(
+    raw_face: RawFace,
+    first_line_indices: tuple[int, ...],
+    second_line_indices: tuple[int, ...],
+) -> float:
+    first_slope, _ = fit_line_to_points(
+        landmarks_number=first_line_indices,
+        raw_face=raw_face,
+    )
 
+    second_slope, _ = fit_line_to_points(
+        landmarks_number=second_line_indices,
+        raw_face=raw_face,
+    )
+
+    first_vector = slope_to_vector(first_slope)
+    second_vector = slope_to_vector(second_slope)
+
+    return calculate_angle_between_vector(
+        first_vector,
+        second_vector,
+    )
 
     

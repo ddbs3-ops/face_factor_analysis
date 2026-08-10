@@ -48,3 +48,21 @@ class HairlineResult:
     estimated_y : float
     final_y : float | None
 
+@dataclass
+class JawMeasurements:
+    jaw_to_cheekbone_width_ratio: float
+
+    chin_contour_angles_deg: tuple[float, ...]
+    left_jaw_contour_angles_deg: tuple[float, ...]
+    right_jaw_contour_angles_deg: tuple[float, ...]
+
+    chin_angle_deg: float
+    left_jaw_angle_deg: float
+    right_jaw_angle_deg: float
+
+
+@dataclass
+class FaceMeasurements:
+    width_to_height_ratio: float
+    vertical_ratios: VerticalFaceRatios
+    jaw: JawMeasurements
