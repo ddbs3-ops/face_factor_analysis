@@ -14,6 +14,8 @@ from core.schemas import *
 from config import landmark_indices as landmark
 from visualization import show_face_analysis
 
+from database.database import create_table, save_face_measurement, print_all_measurements
+
 SELFIE_MODEL_PATH = 'models/selfie_multiclass_256x256.tflite'
 FACE_LANDMARKER_MODEL_PATH = 'models/face_landmarker.task' 
 
@@ -33,7 +35,7 @@ def main():
 
     #-------------------------------------------------------------------------------------------------------------------
     # 정면성 검사 시작
-    check_frontality(face_landmarker_result) #일단 쓰이지 않으므로 함수 호출만 함 return도 없음
+    frontality_result = check_frontality(face_landmarker_result) #일단 쓰이지 않으므로 함수 호출만 함 return도 없음
 
     raw_face = create_raw_face(face_landmarker_result, img_width, img_height)
     vertical_facepoints = get_vertical_landmark_y(raw_face) #이거 좀 불편하네 어떻게 하긴 해야할듯
@@ -71,6 +73,17 @@ def main():
         hairline_result=hairline_result,
         face_measurements=face_measurements,
     )
+
+    create_table()
+    save_face_measurement(
+        image_path=IMAGE_PATH,
+        frontality_result=frontality_result,
+        face_measurements=face_measurements,
+    )
+    print_all_measurements()
+
+    
+    
 
     
 
@@ -142,6 +155,8 @@ def check_frontality(
             print(reason)
     
         print("그렇지 않으면 향후 검출 값이 오류를 발생할 수 있습니다.")
+
+    return frontality_result
 
 
 def analyze_hairline(

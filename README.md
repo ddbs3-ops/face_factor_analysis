@@ -27,3 +27,40 @@ yaw, pitch, roll을 계산한다.
 헤어라인 검출은 mediapipe의 selifie_multicalss 를 사용한다. 
 selifie_multicalss로 헤어 영역과 피부 영역을 분리한다. 
 이후 얼굴 중심 세로선을 랜드마크로 검출하고 그 영역을 좌우로 검사하며 위로 올라간다. 이때 헤어라인이 끝나는 지점을 검출한다. 하지만 앞머리 이마를 덮고있으면 이 추정이 쓸모 없어지기 때문에 중안부 하안부 거리를 통해 간접적으로 검출한다. 이후 UX를 이용해 사용자에게 헤어라인을 직접 움직이게 해서 정확도를 올리려한다.
+
+db에 저장할 목록
+
+#face_measurements_db
+id
+path
+is_frontial
+
+yaw
+pitch
+roll
+
+height_to_width_ratio
+jaw_to_cheekbone_ratio
+
+upper_ratio
+middle_ratio
+lower_ratio
+
+chin_angle
+chin_contour_mean
+chin_contour_std
+chin_contour_min #가장 강한 코너
+chin_contour_range
+
+left_jaw_angle
+left_jaw_contour_std
+left_jaw_contour_min #가장 강한 코너
+left_jaw_contour_range
+
+right_jaw_anlge
+right_jaw_contour_std
+right_jaw_contour_min #가장 강한 코너
+right_jaw_contour_range
+
+#countour_measurement_db
+튜플 저장
