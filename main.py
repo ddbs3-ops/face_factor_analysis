@@ -12,11 +12,12 @@ from core.face_features import *
 from core.schemas import *
 
 from config import landmark_indices as landmark
+from visualization import show_face_analysis
 
 SELFIE_MODEL_PATH = 'models/selfie_multiclass_256x256.tflite'
 FACE_LANDMARKER_MODEL_PATH = 'models/face_landmarker.task' 
 
-IMAGE_PATH = "data/raw/test_face.jpg"
+IMAGE_PATH = "data/raw/test_face2.jpeg"
 
 
 def main():
@@ -49,7 +50,7 @@ def main():
         vertical_facepoints=vertical_facepoints,
         hairline_y= hairline_result.final_y)
 
-    print(face_measurements.width_to_height_ratio)
+    print(face_measurements.height_to_width_ratio)
 
     print(face_measurements.vertical_ratios.upper)
     print(face_measurements.vertical_ratios.middle)
@@ -64,58 +65,13 @@ def main():
     print(face_measurements.jaw.right_jaw_contour_angles_deg)
 
 
-    
-
-
-
-
-    show_img_third(img = img,hairline_y=hairline_result.final_y,detected_y=hairline_result.detected_y,
-                   estimated_y=hairline_result.estimated_y, raw_face=raw_face)
-
-
-
-
-
-def show_img_third(
-        img,
-        hairline_y,
-        detected_y,
-        estimated_y,
-        raw_face 
-):  
-    
-    cv2.line(img, (0, int(hairline_y)), (raw_face.image_width-1, int(hairline_y)), (0,0,255),3)
-    cv2.line(img, (0, int(detected_y)), (raw_face.image_width-1, int(detected_y)), (0,255,0),2)
-    cv2.line(img, (0, int(estimated_y)), (raw_face.image_width-1, int(estimated_y)), (255,0,0),2)
-    
-    glabella_y = int(((raw_face.points[8].y+raw_face.points[9].y)/2)*raw_face.image_height)
-    subnose_y = int(raw_face.points[94].y*raw_face.image_height)
-    chin_y = int(raw_face.points[152].y*raw_face.image_height)
-    cv2.line(img, (0, glabella_y), (raw_face.image_width-1, glabella_y), (0,0,255),2)
-    cv2.line(img, (0, subnose_y), (raw_face.image_width-1, subnose_y), (0,0,255),2)
-    cv2.line(img, (0, chin_y), (raw_face.image_width-1, chin_y), (0,0,255),2)
-
-    left_zygion = raw_face.points[234]
-    right_zygion = raw_face.points[454]
-
-    cv2.line(
-        img,
-        (
-        int(left_zygion.x * raw_face.image_width),
-        int(left_zygion.y * raw_face.image_height),
-        ),
-        (
-        int(right_zygion.x * raw_face.image_width),
-        int(right_zygion.y * raw_face.image_height),
-        ),
-        (0, 255, 255),
-        2,
+    show_face_analysis(
+        image=img,
+        raw_face=raw_face,
+        hairline_result=hairline_result,
+        face_measurements=face_measurements,
     )
-    
 
-    cv2.imshow("Image",img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
     
 
 def create_raw_face(
@@ -229,7 +185,7 @@ def analyze_face_measurements(
 ):
     face_ratios = calculate_vertical_face_ratios(hairline_y, vertical_facepoints) # 3,4,5 상중하안부 비율
 
-    face_width_height_ratio = calculate_face_width_height_ratio(hairline_y, raw_face) # 1 얼굴 가로 세로 종횡비
+    face_height_width_ratio = calculate_face_height_to_width_ratio(hairline_y, raw_face) # 1 얼굴 세로/가로 종횡비
     jaw_cheekbone_width_ratio = calculate_jaw_to_cheekbone_width_ratio(raw_face) # 2 턱/ 광대 폭 비율
 
     chin_contour = calculate_face_contour_local_angles(landmark.CHIN_CONTOUR_INDICES, raw_face) #턱끝 중글기
@@ -266,7 +222,7 @@ def analyze_face_measurements(
     )
     
     return FaceMeasurements(
-        width_to_height_ratio=face_width_height_ratio,
+        height_to_width_ratio=face_height_width_ratio,
         vertical_ratios=face_ratios,
         jaw=jaw_measurements,
     )

@@ -19,8 +19,8 @@ def calculate_vertical_face_ratios(
         lower=round(lower_floor_ratio,4)
     ) 
 
-def calculate_face_width_height_ratio(
-    hairlne_y : float,
+def calculate_face_height_to_width_ratio(
+    hairline_y : float,
     raw_face : RawFace
 ):
 
@@ -28,10 +28,10 @@ def calculate_face_width_height_ratio(
     left_cheekbone = get_pixel_point(raw_face, 234)
     right_cheekbone = get_pixel_point(raw_face, 454)
     
-    face_height = abs(hairlne_y - chin.y)
+    face_height = abs(hairline_y - chin.y)
     face_width = abs(right_cheekbone.x - left_cheekbone.x)
 
-    return round(face_width / face_height , 4)
+    return round(face_height / face_width , 4)
 
 def calculate_jaw_to_cheekbone_width_ratio(
         raw_face : RawFace
@@ -141,10 +141,11 @@ def calculate_angle_between_vector(
     if vector1_norm == 0 or vector2_norm == 0:
         raise ValueError("영벡터의 각도는 계산 할 수 없습니다.")
 
-    cosine_theta = dot / (vector1_norm * vector2_norm)
+    cosine_theta = max(-1.0,min( 1.0 ,dot / (vector1_norm * vector2_norm)))
     theta = math.acos(cosine_theta)
+    supplementary_angle = 180 - math.degrees(theta)
 
-    return round(math.degrees(theta), 2)
+    return round(supplementary_angle, 2)
 
 def calculate_angle_between_landmark_lines(
     raw_face: RawFace,

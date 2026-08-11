@@ -63,6 +63,6 @@ class JawMeasurements:
 
 @dataclass
 class FaceMeasurements:
-    width_to_height_ratio: float
+    height_to_width_ratio: float
     vertical_ratios: VerticalFaceRatios
     jaw: JawMeasurements
