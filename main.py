@@ -14,12 +14,12 @@ from core.schemas import *
 from config import landmark_indices as landmark
 from visualization import show_face_analysis
 
-from database.database import create_table, save_face_measurement, print_all_measurements
+from database.database import *
 
 SELFIE_MODEL_PATH = 'models/selfie_multiclass_256x256.tflite'
 FACE_LANDMARKER_MODEL_PATH = 'models/face_landmarker.task' 
 
-IMAGE_PATH = "data/raw/test_face2.jpeg"
+IMAGE_PATH = "data/raw/round_face1.jpg"
 
 
 def main():
@@ -81,6 +81,10 @@ def main():
         face_measurements=face_measurements,
     )
     print_all_measurements()
+
+    delete_face_measurement((1,2,3))
+    
+
 
     
     

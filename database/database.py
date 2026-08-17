@@ -31,8 +31,24 @@ def create_table():
         )
     """)
 
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS contour_measurements(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            face_measurement_id INTEGER,
+            region TEXT,
+            point_index INTEGER,
+            angle REAL,
+
+            FOREIGN KEY (face_measurement_id)
+                REFERENCES face_measurements(id)
+                ON DELETE CASCADE
+            )
+    """)
+
+
     conn.commit()
     conn.close()
+
 
 def save_face_measurement(
     image_path,
@@ -40,6 +56,7 @@ def save_face_measurement(
     face_measurements,
 ):
     conn = sqlite3.connect("data/face_analysis.db")
+    conn.execute("PRAGMA foreign_keys = ON")
     cursor = conn.cursor()
 
     cursor.execute("""
@@ -80,6 +97,61 @@ def save_face_measurement(
         face_measurements.jaw.right_jaw_angle_deg,
     ))
 
+
+    face_measurement_id = cursor.lastrowid
+    for point_index, angle in enumerate(
+        face_measurements.jaw.chin_contour_angles_deg
+    ):
+        cursor.execute("""
+            INSERT INTO contour_measurements(
+                face_measurement_id,
+                region,
+                point_index,
+                angle
+            )
+            VALUES (?, ?, ?, ?)
+        """, (
+        face_measurement_id,
+        "chin",
+        point_index,
+        angle))
+
+    for point_index, angle in enumerate(
+        face_measurements.jaw.right_jaw_contour_angles_deg
+    ):
+        cursor.execute("""
+            INSERT INTO contour_measurements(
+                face_measurement_id,
+                region,
+                point_index,
+                angle
+            )
+            VALUES (?, ?, ?, ?)
+            """, (
+        face_measurement_id,
+        "right_jaw",
+        point_index,
+        angle))
+
+    for point_index, angle in enumerate(
+        face_measurements.jaw.left_jaw_contour_angles_deg
+    ):
+        cursor.execute("""
+            INSERT INTO contour_measurements(
+                face_measurement_id,
+                region,
+                point_index,
+                angle
+            )
+            VALUES (?, ?, ?, ?)
+            """, (
+        face_measurement_id,
+        "left_jaw",
+        point_index,
+        angle))
+
+
+
     conn.commit()
     conn.close()
 
@@ -95,3 +167,18 @@ def print_all_measurements():
         print(row)
 
     conn.close()
+
+def delete_face_measurement(ids):
+    conn = sqlite3.connect("data/face_analysis.db")
+    conn.execute("PRAGMA foreign_keys = ON")
+    cursor = conn.cursor()
+
+    for face_id in ids:
+        cursor.execute(
+            "DELETE FROM face_measurements WHERE id = ?",
+            (face_id,)
+        ) 
+    
+    conn.commit()
+    conn.close()
+
