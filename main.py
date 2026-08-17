@@ -23,8 +23,6 @@ FACE_LANDMARKER_MODEL_PATH = 'models/face_landmarker.task'
 IMAGE_DIRECTORY = Path("data/raw")
 
 def main():
-
-
     create_table()
     
     image_extensions = {".jpg", ".jpeg", ".png"}
@@ -42,7 +40,8 @@ def main():
         analyze_image(image_path_string)
 
     
-    print_all_measurements()
+    
+  
 
     
 def analyze_image(image_path):

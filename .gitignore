@@ -15,7 +15,7 @@ venv/
 
 # 테스트 이미지 / 개인 이미지
 images/
-data/
+data/raw
 
 # MediaPipe 모델 파일
 models/
