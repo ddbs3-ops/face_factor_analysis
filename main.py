@@ -16,16 +16,37 @@ from visualization import show_face_analysis
 
 from database.database import *
 
+from pathlib import Path
+
 SELFIE_MODEL_PATH = 'models/selfie_multiclass_256x256.tflite'
 FACE_LANDMARKER_MODEL_PATH = 'models/face_landmarker.task' 
-
-IMAGE_PATH = "data/raw/round_face1.jpg"
-
+IMAGE_DIRECTORY = Path("data/raw")
 
 def main():
 
-    img, mp_image, img_height, img_width = load_image(IMAGE_PATH)
 
+    create_table()
+    
+    image_extensions = {".jpg", ".jpeg", ".png"}
+
+    for image_path in IMAGE_DIRECTORY.iterdir():
+        if image_path.suffix.lower() not in image_extensions:
+            continue
+
+        image_path_string = str(image_path)
+
+        if face_measurement_exists(image_path_string):
+            print(f"이미 분석됨: {image_path.name}")
+            continue
+
+        analyze_image(image_path_string)
+
+    
+    print_all_measurements()
+
+    
+def analyze_image(image_path):
+    img, mp_image, img_height, img_width = load_image(image_path)
     detection_result = detect_face(mp_image)
 
     if detection_result is None:
@@ -52,44 +73,33 @@ def main():
         vertical_facepoints=vertical_facepoints,
         hairline_y= hairline_result.final_y)
 
-    print(face_measurements.height_to_width_ratio)
+    #show_face_analysis(
+    #    image=img,
+    #    raw_face=raw_face,
+    #    hairline_result=hairline_result,
+    #    face_measurements=face_measurements,
+    #)
 
-    print(face_measurements.vertical_ratios.upper)
-    print(face_measurements.vertical_ratios.middle)
-    print(face_measurements.vertical_ratios.lower)
-
-    print(face_measurements.jaw.chin_angle_deg)
-    print(face_measurements.jaw.left_jaw_angle_deg)
-    print(face_measurements.jaw.right_jaw_angle_deg) # 180 - deg 해야할듯
-
-    print(face_measurements.jaw.chin_contour_angles_deg)
-    print(face_measurements.jaw.left_jaw_contour_angles_deg)
-    print(face_measurements.jaw.right_jaw_contour_angles_deg)
-
-
-    show_face_analysis(
-        image=img,
-        raw_face=raw_face,
-        hairline_result=hairline_result,
-        face_measurements=face_measurements,
-    )
-
-    create_table()
+ 
     save_face_measurement(
-        image_path=IMAGE_PATH,
+        image_path=image_path,
         frontality_result=frontality_result,
         face_measurements=face_measurements,
     )
-    print_all_measurements()
+    #print(face_measurements.height_to_width_ratio)
 
-    delete_face_measurement((1,2,3))
-    
+    #print(face_measurements.vertical_ratios.upper)
+    #print(face_measurements.vertical_ratios.middle)
+    #print(face_measurements.vertical_ratios.lower)
 
+    #print(face_measurements.jaw.chin_angle_deg)
+    #print(face_measurements.jaw.left_jaw_angle_deg)
+    #print(face_measurements.jaw.right_jaw_angle_deg) # 180 - deg 해야할듯
 
-    
-    
+    #print(face_measurements.jaw.chin_contour_angles_deg)
+    #print(face_measurements.jaw.left_jaw_contour_angles_deg)
+    #print(face_measurements.jaw.right_jaw_contour_angles_deg)
 
-    
 
 def create_raw_face(
         face_landmark_result,

@@ -182,3 +182,31 @@ def delete_face_measurement(ids):
     conn.commit()
     conn.close()
 
+def delete_all_face_measurements():
+    conn = sqlite3.connect("data/face_analysis.db")
+    conn.execute("PRAGMA foreign_keys = ON")
+    cursor = conn.cursor()
+
+    cursor.execute("DELETE FROM face_measurements")
+
+    conn.commit()
+    conn.close()
+
+def face_measurement_exists(image_path):
+    conn = sqlite3.connect("data/face_analysis.db")
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        SELECT 1
+        FROM face_measurements
+        WHERE image_path = ?
+        LIMIT 1
+        """,
+        (image_path,)
+    )
+
+    exists = cursor.fetchone() is not None
+
+    conn.close()
+    return exists
