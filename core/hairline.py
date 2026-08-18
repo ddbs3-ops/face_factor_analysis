@@ -75,7 +75,7 @@ def estimate_hairline_y(
 
 def get_vertical_landmark_y(
     raw_face: RawFace,
-) -> tuple[float, float, float]:
+)-> VerticalFacePoints:
 
     glabella_y = (
         raw_face.points[8].y

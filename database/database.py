@@ -1,6 +1,17 @@
 import sqlite3
 
 
+def add_missing_columns(cursor, table_name, columns):
+    cursor.execute(f"PRAGMA table_info({table_name})")
+    existing_columns = {row[1] for row in cursor.fetchall()}
+
+    for column_name, column_type in columns.items():
+        if column_name not in existing_columns:
+            cursor.execute(
+                f"ALTER TABLE {table_name} ADD COLUMN {column_name} {column_type}"
+            )
+
+
 def create_table():
     conn = sqlite3.connect("data/face_analysis.db")
     cursor = conn.cursor()
@@ -9,11 +20,14 @@ def create_table():
         CREATE TABLE IF NOT EXISTS face_measurements (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             image_path TEXT,
-
-            yaw REAL,
-            pitch REAL,
-            roll REAL,
-            is_frontal INTEGER,
+            person_id INTEGER,
+            mp_yaw REAL,
+            gt_yaw REAL,
+            mp_pitch REAL,
+            gt_pitch REAL,
+            mp_roll REAL,
+            gt_roll REAL,
+            mp_is_frontal INTEGER,
 
             height_to_width_ratio REAL,
 
@@ -45,6 +59,20 @@ def create_table():
             )
     """)
 
+    add_missing_columns(
+        cursor,
+        "face_measurements",
+        {
+            "person_id": "INTEGER",
+            "mp_yaw": "REAL",
+            "gt_yaw": "REAL",
+            "mp_pitch": "REAL",
+            "gt_pitch": "REAL",
+            "mp_roll": "REAL",
+            "gt_roll": "REAL",
+            "mp_is_frontal": "INTEGER",
+        },
+    )
 
     conn.commit()
     conn.close()
@@ -52,6 +80,10 @@ def create_table():
 
 def save_face_measurement(
     image_path,
+    person_id,
+    gt_yaw,
+    gt_pitch,
+    gt_roll,
     frontality_result,
     face_measurements,
 ):
@@ -62,10 +94,14 @@ def save_face_measurement(
     cursor.execute("""
         INSERT INTO face_measurements (
             image_path,
-            yaw,
-            pitch,
-            roll,
-            is_frontal,
+            person_id,
+            mp_yaw,
+            gt_yaw,
+            mp_pitch,
+            gt_pitch,
+            mp_roll,
+            gt_roll, 
+            mp_is_frontal,
             height_to_width_ratio,
             upper_ratio,
             middle_ratio,
@@ -75,13 +111,16 @@ def save_face_measurement(
             left_jaw_angle,
             right_jaw_angle
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         image_path,
-
+        person_id,
         frontality_result.pose.yaw_deg,
+        gt_yaw,
         frontality_result.pose.pitch_deg,
+        gt_pitch,
         frontality_result.pose.roll_deg,
+        gt_roll,
         int(frontality_result.is_frontal),
 
         face_measurements.height_to_width_ratio,

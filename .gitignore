@@ -1,6 +1,7 @@
 # Python 캐시
 __pycache__/
 *.py[cod]
+core/__pycache__
 
 # 가상환경
 .venv/
@@ -15,7 +16,8 @@ venv/
 
 # 테스트 이미지 / 개인 이미지
 images/
-data/raw
+data/labeling_data
+data/raw_data
 sample/
 
 # MediaPipe 모델 파일

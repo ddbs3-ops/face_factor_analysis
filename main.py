@@ -21,8 +21,8 @@ from pathlib import Path
 from core.dataset_loader import *
 
 
-LABELING_DATA_FOLDER = "sample/labeling_data"
-RAW_DATA_FOLDER = "sample/raw_data"
+LABELING_DATA_FOLDER = "data/labeling_data"
+RAW_DATA_FOLDER = "data/raw_data"
 SELFIE_MODEL_PATH = 'models/selfie_multiclass_256x256.tflite'
 FACE_LANDMARKER_MODEL_PATH = 'models/face_landmarker.task' 
 IMAGE_DIRECTORY = Path("data/raw")
@@ -31,34 +31,24 @@ def main():
     create_table()
 
     json_files = find_json_files(LABELING_DATA_FOLDER)
+    samples = select_first_frontal_samples(json_files, RAW_DATA_FOLDER)
 
-    for json_path in json_files[:5]:
-        data = load_json(json_path)
-        
-        image_path = find_image_path(data,RAW_DATA_FOLDER)
-        print("이미지경로", image_path)
-        print(json_path.name, is_target_sample(data))
-    
-    image_extensions = {".jpg", ".jpeg", ".png"}
-
-    for image_path in IMAGE_DIRECTORY.iterdir():
-        if image_path.suffix.lower() not in image_extensions:
-            continue
-
-        image_path_string = str(image_path)
+    for sample in samples[:5]:
+        image_path_string = str(sample.image_path)
 
         if face_measurement_exists(image_path_string):
-            print(f"이미 분석됨: {image_path.name}")
+            print(f"이미 분석됨: {sample.image_path.name}")
             continue
 
-        analyze_image(image_path_string)
+        analyze_image(sample)
 
     
     
   
 
     
-def analyze_image(image_path):
+def analyze_image(sample):
+    image_path = str(sample.image_path)
     img, mp_image, img_height, img_width = load_image(image_path)
     detection_result = detect_face(mp_image)
 
@@ -96,6 +86,10 @@ def analyze_image(image_path):
  
     save_face_measurement(
         image_path=image_path,
+        person_id=sample.person_id,
+        gt_yaw=sample.gt_yaw,
+        gt_pitch=sample.gt_pitch,
+        gt_roll=sample.gt_roll,
         frontality_result=frontality_result,
         face_measurements=face_measurements,
     )

@@ -1,49 +1,69 @@
 import json
 from pathlib import Path
-
+from core.schemas import SelectedSample
 
 def load_json(json_path):
     with open(json_path, "r", encoding="utf-8") as f:
-        data = json.load(f)
+        return json.load(f)
 
-    return data
 
 def find_json_files(folder_path):
     folder = Path(folder_path)
+    return sorted(folder.rglob("*.json"))
 
-    return list(folder.rglob("*.json"))
+def build_image_index(image_root):
+    image_root = Path(image_root)
+    return {
+        image_path.name: image_path
+        for image_path in image_root.rglob("*.png")
+    }
 
-def is_frontal_pose(pose):
-    if pose is None:
-        return False
-
+def is_exact_frontal_pose(pose):
     return (
-        abs(pose["yaw"]) <= 10
-        and abs(pose["pitch"]) <= 10
-        and abs(pose["roll"]) <= 10
+        pose is not None
+        and pose["yaw"] == 0
+        and pose["pitch"] == 0
+        and pose["roll"] == 0
     )
 
-def find_image_path(data, image_root):
-    image_name = data["rawfile"]["name"]
+def select_first_frontal_samples(json_files, image_root):
+    image_index = build_image_index(image_root)
 
-    image_root = Path(image_root)
+    selected_ids = set()
+    selected_samples = []
 
-    matches = list(image_root.rglob(image_name))
-    if len(matches) == 0:
-        return None
-    
-    return matches[0]
+    for json_path in json_files:
+        data = load_json(json_path)
 
+        person_id = data["rawfile"]["id"]
 
+        if person_id in selected_ids:
+            continue
 
-def is_target_sample(data):
-    gender = data["label_gt"]["metadata"]["gender"]
-    expression = data["label_gt"]["exp"]
-    pose = data["label_gt"]["pose"]
+        gender = data["label_gt"]["metadata"]["gender"]
+        pose = data["label_gt"]["pose"]
 
-    return (gender == "male" 
-        and expression == "none"
-        and is_frontal_pose(pose))
+        if gender != "male":
+            continue
 
+        if not is_exact_frontal_pose(pose):
+            continue
 
+        image_name = data["rawfile"]["name"]
+        image_path = image_index.get(image_name)
 
+        if image_path is None:
+            continue
+
+        selected_ids.add(person_id)
+        selected_samples.append(
+            SelectedSample(
+                image_path=image_path,
+                person_id=person_id,
+                gt_yaw=pose["yaw"],
+                gt_pitch=pose["pitch"],
+                gt_roll=pose["roll"],
+            )
+        )
+
+    return selected_samples
