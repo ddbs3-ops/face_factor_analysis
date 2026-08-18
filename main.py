@@ -18,12 +18,26 @@ from database.database import *
 
 from pathlib import Path
 
+from core.dataset_loader import *
+
+
+LABELING_DATA_FOLDER = "sample/labeling_data"
+RAW_DATA_FOLDER = "sample/raw_data"
 SELFIE_MODEL_PATH = 'models/selfie_multiclass_256x256.tflite'
 FACE_LANDMARKER_MODEL_PATH = 'models/face_landmarker.task' 
 IMAGE_DIRECTORY = Path("data/raw")
 
 def main():
     create_table()
+
+    json_files = find_json_files(LABELING_DATA_FOLDER)
+
+    for json_path in json_files[:5]:
+        data = load_json(json_path)
+        
+        image_path = find_image_path(data,RAW_DATA_FOLDER)
+        print("이미지경로", image_path)
+        print(json_path.name, is_target_sample(data))
     
     image_extensions = {".jpg", ".jpeg", ".png"}
 
