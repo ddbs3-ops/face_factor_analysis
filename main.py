@@ -21,8 +21,8 @@ from pathlib import Path
 from core.dataset_loader import *
 
 
-LABELING_DATA_FOLDER = "data/labeling_data"
-RAW_DATA_FOLDER = "data/raw_data"
+LABELING_DATA_FOLDER = r"D:\data\labeling_data"
+RAW_DATA_FOLDER = r"D:\data\raw_data"
 SELFIE_MODEL_PATH = 'models/selfie_multiclass_256x256.tflite'
 FACE_LANDMARKER_MODEL_PATH = 'models/face_landmarker.task' 
 
@@ -44,7 +44,7 @@ def main():
     )
 
     try:
-        for sample in samples[:5]:
+        for sample in samples:
             image_path_string = str(sample.image_path)
 
             if face_measurement_exists(image_path_string):
