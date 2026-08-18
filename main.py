@@ -4,7 +4,7 @@ import cv2
 import mediapipe as mp
 
 from core.frontality import evaluate_frontality
-from core.mediapipe_tasks import launch_facelandmark, launch_segment_selfie, prepare_mp_image
+from core.mediapipe_tasks import *
 from core.hairline import detect_hairline_y, estimate_hairline_y ,get_vertical_landmark_y
 from scipy.spatial.transform import Rotation
 from core.face_features import *
@@ -25,32 +25,55 @@ LABELING_DATA_FOLDER = "data/labeling_data"
 RAW_DATA_FOLDER = "data/raw_data"
 SELFIE_MODEL_PATH = 'models/selfie_multiclass_256x256.tflite'
 FACE_LANDMARKER_MODEL_PATH = 'models/face_landmarker.task' 
-IMAGE_DIRECTORY = Path("data/raw")
 
 def main():
     create_table()
 
     json_files = find_json_files(LABELING_DATA_FOLDER)
-    samples = select_first_frontal_samples(json_files, RAW_DATA_FOLDER)
+    samples = select_first_frontal_samples(
+        json_files,
+        RAW_DATA_FOLDER,
+    )
 
-    for sample in samples[:5]:
-        image_path_string = str(sample.image_path)
+    face_landmarker = create_face_landmarker(
+        FACE_LANDMARKER_MODEL_PATH
+    )
 
-        if face_measurement_exists(image_path_string):
-            print(f"이미 분석됨: {sample.image_path.name}")
-            continue
+    selfie_segmenter = create_selfie_segmenter(
+        SELFIE_MODEL_PATH
+    )
 
-        analyze_image(sample)
+    try:
+        for sample in samples[:5]:
+            image_path_string = str(sample.image_path)
+
+            if face_measurement_exists(image_path_string):
+                print(f"이미 분석됨: {sample.image_path.name}")
+                continue
+
+            analyze_image(
+                sample,
+                face_landmarker,
+                selfie_segmenter,
+            )
+
+    finally:
+        face_landmarker.close()
+        selfie_segmenter.close()
 
     
     
   
 
     
-def analyze_image(sample):
+def analyze_image(
+        sample,
+        face_landmarker,
+        selfie_segmenter
+    ):
     image_path = str(sample.image_path)
     img, mp_image, img_height, img_width = load_image(image_path)
-    detection_result = detect_face(mp_image)
+    detection_result = detect_face(mp_image, face_landmarker, selfie_segmenter)
 
     if detection_result is None:
         return
@@ -143,9 +166,12 @@ def load_image(
     return img, mp_image, img_height, img_width
 
 
-def detect_face(mp_image):
-    face_landmarker_result = launch_facelandmark(FACE_LANDMARKER_MODEL_PATH, mp_image)
-    segmented_masks_result = launch_segment_selfie(SELFIE_MODEL_PATH, mp_image)
+def detect_face(
+        mp_image,
+        face_landmarker,
+        selfie_segmenter):
+    face_landmarker_result = launch_facelandmark(face_landmarker, mp_image)
+    segmented_masks_result = launch_segment_selfie(selfie_segmenter, mp_image)
 
 
     face_count = len(face_landmarker_result.face_landmarks) 

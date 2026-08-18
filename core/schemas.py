@@ -71,12 +71,6 @@ class FaceMeasurements:
 
 
 @dataclass
-class RatioComparison:
-    axis: float
-    euclidean: float
-
-
-@dataclass
 class SelectedSample:
     image_path: Path
     person_id: int

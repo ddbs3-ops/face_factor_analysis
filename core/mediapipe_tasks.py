@@ -19,45 +19,38 @@ def prepare_mp_image(
 
     return mp_image, height, width
 
-
-def launch_facelandmark(
-        model_path : str,
-        mp_image 
-):
+def create_face_landmarker(model_path: str):
     BaseOptions = mp.tasks.BaseOptions
     FaceLandmarker = mp.tasks.vision.FaceLandmarker
     FaceLandmarkerOptions = mp.tasks.vision.FaceLandmarkerOptions
     VisionRunningMode = mp.tasks.vision.RunningMode
 
-    
     options = FaceLandmarkerOptions(
         base_options=BaseOptions(model_asset_path=model_path),
         running_mode=VisionRunningMode.IMAGE,
-        output_facial_transformation_matrixes=True)         #yaw,roll,deg를 추출하기 위한 변환행렬 가져오는 옵션 
-    
-    with FaceLandmarker.create_from_options(options) as landmarker:
-        face_landmarker = landmarker.detect(mp_image)        #mediapipe로 image에서 랜드마크 좌표 추출
+        output_facial_transformation_matrixes=True,
+    )
 
-    return face_landmarker
+    return FaceLandmarker.create_from_options(options)
 
-
-def launch_segment_selfie(
-        model_path : str,
-        mp_image        
-):
+def create_selfie_segmenter(model_path: str):
     BaseOptions = mp.tasks.BaseOptions
     ImageSegmenter = mp.tasks.vision.ImageSegmenter
     ImageSegmenterOptions = mp.tasks.vision.ImageSegmenterOptions
     VisionRunningMode = mp.tasks.vision.RunningMode
 
-    # Create a image segmenter instance with the image mode:
     options = ImageSegmenterOptions(
         base_options=BaseOptions(model_asset_path=model_path),
         running_mode=VisionRunningMode.IMAGE,
-        output_category_mask=True)
-    
-    with ImageSegmenter.create_from_options(options) as segmenter:
-        segmented_masks = segmenter.segment(mp_image)
+        output_category_mask=True,
+    )
 
-    return segmented_masks
+    return ImageSegmenter.create_from_options(options)
+
+def launch_facelandmark(landmarker, mp_image):
+    return landmarker.detect(mp_image)
+
+
+def launch_segment_selfie(segmenter, mp_image):
+    return segmenter.segment(mp_image)
 
