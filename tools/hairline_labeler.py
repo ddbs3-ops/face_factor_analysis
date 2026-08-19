@@ -25,11 +25,12 @@ from main import create_raw_face, detect_face, load_image  # noqa: E402
 
 
 DEFAULT_DB_PATH = "data/face_analysis.db"
-DEFAULT_CSV_PATH = "data/hairline_labels.csv"
+DEFAULT_CSV_PATH = "data/hairline_labels_v3.csv"
 DEFAULT_SELFIE_MODEL_PATH = "models/selfie_multiclass_256x256.tflite"
 DEFAULT_FACE_LANDMARKER_MODEL_PATH = "models/face_landmarker.task"
 
 NEAR_BOUNDARY_DIFFERENCE_RATIO_THRESHOLD = 0.08
+FINAL_SOURCE_DIFFERENCE_RATIO_THRESHOLD = 0.30
 
 VISIBILITY_OPTIONS = ("visible", "partial", "covered")
 TRUE_Y_MODES = (
@@ -47,6 +48,7 @@ CSV_COLUMNS = [
     "true_y_source",
     "estimated_hairline_y",
     "detected_hairline_y",
+    "detected_estimated_difference_ratio",
     "mean_difference_ratio",
     "std_difference_ratio",
     "min_difference_ratio",
@@ -71,6 +73,24 @@ def load_existing_label_ids(csv_path: Path) -> set[int]:
                 except ValueError:
                     pass
         return existing_ids
+
+
+def load_existing_label_rows(csv_path: Path) -> dict[int, dict]:
+    if not csv_path.exists():
+        return {}
+
+    with csv_path.open("r", newline="", encoding="utf-8") as csv_file:
+        reader = csv.DictReader(csv_file)
+        rows = {}
+        for row in reader:
+            value = row.get("face_measurement_id")
+            if not value:
+                continue
+            try:
+                rows[int(value)] = row
+            except ValueError:
+                pass
+        return rows
 
 
 @st.cache_data(show_spinner="DB에서 라벨링 대상 로딩 중...")
@@ -112,6 +132,39 @@ def target_session_key(target: dict) -> str:
 
 def target_display_name(target: dict) -> str:
     return f'{target["face_measurement_id"]} | person {target["person_id"]} | {target["image_path"]}'
+
+
+def find_target_by_id(targets: list[dict], face_measurement_id: int) -> dict | None:
+    for target in targets:
+        if target["face_measurement_id"] == face_measurement_id:
+            return target
+    return None
+
+
+def parse_review_ids(review_ids_text: str) -> list[int]:
+    normalized_text = review_ids_text.replace(",", " ").replace("\n", " ")
+    review_ids = []
+    for value in normalized_text.split():
+        try:
+            review_ids.append(int(value))
+        except ValueError:
+            pass
+    return review_ids
+
+
+def filter_targets_by_ids(targets: list[dict], review_ids: list[int]) -> list[dict]:
+    if not review_ids:
+        return []
+
+    targets_by_id = {
+        target["face_measurement_id"]: target
+        for target in targets
+    }
+    return [
+        targets_by_id[review_id]
+        for review_id in review_ids
+        if review_id in targets_by_id
+    ]
 
 
 def get_existing_label_progress(existing_ids: set[int], targets: list[dict]) -> int:
@@ -167,6 +220,41 @@ def calculate_near_boundary_ratio(difference_ratios: list[float]) -> float | Non
     return near_count / len(difference_ratios)
 
 
+def calculate_detected_estimated_difference_ratio(
+    detected_hairline_y: float | None,
+    estimated_hairline_y: float,
+    vertical_facepoints,
+) -> float | None:
+    if detected_hairline_y is None:
+        return None
+
+    middle_face_length = (
+        vertical_facepoints.subnasale_y
+        - vertical_facepoints.glabella_y
+    )
+    if middle_face_length == 0:
+        return None
+
+    return abs(detected_hairline_y - estimated_hairline_y) / middle_face_length
+
+
+def calculate_analysis_final_hairline(
+    detected_hairline_y: float | None,
+    estimated_hairline_y: float,
+    difference_ratio: float | None,
+) -> tuple[str, float]:
+    if detected_hairline_y is None:
+        return "estimated", estimated_hairline_y
+
+    if (
+        difference_ratio is not None
+        and difference_ratio > FINAL_SOURCE_DIFFERENCE_RATIO_THRESHOLD
+    ):
+        return "estimated", estimated_hairline_y
+
+    return "detected", detected_hairline_y
+
+
 @st.cache_data(show_spinner="이미지 분석 중...")
 def calculate_hairline_features(
     image_path_string: str,
@@ -202,12 +290,27 @@ def calculate_hairline_features(
 
     difference_stats = calculate_stats(difference_ratios)
     skin_stats = calculate_stats(skin_ratios)
+    detected_estimated_difference_ratio = calculate_detected_estimated_difference_ratio(
+        detected_hairline_y,
+        estimated_hairline_y,
+        vertical_facepoints,
+    )
+    analysis_final_source, analysis_final_hairline_y = calculate_analysis_final_hairline(
+        detected_hairline_y,
+        estimated_hairline_y,
+        detected_estimated_difference_ratio,
+    )
 
     return {
         "image": image,
         "image_height": image_height,
         "estimated_hairline_y": optional_float(estimated_hairline_y),
         "detected_hairline_y": optional_float(detected_hairline_y),
+        "detected_estimated_difference_ratio": optional_float(
+            detected_estimated_difference_ratio
+        ),
+        "analysis_final_source": analysis_final_source,
+        "analysis_final_hairline_y": optional_float(analysis_final_hairline_y),
         "roi_info": roi_info,
         "boundary_points": boundary_points,
         "mean_difference_ratio": difference_stats["mean"],
@@ -290,6 +393,9 @@ def build_label_row(
         "true_y_source": true_y_source,
         "estimated_hairline_y": format_csv_value(features["estimated_hairline_y"]),
         "detected_hairline_y": format_csv_value(features["detected_hairline_y"]),
+        "detected_estimated_difference_ratio": format_csv_value(
+            features["detected_estimated_difference_ratio"]
+        ),
         "mean_difference_ratio": format_csv_value(features["mean_difference_ratio"]),
         "std_difference_ratio": format_csv_value(features["std_difference_ratio"]),
         "min_difference_ratio": format_csv_value(features["min_difference_ratio"]),
@@ -338,6 +444,23 @@ def save_label(
         true_y_source,
     )
 
+    if csv_path.exists() and csv_path.stat().st_size > 0:
+        with csv_path.open("r", newline="", encoding="utf-8") as csv_file:
+            reader = csv.DictReader(csv_file)
+            rows = [
+                existing_row
+                for existing_row in reader
+                if existing_row.get("face_measurement_id") != str(target["face_measurement_id"])
+            ]
+
+        with csv_path.open("w", newline="", encoding="utf-8") as csv_file:
+            writer = csv.DictWriter(csv_file, fieldnames=CSV_COLUMNS)
+            writer.writeheader()
+            writer.writerows(rows)
+            writer.writerow(row)
+            csv_file.flush()
+        return
+
     with csv_path.open("a", newline="", encoding="utf-8") as csv_file:
         writer = csv.DictWriter(csv_file, fieldnames=CSV_COLUMNS)
         if should_write_header:
@@ -354,13 +477,16 @@ def initialize_session_state():
         "true_y_mode": TRUE_Y_MODES[2],
         "manual_y": None,
         "skipped_face_measurement_ids": set(),
+        "visited_target_ids": [],
+        "review_target_id": None,
+        "review_ids_text": "",
     }
     for key, value in defaults.items():
         if key not in st.session_state:
             st.session_state[key] = value
 
 
-def reset_selection_for_target(target: dict, features: dict):
+def reset_selection_for_target(target: dict, features: dict, existing_label_row: dict | None):
     session_key = target_session_key(target)
     if st.session_state.current_image_name == session_key:
         return
@@ -371,9 +497,31 @@ def reset_selection_for_target(target: dict, features: dict):
     default_manual_y = max(roi.top_y, min(default_manual_y, roi.bottom_y))
 
     st.session_state.current_image_name = session_key
+    st.session_state.manual_y = int(round(default_manual_y))
     st.session_state.visibility_label = None
     st.session_state.true_y_mode = TRUE_Y_MODES[2]
-    st.session_state.manual_y = int(round(default_manual_y))
+
+    if existing_label_row is None:
+        return
+
+    visibility_label = existing_label_row.get("visibility_label")
+    true_y_source = existing_label_row.get("true_y_source")
+    true_hairline_y = existing_label_row.get("true_hairline_y")
+
+    if visibility_label in VISIBILITY_OPTIONS:
+        st.session_state.visibility_label = visibility_label
+    if true_y_source == "detected":
+        st.session_state.true_y_mode = TRUE_Y_MODES[0]
+    elif true_y_source == "manual":
+        st.session_state.true_y_mode = TRUE_Y_MODES[1]
+        if true_hairline_y:
+            st.session_state.manual_y = int(round(float(true_hairline_y)))
+    else:
+        st.session_state.true_y_mode = TRUE_Y_MODES[2]
+
+    st.session_state.manual_y = int(
+        max(roi.top_y, min(st.session_state.manual_y, roi.bottom_y))
+    )
 
 
 def get_current_true_y(features: dict) -> tuple[float | None, str]:
@@ -386,14 +534,28 @@ def get_current_true_y(features: dict) -> tuple[float | None, str]:
     return None, "unknown"
 
 
-def clamp_current_index(pending_count: int):
+def clamp_current_index(pending_count: int, allow_end: bool = False):
     if pending_count <= 0:
         st.session_state.current_index = 0
+        return
+    if allow_end and st.session_state.current_index >= pending_count:
+        st.session_state.current_index = pending_count
         return
     st.session_state.current_index = max(
         0,
         min(st.session_state.current_index, pending_count - 1),
     )
+
+
+def remember_visited_target(target: dict):
+    face_measurement_id = target["face_measurement_id"]
+    if (
+        st.session_state.visited_target_ids
+        and st.session_state.visited_target_ids[-1] == face_measurement_id
+    ):
+        return
+
+    st.session_state.visited_target_ids.append(face_measurement_id)
 
 
 def render_sidebar():
@@ -408,30 +570,47 @@ def render_sidebar():
         "Selfie segmenter 모델",
         DEFAULT_SELFIE_MODEL_PATH,
     )
+    review_ids_text = st.sidebar.text_area(
+        "검토할 face_measurement_id 목록",
+        help="비워두면 일반 라벨링 모드입니다. 예: 32, 31, 42",
+    )
 
     return (
         Path(db_path_string),
         Path(csv_path_string),
         Path(face_model_path_string),
         Path(selfie_model_path_string),
+        review_ids_text,
     )
 
 
-def render_navigation(current_target: dict, pending_count: int):
+def render_navigation(
+    current_target: dict,
+    pending_count: int,
+    is_review_mode: bool,
+    is_id_review_mode: bool,
+):
     previous_col, skip_col = st.columns(2)
 
     with previous_col:
-        if st.button("이전 이미지", disabled=st.session_state.current_index <= 0):
-            st.session_state.current_index -= 1
+        if st.button("이전 이미지", disabled=not st.session_state.visited_target_ids):
+            st.session_state.review_target_id = st.session_state.visited_target_ids.pop()
             st.session_state.current_image_name = None
             st.rerun()
 
     with skip_col:
-        if st.button("현재 이미지 건너뛰기", disabled=pending_count == 0):
-            st.session_state.skipped_face_measurement_ids.add(
-                current_target["face_measurement_id"]
-            )
-            clamp_current_index(pending_count)
+        if st.button("현재 이미지 건너뛰기", disabled=(pending_count == 0 and not is_review_mode)):
+            if is_review_mode:
+                st.session_state.review_target_id = None
+            elif is_id_review_mode:
+                st.session_state.current_index += 1
+                clamp_current_index(pending_count, allow_end=True)
+            else:
+                remember_visited_target(current_target)
+                st.session_state.skipped_face_measurement_ids.add(
+                    current_target["face_measurement_id"]
+                )
+                clamp_current_index(pending_count)
             st.session_state.current_image_name = None
             st.rerun()
 
@@ -482,6 +661,9 @@ def render_feature_summary(features: dict):
         "green: estimated_hairline_y / cyan dashed: detected_hairline_y / "
         "magenta: boundary_points / red: true_hairline_y"
     )
+    final_source = features["analysis_final_source"].upper()
+    final_y = int(round(features["analysis_final_hairline_y"]))
+    st.write(f"실제 분석 로직: {final_source} 사용 (y={final_y})")
     cols = st.columns(4)
     cols[0].metric("estimated_y", format_csv_value(features["estimated_hairline_y"]) or "-")
     cols[1].metric("detected_y", format_csv_value(features["detected_hairline_y"]) or "-")
@@ -494,21 +676,40 @@ def run_labeler():
     st.title("Hairline Labeler")
 
     initialize_session_state()
-    db_path, csv_path, face_model_path, selfie_model_path = render_sidebar()
+    db_path, csv_path, face_model_path, selfie_model_path, review_ids_text = render_sidebar()
+    if st.session_state.review_ids_text != review_ids_text:
+        st.session_state.review_ids_text = review_ids_text
+        st.session_state.current_index = 0
+        st.session_state.current_image_name = None
+        st.session_state.review_target_id = None
 
     targets = load_face_measurement_targets(str(db_path))
+    review_ids = parse_review_ids(review_ids_text)
+    review_targets = filter_targets_by_ids(targets, review_ids)
+    is_id_review_mode = bool(review_ids)
     existing_label_ids = load_existing_label_ids(csv_path)
+    existing_label_rows = load_existing_label_rows(csv_path)
     labeled_count = get_existing_label_progress(existing_label_ids, targets)
-    pending_targets = [
-        target
-        for target in targets
-        if (
-            target["face_measurement_id"] not in existing_label_ids
-            and target["face_measurement_id"]
-            not in st.session_state.skipped_face_measurement_ids
-        )
-    ]
-    clamp_current_index(len(pending_targets))
+    if is_id_review_mode:
+        pending_targets = review_targets
+    else:
+        pending_targets = [
+            target
+            for target in targets
+            if (
+                target["face_measurement_id"] not in existing_label_ids
+                and target["face_measurement_id"]
+                not in st.session_state.skipped_face_measurement_ids
+            )
+        ]
+    clamp_current_index(len(pending_targets), allow_end=is_id_review_mode)
+    review_target = (
+        find_target_by_id(targets, st.session_state.review_target_id)
+        if st.session_state.review_target_id is not None
+        else None
+    )
+    if st.session_state.review_target_id is not None and review_target is None:
+        st.session_state.review_target_id = None
 
     st.progress(
         0 if not targets else min(labeled_count / len(targets), 1.0),
@@ -519,7 +720,19 @@ def run_labeler():
         st.info("DB의 face_measurements 테이블에 라벨링할 대상이 없습니다.")
         return
 
-    if not pending_targets:
+    if is_id_review_mode and not pending_targets:
+        st.warning("입력한 face_measurement_id에 해당하는 DB 대상이 없습니다.")
+        return
+
+    if is_id_review_mode and st.session_state.current_index >= len(pending_targets):
+        st.success("검토 목록을 모두 확인했습니다.")
+        if st.button("검토 목록 처음으로"):
+            st.session_state.current_index = 0
+            st.session_state.current_image_name = None
+            st.rerun()
+        return
+
+    if not pending_targets and review_target is None:
         st.success("모든 이미지 라벨링이 완료되었습니다.")
         return
 
@@ -528,14 +741,24 @@ def run_labeler():
         str(selfie_model_path),
     )
 
-    current_target = pending_targets[st.session_state.current_index]
+    is_review_mode = review_target is not None
+    current_target = (
+        review_target
+        if is_review_mode
+        else pending_targets[st.session_state.current_index]
+    )
     current_image_path = target_image_path(current_target)
-    st.subheader(f"{st.session_state.current_index + 1} / {len(pending_targets)} pending")
+    if is_review_mode:
+        st.subheader("이전 이미지")
+    elif is_id_review_mode:
+        st.subheader(f"{st.session_state.current_index + 1} / {len(pending_targets)} review")
+    else:
+        st.subheader(f"{st.session_state.current_index + 1} / {len(pending_targets)} pending")
     st.write(target_display_name(current_target))
 
     if not current_image_path.exists():
         st.warning(f"이미지 파일을 찾을 수 없습니다: {current_target['image_path']}")
-        render_navigation(current_target, len(pending_targets))
+        render_navigation(current_target, len(pending_targets), is_review_mode, is_id_review_mode)
         return
 
     features = calculate_hairline_features(
@@ -547,10 +770,11 @@ def run_labeler():
 
     if features is None:
         st.warning("얼굴 또는 segmentation 결과를 만들 수 없어 이 이미지를 라벨링할 수 없습니다.")
-        render_navigation(current_target, len(pending_targets))
+        render_navigation(current_target, len(pending_targets), is_review_mode, is_id_review_mode)
         return
 
-    reset_selection_for_target(current_target, features)
+    existing_label_row = existing_label_rows.get(current_target["face_measurement_id"])
+    reset_selection_for_target(current_target, features, existing_label_row)
     visibility_label = render_label_controls(features)
     true_hairline_y, true_y_source = get_current_true_y(features)
 
@@ -574,12 +798,19 @@ def run_labeler():
                     true_hairline_y,
                     true_y_source,
                 )
+                if is_review_mode:
+                    st.session_state.review_target_id = None
+                elif is_id_review_mode:
+                    st.session_state.current_index += 1
+                    clamp_current_index(len(pending_targets), allow_end=True)
+                else:
+                    remember_visited_target(current_target)
                 st.session_state.current_image_name = None
                 st.success(f"저장됨: {target_display_name(current_target)}")
                 st.rerun()
 
     with nav_col:
-        render_navigation(current_target, len(pending_targets))
+        render_navigation(current_target, len(pending_targets), is_review_mode, is_id_review_mode)
 
 
 if __name__ == "__main__":

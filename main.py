@@ -20,7 +20,6 @@ from pathlib import Path
 
 from core.dataset_loader import *
 
-
 LABELING_DATA_FOLDER = r"D:\data\labeling_data"
 RAW_DATA_FOLDER = r"D:\data\raw_data"
 SELFIE_MODEL_PATH = 'models/selfie_multiclass_256x256.tflite'
@@ -206,6 +205,9 @@ def check_frontality(
     return frontality_result
 
 
+HAIRLINE_DIFFERENCE_THRESHOLD = 0.30
+
+
 def analyze_hairline(
     segmented_masks_result,
     raw_face,
@@ -214,30 +216,41 @@ def analyze_hairline(
     category_mask = segmented_masks_result.category_mask.numpy_view()
     category_mask_2d = np.squeeze(category_mask)
 
-    detected_hairline = detect_hairline_y(raw_face, category_mask_2d)
-    estimated_hairline = estimate_hairline_y(vertical_facepoints)
+    detected_hairline = detect_hairline_y(
+        raw_face,
+        category_mask_2d,
+    )
+
+    estimated_hairline = estimate_hairline_y(
+        vertical_facepoints
+    )
 
     if detected_hairline is None:
-        hairline_y = estimate_hairline_y(
-            vertical_facepoints
-        )
-    else:
-        difference = abs(detected_hairline - estimated_hairline)
-        allowed_difference = (raw_face.image_height * 0.08)
+        hairline_y = estimated_hairline
 
-        if difference > allowed_difference:
+    else:
+        middle_face_length = (
+            vertical_facepoints.subnasale_y
+            - vertical_facepoints.glabella_y
+        )
+
+        difference_ratio = (
+            abs(detected_hairline - estimated_hairline)
+            / middle_face_length
+        )
+
+        if difference_ratio > HAIRLINE_DIFFERENCE_THRESHOLD:
             hairline_y = estimated_hairline
-            print("앞머리로 인한 추정치 입니다.")
+            print("앞머리로 인한 추정치입니다.")
         else:
             hairline_y = detected_hairline
-            print("영역분리 기준 헤어 라인")
-    hairline_result = HairlineResult(
+            print("영역분리 기준 헤어라인입니다.")
+
+    return HairlineResult(
         detected_y=detected_hairline,
         estimated_y=estimated_hairline,
         final_y=hairline_y,
     )
-
-    return hairline_result
 
 def analyze_face_measurements(
     raw_face : RawFace,

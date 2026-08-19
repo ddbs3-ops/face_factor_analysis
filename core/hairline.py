@@ -8,10 +8,10 @@ def detect_hairline_y(
     category_mask_2d: np.ndarray,
     hair_class_id: int = 1,
     skin_class_id: int = 3,
-    top_ratio: float = 0.15,
+    hairline_candidate_ratio: float = 0.15,
 ) -> float | None:
 
-    if not 0 < top_ratio <= 1:
+    if not 0 < hairline_candidate_ratio <= 1:
         raise ValueError("top_ratio는 0보다 크고 1 이하여야 합니다.")
 
     mask_height, mask_width = category_mask_2d.shape
@@ -45,7 +45,7 @@ def detect_hairline_y(
 
     top_count = max(
         1,
-        int(len(boundary_y_values) * top_ratio)
+        int(len(boundary_y_values) * hairline_candidate_ratio)
     )
 
     top_y_values = boundary_y_values[:top_count]
@@ -65,7 +65,7 @@ def estimate_hairline_y(
         - vertical_facepoints.subnasale_y
     )
 
-    estimated_upper_face_length = ((middle_face_length + lower_face_length) / 2) * 0.9
+    estimated_upper_face_length = ((middle_face_length + lower_face_length) / 2) * 0.85
 
     hairline_y = (
         vertical_facepoints.glabella_y
@@ -104,7 +104,7 @@ def get_vertical_landmark_y(
 def get_forehead_roi(
     raw_face: RawFace,
     vertical_facepoints : VerticalFacePoints
-):
+)-> HairlineROI:
     left_eye_outer = get_pixel_point(raw_face,226)
     right_eye_outer = get_pixel_point(raw_face,446)
 

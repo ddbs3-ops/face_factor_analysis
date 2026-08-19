@@ -64,3 +64,16 @@ right_jaw_contour_range
 
 #countour_measurement_db
 튜플 저장
+
+
+segmentation
+→ skin-hair boundary
+→ 위쪽 15% median
+→ detected hairline
+
+기하학적 estimate
+→ (중안부 + 하안부) / 2 × 0.85
+
+detected와 estimate 차이
+→ 중안부의 30% 이하: detected
+→ 초과: estimated
