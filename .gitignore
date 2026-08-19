@@ -18,8 +18,6 @@ venv/
 
 # 테스트 이미지 / 개인 이미지
 images/
-data/labeling_data/
-data/raw_data/
 data/raw/
 sample/
 

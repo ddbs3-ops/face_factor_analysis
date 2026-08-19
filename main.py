@@ -43,7 +43,7 @@ def main():
     )
 
     try:
-        for sample in samples[:5]:
+        for sample in samples:
             image_path_string = str(sample.image_path)
 
             if face_measurement_exists(image_path_string):
