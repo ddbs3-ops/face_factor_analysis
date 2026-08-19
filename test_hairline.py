@@ -3,7 +3,7 @@ from core.mediapipe_tasks import create_face_landmarker, create_selfie_segmenter
 from core.hairline import *
 import matplotlib.pyplot as plt
 
-TEST_IMAGE_PATH = "data/raw/20221020_ID0280_C_02_N00001.png"
+TEST_IMAGE_PATH = "data/raw/20221129_ID2368_C_01_N00003.png"
 SELFIE_MODEL_PATH = 'models/selfie_multiclass_256x256.tflite'
 FACE_LANDMARKER_MODEL_PATH = 'models/face_landmarker.task' 
 
@@ -31,7 +31,6 @@ if detection_result is not None:
     vertical_facepoints = get_vertical_landmark_y(raw_face)
 
     estimated_y = estimate_hairline_y(
-        raw_face,
         vertical_facepoints
     )
 
@@ -40,7 +39,6 @@ if detection_result is not None:
 
     roi_info = get_forehead_roi(
         raw_face,
-        category_mask_2d,
         vertical_facepoints,
     )
 
@@ -49,31 +47,25 @@ if detection_result is not None:
         roi_info,
     )
 
-    y_values = range(
-        roi_info.top_y,
-       roi_info.top_y + len(skin_ratios)
-    )
+
     boundary_points = get_skin_hair_boundary_points(
         category_mask_2d,
         roi_info,
     )
 
-    x_values = [point[0] for point in boundary_points]
-    y_values = [point[1] for point in boundary_points]
-
-    plt.scatter(x_values, y_values, s=5)
-
-    plt.axhline(
-        y=estimated_y,
-        linestyle="--",
-        label="Estimated hairline"
+    difference_ratios = calculate_boundary_difference_ratios(
+        boundary_points,
+        estimated_y,
+        vertical_facepoints,
     )
 
-    plt.gca().invert_yaxis()
-    plt.xlabel("Image x")
-    plt.ylabel("Boundary y")
-    plt.title("Skin-Hair Boundary")
-    plt.show()
+    print("difference_ratios:", difference_ratios)
+    print("mean:", np.mean(difference_ratios))
+    print("std:", np.std(difference_ratios))
+    print("min:", np.min(difference_ratios))
+    print("max:", np.max(difference_ratios))
+
+    
 
 
 

@@ -215,11 +215,10 @@ def analyze_hairline(
     category_mask_2d = np.squeeze(category_mask)
 
     detected_hairline = detect_hairline_y(raw_face, category_mask_2d)
-    estimated_hairline = estimate_hairline_y(raw_face, vertical_facepoints)
+    estimated_hairline = estimate_hairline_y(vertical_facepoints)
 
     if detected_hairline is None:
         hairline_y = estimate_hairline_y(
-            raw_face,
             vertical_facepoints
         )
     else:
