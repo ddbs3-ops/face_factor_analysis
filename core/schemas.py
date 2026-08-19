@@ -77,3 +77,10 @@ class SelectedSample:
     gt_yaw: float
     gt_pitch: float
     gt_roll: float
+
+@dataclass
+class HairlineROI:
+    left_x: int
+    right_x: int
+    top_y: int
+    bottom_y: int

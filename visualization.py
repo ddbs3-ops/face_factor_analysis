@@ -214,3 +214,17 @@ def show_face_analysis(
     cv2.imshow("Face analysis", result_image)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+
+def draw_face_landmarks(
+    image,
+    raw_face,
+):
+    output = image.copy()
+
+    for point in raw_face.points:
+        x = int(point.x * raw_face.image_width)
+        y = int(point.y * raw_face.image_height)
+
+        cv2.circle(output, (x, y), 1, (0, 255, 0), -1)
+
+    return output
