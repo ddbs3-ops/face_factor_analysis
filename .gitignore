@@ -20,6 +20,7 @@ venv/
 images/
 data/labeling_data
 data/raw_data
+data/raw
 sample/
 
 # MediaPipe 모델 파일
