@@ -43,14 +43,12 @@ def main():
         face_measurements
     )
 
-    quantized_measuurements = {}
+    quantized_measurements = {
+        key: quantize_top_percent(value)
+        for key, value in measurement_top_percentiles.items()
+    }
 
-    for key, value in measurement_top_percentiles.items():
-        q_value = quantize_top_percent(value)
-
-        quantized_measuurements[key] = q_value
-
-    print(quantized_measuurements)
+    print(quantized_measurements)
 
 
 
