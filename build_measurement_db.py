@@ -43,17 +43,31 @@ def main():
     )
 
     try:
-        for sample in samples:
+        for sample in samples[:3]:
             image_path_string = str(sample.image_path)
 
             if face_measurement_exists(image_path_string):
                 print(f"이미 분석됨: {sample.image_path.name}")
                 continue
 
-            analyze_image(
-                sample,
+            result = analyze_image(
+                image_path_string,
                 face_landmarker,
                 selfie_segmenter,
+            )
+            if result is None:
+                continue
+
+            frontality_result, face_measurements = result
+
+            save_face_measurement(
+                image_path=image_path_string,
+                person_id=sample.person_id,
+                gt_yaw=sample.gt_yaw,
+                gt_pitch=sample.gt_pitch,
+                gt_roll=sample.gt_roll,
+                frontality_result=frontality_result,
+                face_measurements=face_measurements,
             )
 
     finally:
@@ -66,11 +80,10 @@ def main():
 
     
 def analyze_image(
-        sample,
+        image_path,
         face_landmarker,
         selfie_segmenter
     ):
-    image_path = str(sample.image_path)
     img, mp_image, img_height, img_width = load_image(image_path)
     detection_result = detect_face(mp_image, face_landmarker, selfie_segmenter)
 
@@ -105,16 +118,8 @@ def analyze_image(
     #    face_measurements=face_measurements,
     #)
 
+    return frontality_result, face_measurements
  
-    save_face_measurement(
-        image_path=image_path,
-        person_id=sample.person_id,
-        gt_yaw=sample.gt_yaw,
-        gt_pitch=sample.gt_pitch,
-        gt_roll=sample.gt_roll,
-        frontality_result=frontality_result,
-        face_measurements=face_measurements,
-    )
     #print(face_measurements.height_to_width_ratio)
 
     #print(face_measurements.vertical_ratios.upper)
@@ -128,6 +133,7 @@ def analyze_image(
     #print(face_measurements.jaw.chin_contour_angles_deg)
     #print(face_measurements.jaw.left_jaw_contour_angles_deg)
     #print(face_measurements.jaw.right_jaw_contour_angles_deg)
+
 
 
 def create_raw_face(
