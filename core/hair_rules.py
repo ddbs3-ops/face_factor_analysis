@@ -262,3 +262,71 @@ def get_lower_face_rule(
 
     else:
         return None
+
+def merge_hair_rules(rules):
+    merged_adjustments = {}
+
+    for rule in rules:
+        for element, value in rule["adjustments"].items():
+            if element not in merged_adjustments:
+                merged_adjustments[element] = 0
+
+            merged_adjustments[element] += value
+
+    return {
+        "rules": rules,
+        "merged_adjustments": merged_adjustments,
+    }
+
+def build_hair_recommendation(merged_adjustments):
+    recommendations = []
+
+    recommendation_texts = {
+        "top_volume": {
+            "positive": "윗머리 볼륨을 살리는 방향",
+            "negative": "윗머리 볼륨을 낮추는 방향",
+        },
+        "side_volume": {
+            "positive": "옆머리 볼륨을 살리는 방향",
+            "negative": "옆머리 볼륨을 줄이는 방향",
+        },
+        "forehead_exposure": {
+            "positive": "이마를 더 드러내는 방향",
+            "negative": "이마 노출을 줄이는 방향",
+        },
+        "bangs_length": {
+            "positive": "앞머리를 길게 가져가는 방향",
+            "negative": "앞머리를 짧게 가져가는 방향",
+        },
+        "bangs_weight": {
+            "positive": "앞머리에 무게감을 주는 방향",
+            "negative": "앞머리를 가볍게 가져가는 방향",
+        },
+        "parting_asymmetry": {
+            "positive": "가르마를 비대칭적으로 가져가는 방향",
+            "negative": "가르마를 대칭적으로 가져가는 방향",
+        },
+        "curl_strength": {
+            "positive": "컬감을 살리는 방향",
+            "negative": "컬을 줄이고 직선적인 느낌을 살리는 방향",
+        },
+    }
+
+    for element in HAIR_ELEMENTS:
+        value = merged_adjustments.get(element, 0)
+
+        if value > 0:
+            recommendations.append({
+                "element": element,
+                "score": value,
+                "text": recommendation_texts[element]["positive"],
+            })
+
+        elif value < 0:
+            recommendations.append({
+                "element": element,
+                "score": value,
+                "text": recommendation_texts[element]["negative"],
+            })
+
+    return recommendations

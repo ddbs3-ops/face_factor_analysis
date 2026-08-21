@@ -1,12 +1,12 @@
 from build_measurement_db import analyze_image
 from core.mediapipe_tasks import create_face_landmarker, create_selfie_segmenter
-from core.hair_rules import get_hair_rules
+from core.hair_rules import get_hair_rules, merge_hair_rules, build_hair_recommendation
 import sqlite3
 import pandas as pd
 
 SELFIE_MODEL_PATH = 'models/selfie_multiclass_256x256.tflite'
 FACE_LANDMARKER_MODEL_PATH = 'models/face_landmarker.task' 
-IMAGE_PATH = r"C:\Users\82107\Downloads\sp_data\20221129_ID2368_C_01_N00003.png"
+IMAGE_PATH = r"C:\Users\82107\Downloads\sp_data\20220930_ID0161_C_02_N00002.png"
 DB_PATH = "data/face_analysis_v1_1.db"
 
 
@@ -49,25 +49,25 @@ def main():
         for key, value in measurement_top_percentiles.items()
     }
 
-    hair_recommand = get_hair_rules(face_measurements, quantized_measurements)
+    hair_rules = get_hair_rules(face_measurements, quantized_measurements)
     
-    print(hair_recommand)
-    print(
-        "jaw width level:",
-        quantized_measurements["jaw_to_cheekbone_width_ratio"]
-    )
-    print(
-        "chin level:",
-        quantized_measurements["chin_angle"]
-    )
-    print(
-        "left jaw level:",
-        quantized_measurements["left_jaw_angle"]
-    )
-    print(
-        "right jaw level:",
-        quantized_measurements["right_jaw_angle"]
-    )
+    hair_result = merge_hair_rules(hair_rules)
+
+    recommendations = build_hair_recommendation(
+        hair_result["merged_adjustments"])
+
+    final_result = {
+        "face_measurements": face_measurements,
+        "measurement_top_percentiles": measurement_top_percentiles,
+        "quantized_measurements": quantized_measurements,
+        "rules": hair_result["rules"],
+        "merged_adjustments": hair_result["merged_adjustments"],
+        "recommendations": recommendations,
+    }
+
+    print_analysis_result(final_result)
+
+    
 
 def load_reference_db():
     conn = sqlite3.connect(DB_PATH)
@@ -163,7 +163,17 @@ def quantize_top_percent(top_percent):
     else:
         return -2
 
+def print_analysis_result(final_result):
+    print("\n[얼굴 특징]")
+    for rule in final_result["rules"]:
+        print("-", rule["feature"])
 
+    print("\n[헤어 추천]")
+    for recommendation in final_result["recommendations"]:
+        print(
+            f"- {recommendation['text']} "
+            f"(score: {recommendation['score']})"
+        )
 
 if __name__ == "__main__":
     main()
