@@ -1,11 +1,12 @@
 from build_measurement_db import analyze_image
 from core.mediapipe_tasks import create_face_landmarker, create_selfie_segmenter
+from core.hair_rules import get_hair_rules
 import sqlite3
 import pandas as pd
 
 SELFIE_MODEL_PATH = 'models/selfie_multiclass_256x256.tflite'
 FACE_LANDMARKER_MODEL_PATH = 'models/face_landmarker.task' 
-IMAGE_PATH = r"sample\raw_data\C\20220726_ID0001_C_02_N00348.png"
+IMAGE_PATH = r"C:\Users\82107\Downloads\sp_data\20221129_ID2368_C_01_N00003.png"
 DB_PATH = "data/face_analysis_v1_1.db"
 
 
@@ -48,9 +49,25 @@ def main():
         for key, value in measurement_top_percentiles.items()
     }
 
-    print(quantized_measurements)
-
-
+    hair_recommand = get_hair_rules(face_measurements, quantized_measurements)
+    
+    print(hair_recommand)
+    print(
+        "jaw width level:",
+        quantized_measurements["jaw_to_cheekbone_width_ratio"]
+    )
+    print(
+        "chin level:",
+        quantized_measurements["chin_angle"]
+    )
+    print(
+        "left jaw level:",
+        quantized_measurements["left_jaw_angle"]
+    )
+    print(
+        "right jaw level:",
+        quantized_measurements["right_jaw_angle"]
+    )
 
 def load_reference_db():
     conn = sqlite3.connect(DB_PATH)
