@@ -1,98 +1,100 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import "./App.css"
+import AnalysisResultView from "./components/AnalysisResult"
+import ImageUpload from "./components/ImageUpload"
+import type { AnalysisResult, AnalysisStatus } from "./types/analysis"
+
+const ANALYZE_API_URL = "http://127.0.0.1:8000/analyze"
 
 function App() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null)
+  const [analysisStatus, setAnalysisStatus] = useState<AnalysisStatus>("idle")
+  const [errorMessage, setErrorMessage] = useState("")
 
-  async function handleAnalyze() {
+  useEffect(() => {
     if (!selectedFile) {
+      setPreviewUrl(null)
       return
     }
+    const objectUrl = URL.createObjectURL(selectedFile)
+    setPreviewUrl(objectUrl)
+    return () => URL.revokeObjectURL(objectUrl)
+  }, [selectedFile])
+
+  function handleFileChange(file: File | null) {
+    setSelectedFile(file)
+    setAnalysisResult(null)
+    setAnalysisStatus("idle")
+    setErrorMessage("")
+  }
+
+  async function handleAnalyze() {
+    if (!selectedFile || analysisStatus === "loading") return
 
     const formData = new FormData()
     formData.append("file", selectedFile)
+    setAnalysisStatus("loading")
+    setErrorMessage("")
 
-    const response = await fetch(
-      "http://127.0.0.1:8000/analyze",
-      {
+    try {
+      const response = await fetch(ANALYZE_API_URL, {
         method: "POST",
         body: formData,
-      }
-    )
+      })
+      if (!response.ok) throw new Error("분석 요청에 실패했습니다.")
 
-    const result = await response.json()
-
-    setAnalysisResult(result)
+      const result: AnalysisResult = await response.json()
+      setAnalysisResult(result)
+      setAnalysisStatus("success")
+    } catch {
+      setAnalysisResult(null)
+      setAnalysisStatus("error")
+      setErrorMessage("이미지를 분석하지 못했습니다. 잠시 후 다시 시도해주세요.")
+    }
   }
 
-  type Rule = {
-  source: string
-  feature: string
-  feature_level: number
-  effect: string
-}
-
-type Recommendation = {
-  element: string
-  score: number
-  text: string
-}
-
-type AnalysisResult = {
-  rules: Rule[]
-  merged_adjustments: Record<string, number>
-  recommendations: Recommendation[]
-}
+  const isLoading = analysisStatus === "loading"
 
   return (
-    <main>
-      <h1>헤어 분석</h1>
+    <main className="app-shell">
+      <section className="hero" aria-labelledby="page-title">
+        <p className="eyebrow">FACE FACTOR ANALYSIS</p>
+        <h1 id="page-title">내 얼굴에 어울리는 헤어 방향 찾기</h1>
+        <p className="hero-description">
+          정면 사진 한 장으로 얼굴의 비율과 특징을 분석하고, 균형을 살리는
+          헤어스타일 방향을 확인해보세요.
+        </p>
+      </section>
 
-      <input
-        type="file"
-        accept="image/*"
-        onChange={(event) => {
-          const file = event.target.files?.[0] ?? null
-          setSelectedFile(file)
-        }}
-      />
-
-      {selectedFile && (
-        <>
-          <p>선택한 파일: {selectedFile.name}</p>
-
-        </>
-      )}
-
-      <button
-        disabled={!selectedFile}
-        onClick={handleAnalyze}
-      >
-        분석하기
-      </button>
-
-      {analysisResult && (
-        <div>
-          <h2>얼굴 특징</h2>
-
-          {analysisResult.rules.map((rule, index) => (
-            <div key={index}>
-              <p>특징: {rule.feature}</p>
-              <p>효과: {rule.effect}</p>
-            </div>
-          ))}
-        
-          <h2>헤어 추천</h2>
-
-          {analysisResult.recommendations.map((recommendation) => (
-            <div key={recommendation.element}>
-              <p>{recommendation.text}
-              {" "}
-              (score: {recommendation.score})
-              </p>
-            </div>
-          ))}
+      <section className="upload-card" aria-labelledby="upload-title">
+        <div className="section-heading">
+          <span className="step-number" aria-hidden="true">01</span>
+          <div>
+            <h2 id="upload-title">사진 업로드</h2>
+            <p>얼굴이 정면으로 잘 보이는 밝은 사진을 선택해주세요.</p>
+          </div>
         </div>
+
+        <ImageUpload selectedFile={selectedFile} previewUrl={previewUrl}
+          disabled={isLoading} onFileChange={handleFileChange} />
+
+        <button className="analyze-button" type="button"
+          disabled={!selectedFile || isLoading} onClick={handleAnalyze}>
+          {isLoading ? "분석 중..." : "얼굴 분석하기"}
+        </button>
+
+        <div className="status-message" aria-live="polite">
+          {isLoading && <p>얼굴 특징을 분석하고 있습니다.</p>}
+          {analysisStatus === "error" && (
+            <p className="error-message" role="alert">{errorMessage}</p>
+          )}
+        </div>
+      </section>
+
+      {analysisStatus === "success" && analysisResult && (
+        <AnalysisResultView result={analysisResult} />
       )}
     </main>
   )
