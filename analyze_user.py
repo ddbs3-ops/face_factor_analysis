@@ -1,16 +1,24 @@
 from build_measurement_db import analyze_image
-from core.mediapipe_tasks import create_face_landmarker, create_selfie_segmenter
-from core.hair_rules import get_hair_rules, merge_hair_rules, build_hair_recommendation
+from core.mediapipe_tasks import (
+    create_face_landmarker,
+    create_selfie_segmenter,
+)
+from core.hair_rules import (
+    get_hair_rules,
+    merge_hair_rules,
+    build_hair_recommendation,
+)
+
 import sqlite3
 import pandas as pd
 
-SELFIE_MODEL_PATH = 'models/selfie_multiclass_256x256.tflite'
-FACE_LANDMARKER_MODEL_PATH = 'models/face_landmarker.task' 
-IMAGE_PATH = r"C:\Users\82107\Downloads\sp_data\20220930_ID0161_C_02_N00002.png"
+
+SELFIE_MODEL_PATH = "models/selfie_multiclass_256x256.tflite"
+FACE_LANDMARKER_MODEL_PATH = "models/face_landmarker.task"
 DB_PATH = "data/face_analysis_v1_1.db"
 
 
-def main():
+def analyze_user_image(image_path):
     face_landmarker = create_face_landmarker(
         FACE_LANDMARKER_MODEL_PATH
     )
@@ -21,17 +29,15 @@ def main():
 
     try:
         result = analyze_image(
-            IMAGE_PATH,
+            image_path,
             face_landmarker,
             selfie_segmenter,
         )
 
         if result is None:
-            print("얼굴 분석 실패")
-            return
+            return None
 
         frontality_result, face_measurements = result
-
 
     finally:
         face_landmarker.close()
@@ -40,8 +46,8 @@ def main():
     reference_data = load_reference_db()
 
     measurement_top_percentiles = calculate_measurement_top_percentiles(
-        reference_data, 
-        face_measurements
+        reference_data,
+        face_measurements,
     )
 
     quantized_measurements = {
@@ -49,14 +55,19 @@ def main():
         for key, value in measurement_top_percentiles.items()
     }
 
-    hair_rules = get_hair_rules(face_measurements, quantized_measurements)
-    
+    hair_rules = get_hair_rules(
+        face_measurements,
+        quantized_measurements,
+    )
+
     hair_result = merge_hair_rules(hair_rules)
 
     recommendations = build_hair_recommendation(
-        hair_result["merged_adjustments"])
+        hair_result["merged_adjustments"]
+    )
 
     final_result = {
+        "frontality_result": frontality_result,
         "face_measurements": face_measurements,
         "measurement_top_percentiles": measurement_top_percentiles,
         "quantized_measurements": quantized_measurements,
@@ -65,15 +76,14 @@ def main():
         "recommendations": recommendations,
     }
 
-    print_analysis_result(final_result)
+    return final_result
 
-    
 
 def load_reference_db():
     conn = sqlite3.connect(DB_PATH)
 
     query = """
-    SELECT 
+    SELECT
         height_to_width_ratio,
         upper_ratio,
         middle_ratio,
@@ -90,54 +100,56 @@ def load_reference_db():
 
     return df
 
+
 def calculate_top_percentile(series, target_value):
-    below_count = (series > target_value).sum()
-    top_percent = below_count / len(series) * 100
+    above_count = (series > target_value).sum()
+    top_percent = above_count / len(series) * 100
 
     return top_percent
 
+
 def calculate_measurement_top_percentiles(
     reference_data,
-    face_measurements
+    face_measurements,
 ):
     height_to_width_top_percent = calculate_top_percentile(
         reference_data["height_to_width_ratio"],
-        face_measurements.height_to_width_ratio
+        face_measurements.height_to_width_ratio,
     )
 
     upper_top_percent = calculate_top_percentile(
         reference_data["upper_ratio"],
-        face_measurements.vertical_ratios.upper
+        face_measurements.vertical_ratios.upper,
     )
 
     middle_top_percent = calculate_top_percentile(
         reference_data["middle_ratio"],
-        face_measurements.vertical_ratios.middle
+        face_measurements.vertical_ratios.middle,
     )
 
     lower_top_percent = calculate_top_percentile(
         reference_data["lower_ratio"],
-        face_measurements.vertical_ratios.lower
+        face_measurements.vertical_ratios.lower,
     )
 
     jaw_to_cheekbone_top_percent = calculate_top_percentile(
         reference_data["jaw_to_cheekbone_width_ratio"],
-        face_measurements.jaw.jaw_to_cheekbone_width_ratio
+        face_measurements.jaw.jaw_to_cheekbone_width_ratio,
     )
 
     chin_angle_top_percent = calculate_top_percentile(
         reference_data["chin_angle"],
-        face_measurements.jaw.chin_angle_deg
+        face_measurements.jaw.chin_angle_deg,
     )
 
     left_jaw_angle_top_percent = calculate_top_percentile(
         reference_data["left_jaw_angle"],
-        face_measurements.jaw.left_jaw_angle_deg
+        face_measurements.jaw.left_jaw_angle_deg,
     )
 
     right_jaw_angle_top_percent = calculate_top_percentile(
         reference_data["right_jaw_angle"],
-        face_measurements.jaw.right_jaw_angle_deg
+        face_measurements.jaw.right_jaw_angle_deg,
     )
 
     return {
@@ -145,11 +157,15 @@ def calculate_measurement_top_percentiles(
         "upper_ratio": round(upper_top_percent, 2),
         "middle_ratio": round(middle_top_percent, 2),
         "lower_ratio": round(lower_top_percent, 2),
-        "jaw_to_cheekbone_width_ratio": round(jaw_to_cheekbone_top_percent, 2),
+        "jaw_to_cheekbone_width_ratio": round(
+            jaw_to_cheekbone_top_percent,
+            2,
+        ),
         "chin_angle": round(chin_angle_top_percent, 2),
         "left_jaw_angle": round(left_jaw_angle_top_percent, 2),
         "right_jaw_angle": round(right_jaw_angle_top_percent, 2),
     }
+
 
 def quantize_top_percent(top_percent):
     if top_percent <= 20:
@@ -163,17 +179,35 @@ def quantize_top_percent(top_percent):
     else:
         return -2
 
+
 def print_analysis_result(final_result):
     print("\n[얼굴 특징]")
+
     for rule in final_result["rules"]:
         print("-", rule["feature"])
 
     print("\n[헤어 추천]")
+
     for recommendation in final_result["recommendations"]:
         print(
             f"- {recommendation['text']} "
             f"(score: {recommendation['score']})"
         )
+
+
+def main():
+    image_path = (
+        r"C:\Users\eun\Downloads\sp_data\20220930_ID0161_C_02_N00002.png"
+    )
+
+    result = analyze_user_image(image_path)
+
+    if result is None:
+        print("얼굴 분석 실패")
+        return
+
+    print_analysis_result(result)
+
 
 if __name__ == "__main__":
     main()

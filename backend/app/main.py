@@ -1,16 +1,13 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI
+
+from backend.app.api.analyze import router as analyze_router
+
 
 app = FastAPI()
+
+app.include_router(analyze_router)
 
 
 @app.get("/")
 def root():
     return {"message": "Hello FastAPI"}
-
-
-@app.post("/analyze")
-async def analyze(file: UploadFile = File(...)):
-    return {
-        "filename": file.filename,
-        "content_type": file.content_type,
-    }
