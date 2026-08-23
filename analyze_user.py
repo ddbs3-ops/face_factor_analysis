@@ -1,4 +1,6 @@
-from build_measurement_db import analyze_image
+from unittest import result
+
+from core.analysis_pipeline import analyze_image
 from core.mediapipe_tasks import (
     create_face_landmarker,
     create_selfie_segmenter,
@@ -9,13 +11,15 @@ from core.hair_rules import (
     build_hair_recommendation,
 )
 
+from config.settings import (
+    SELFIE_MODEL_PATH,
+    FACE_LANDMARKER_MODEL_PATH,
+    REFERENCE_DB_PATH,
+)
+
 import sqlite3
 import pandas as pd
 
-
-SELFIE_MODEL_PATH = "models/selfie_multiclass_256x256.tflite"
-FACE_LANDMARKER_MODEL_PATH = "models/face_landmarker.task"
-DB_PATH = "data/face_analysis_v1_1.db"
 
 
 def analyze_user_image(image_path):
@@ -28,16 +32,14 @@ def analyze_user_image(image_path):
     )
 
     try:
-        result = analyze_image(
+        image_analysis = analyze_image(
             image_path,
             face_landmarker,
             selfie_segmenter,
         )
 
-        if result is None:
+        if image_analysis is None:
             return None
-
-        frontality_result, face_measurements = result
 
     finally:
         face_landmarker.close()
@@ -47,7 +49,7 @@ def analyze_user_image(image_path):
 
     measurement_top_percentiles = calculate_measurement_top_percentiles(
         reference_data,
-        face_measurements,
+        image_analysis.face_measurements,
     )
 
     quantized_measurements = {
@@ -56,7 +58,7 @@ def analyze_user_image(image_path):
     }
 
     hair_rules = get_hair_rules(
-        face_measurements,
+        image_analysis.face_measurements,
         quantized_measurements,
     )
 
@@ -67,8 +69,8 @@ def analyze_user_image(image_path):
     )
 
     final_result = {
-        "frontality_result": frontality_result,
-        "face_measurements": face_measurements,
+        "frontality_result": image_analysis.frontality_result,
+        "face_measurements": image_analysis.face_measurements,
         "measurement_top_percentiles": measurement_top_percentiles,
         "quantized_measurements": quantized_measurements,
         "rules": hair_result["rules"],
@@ -80,7 +82,7 @@ def analyze_user_image(image_path):
 
 
 def load_reference_db():
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(REFERENCE_DB_PATH)
 
     query = """
     SELECT

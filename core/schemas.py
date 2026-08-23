@@ -84,3 +84,20 @@ class HairlineROI:
     right_x: int
     top_y: int
     bottom_y: int
+
+@dataclass
+class ImageAnalysisResult:
+    frontality_result: FrontalityResult
+    face_measurements: FaceMeasurements
+    hairline_result: HairlineResult
+    image_width: int
+    image_height: int
+
+@dataclass
+class ImageMeasurementResult:
+    frontality_result: FrontalityResult
+    raw_face: RawFace
+    vertical_facepoints: VerticalFacePoints
+    hairline_result: HairlineResult
+    image_width: int
+    image_height: int
