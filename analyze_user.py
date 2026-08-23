@@ -1,5 +1,3 @@
-from unittest import result
-
 from core.analysis_pipeline import analyze_image
 from core.mediapipe_tasks import (
     create_face_landmarker,

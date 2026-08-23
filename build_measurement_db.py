@@ -55,7 +55,7 @@ def main():
             if result is None:
                 continue
 
-            frontality_result, face_measurements, hairline_result = result
+            
 
             save_face_measurement(
                 image_path=image_path_string,
@@ -63,8 +63,8 @@ def main():
                 gt_yaw=sample.gt_yaw,
                 gt_pitch=sample.gt_pitch,
                 gt_roll=sample.gt_roll,
-                frontality_result=frontality_result,
-                face_measurements=face_measurements,
+                frontality_result=result.frontality_result,
+                face_measurements=result.face_measurements,
             )
 
     finally:
