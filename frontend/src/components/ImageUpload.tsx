@@ -4,26 +4,45 @@ type Props = {
   selectedFile: File | null
   previewUrl: string | null
   disabled: boolean
+  hairlineYRatio: number | null
   onFileChange: (file: File | null) => void
 }
 
-function ImageUpload({ selectedFile, previewUrl, disabled, onFileChange }: Props) {
+function ImageUpload({ selectedFile, previewUrl, disabled, hairlineYRatio, onFileChange }: Props) {
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
-    onFileChange(event.target.files?.[0] ?? null)
+    onFileChange(event.target.files?.[0] ?? null) // 선택된 파일이 없으면 null로 전달
   }
 
   return (
     <div className="image-upload">
       <div className={`image-stage${previewUrl ? " has-image" : ""}`}>
-        {previewUrl ? <img src={previewUrl} alt="분석할 얼굴 사진 미리보기" /> : (
+        {previewUrl ? (
+          <div className="image-preview-wrapper">
+            <img
+              src={previewUrl}
+              alt="분석할 얼굴 사진 미리보기"
+            />
+
+            {hairlineYRatio !== null && (
+              <div
+                className="hairline-guide"
+                style={{
+                  top: `${hairlineYRatio * 100}%`,
+                }}
+              />
+            )}
+          </div>
+        ) : (
           <div className="upload-placeholder" aria-hidden="true">
             <span className="upload-icon">＋</span>
             <strong>분석할 사진을 선택하세요</strong>
             <span>JPG, PNG 등 이미지 파일</span>
           </div>
         )}
+
         <div className="image-overlay-layer" aria-hidden="true" />
       </div>
+
       <div className="file-controls">
         <label className={`file-button${disabled ? " is-disabled" : ""}`}>
           <span>{selectedFile ? "다른 사진 선택" : "사진 선택"}</span>

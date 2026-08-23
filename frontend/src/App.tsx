@@ -5,6 +5,7 @@ import ImageUpload from "./components/ImageUpload"
 import type { AnalysisResult, AnalysisStatus } from "./types/analysis"
 
 const ANALYZE_API_URL = "http://127.0.0.1:8000/analyze"
+const MEASURE_API_URL = "http://127.0.0.1:8000/measure"
 
 function App() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null) // 선택된 이미지 파일
@@ -12,6 +13,7 @@ function App() {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null) // 분석 결과 JSON
   const [analysisStatus, setAnalysisStatus] = useState<AnalysisStatus>("idle") // 분석 상태: "idle" | "loading" | "success" | "error"
   const [errorMessage, setErrorMessage] = useState("")
+  const [hairlineYRatio, setHairlineYRatio] = useState<number | null>(null)
 
   useEffect(() => {
     if (!selectedFile) { // 선택된 파일이 없으면 미리보기 URL을 null로 설정
@@ -23,11 +25,40 @@ function App() {
     return () => URL.revokeObjectURL(objectUrl) // 선택된 파일이 변경되거나 컴포넌트가 언마운트될 때 URL 객체를 해제하여 메모리 누수를 방지
   }, [selectedFile])
 
-  function handleFileChange(file: File | null) {// 파일 선택 시 상태 초기화
+  function handleFileChange(file: File | null) {
     setSelectedFile(file)
     setAnalysisResult(null)
     setAnalysisStatus("idle")
     setErrorMessage("")
+    setHairlineYRatio(null)
+
+    if (file) {
+      measureHairline(file)
+    }
+  }
+
+  async function measureHairline(file: File) {
+    const formData = new FormData()
+    formData.append("file", file)
+
+    try {
+      const response = await fetch(MEASURE_API_URL, {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!response.ok) {
+        throw new Error("헤어라인 측정에 실패했습니다.")
+      }
+
+      const result = await response.json()
+
+      setHairlineYRatio(result.hairline_y_ratio)
+
+      console.log("자동 헤어라인:", result.hairline_y_ratio)
+    } catch {
+      setHairlineYRatio(null)
+    }
   }
 
   async function handleAnalyze() {
@@ -77,8 +108,13 @@ function App() {
           </div>
         </div>
 
-        <ImageUpload selectedFile={selectedFile} previewUrl={previewUrl}
-          disabled={isLoading} onFileChange={handleFileChange} /> 
+        <ImageUpload
+          selectedFile={selectedFile}
+          previewUrl={previewUrl}
+          disabled={isLoading}
+          hairlineYRatio={hairlineYRatio}
+          onFileChange={handleFileChange}
+        />
 
         <button className="analyze-button" type="button"
           disabled={!selectedFile || isLoading} onClick={handleAnalyze}>
