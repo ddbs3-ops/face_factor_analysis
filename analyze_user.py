@@ -20,7 +20,9 @@ import pandas as pd
 
 
 
-def analyze_user_image(image_path):
+def analyze_user_image(
+        image_path,
+        hairline_y_ratio=None):
     face_landmarker = create_face_landmarker(
         FACE_LANDMARKER_MODEL_PATH
     )
@@ -34,6 +36,7 @@ def analyze_user_image(image_path):
             image_path,
             face_landmarker,
             selfie_segmenter,
+            hairline_y_ratio=hairline_y_ratio,
         )
 
         if image_analysis is None:

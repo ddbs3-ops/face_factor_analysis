@@ -14,6 +14,7 @@ function App() {
   const [analysisStatus, setAnalysisStatus] = useState<AnalysisStatus>("idle") // 분석 상태: "idle" | "loading" | "success" | "error"
   const [errorMessage, setErrorMessage] = useState("")
   const [hairlineYRatio, setHairlineYRatio] = useState<number | null>(null)
+  const [isMeasuring, setIsMeasuring] = useState(false)
 
   useEffect(() => {
     if (!selectedFile) { // 선택된 파일이 없으면 미리보기 URL을 null로 설정
@@ -41,6 +42,8 @@ function App() {
     const formData = new FormData()
     formData.append("file", file)
 
+    setIsMeasuring(true)
+
     try {
       const response = await fetch(MEASURE_API_URL, {
         method: "POST",
@@ -58,14 +61,21 @@ function App() {
       console.log("자동 헤어라인:", result.hairline_y_ratio)
     } catch {
       setHairlineYRatio(null)
+    } finally {
+      setIsMeasuring(false)
     }
   }
 
   async function handleAnalyze() {
-    if (!selectedFile || analysisStatus === "loading") return
+    if (
+      !selectedFile ||
+      hairlineYRatio === null ||
+      analysisStatus === "loading"
+    ) return
 
     const formData = new FormData()
     formData.append("file", selectedFile)
+    formData.append("hairline_y_ratio", String(hairlineYRatio))
     setAnalysisStatus("loading")
     setErrorMessage("")
 
@@ -105,7 +115,11 @@ function App() {
           <div>
             <h2 id="upload-title">사진 업로드</h2>
             <p>얼굴이 정면으로 잘 보이는 밝은 사진을 선택해주세요.</p>
+            <p>자동으로 표시된 선이 실제 헤어라인과 다르면 위아래로 조정해주세요.</p>
           </div>
+          {isMeasuring && (
+            <p>헤어라인을 찾는 중...</p>
+          )}
         </div>
 
         <ImageUpload
@@ -113,6 +127,7 @@ function App() {
           previewUrl={previewUrl}
           disabled={isLoading}
           hairlineYRatio={hairlineYRatio}
+          onHairlineChange={setHairlineYRatio}
           onFileChange={handleFileChange}
         />
 

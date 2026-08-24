@@ -16,7 +16,9 @@ from config.settings import (
 )
 
 
-async def analyze_uploaded_image(file: UploadFile):
+async def analyze_uploaded_image(
+        file: UploadFile,
+        hairline_y_ratio: float):
     suffix = os.path.splitext(file.filename)[1]
 
     with tempfile.NamedTemporaryFile(
@@ -27,7 +29,7 @@ async def analyze_uploaded_image(file: UploadFile):
         temp_path = temp_file.name
 
     try:
-        result = analyze_user_image(temp_path)
+        result = analyze_user_image(temp_path, hairline_y_ratio)
 
         if result is None:
             return None

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException, Form
 
 from backend.app.services.analysis_service import analyze_uploaded_image, measure_uploaded_image
 
@@ -7,8 +7,14 @@ router = APIRouter()
 
 
 @router.post("/analyze")
-async def analyze(file: UploadFile = File(...)):
-    result = await analyze_uploaded_image(file)
+async def analyze(
+    file: UploadFile = File(...),
+    hairline_y_ratio: float = Form(...),
+):
+    result = await analyze_uploaded_image(
+        file,
+        hairline_y_ratio,
+    )
 
     if result is None:
         raise HTTPException(
