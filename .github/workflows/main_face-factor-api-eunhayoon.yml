@@ -32,10 +32,11 @@ jobs:
           mkdir -p .python_packages/lib/site-packages
 
           python -m pip install \
+            --only-binary=:all: \
             opencv-contrib-python-headless==4.14.0.94 \
             numpy==2.5.1 \
             scipy==1.18.0 \
-            pandas==2.1.1 \
+            pandas==3.0.5 \
             fastapi==0.141.1 \
             uvicorn==0.52.4 \
             python-multipart==0.0.32 \
@@ -47,6 +48,7 @@ jobs:
             --target .python_packages/lib/site-packages
 
           python -m pip install \
+            --only-binary=:all: \
             mediapipe==1.0.1 \
             --no-deps \
             --target .python_packages/lib/site-packages
@@ -57,19 +59,56 @@ jobs:
           MPLBACKEND: Agg
         run: |
           python - <<'PY'
-          import cv2
-          import mediapipe
-          import numpy
-          import matplotlib
-          import certifi
-          import flatbuffers
+          import importlib.metadata as metadata
 
-          print("mediapipe:", mediapipe.__version__)
-          print("opencv:", cv2.__version__)
-          print("numpy:", numpy.__version__)
-          print("matplotlib:", matplotlib.__version__)
-          print("certifi:", certifi.where())
-          print("Dependency smoke test passed.")
+          import certifi
+          import cv2
+          import fastapi
+          import flatbuffers
+          import matplotlib
+          import mediapipe
+          import multipart
+          import numpy as np
+          import pandas as pd
+          import scipy
+          import uvicorn
+          from scipy.spatial.transform import Rotation
+
+          expected = {
+              "numpy": "2.5.1",
+              "pandas": "3.0.5",
+              "scipy": "1.18.0",
+              "mediapipe": "1.0.1",
+              "opencv-contrib-python-headless": "4.14.0.94",
+              "matplotlib": "3.11.1",
+              "flatbuffers": "25.12.19",
+              "absl-py": "2.5.0",
+              "sounddevice": "0.5.6",
+              "fastapi": "0.141.1",
+              "uvicorn": "0.52.4",
+              "python-multipart": "0.0.32",
+              "certifi": "2026.7.22",
+          }
+
+          for package, expected_version in expected.items():
+              actual = metadata.version(package)
+              assert actual == expected_version, (
+                  f"{package}: expected {expected_version}, got {actual}"
+              )
+
+          frame = pd.DataFrame(np.arange(6).reshape(2, 3))
+          assert frame.sum().tolist() == [3, 5, 7]
+
+          matrix = Rotation.from_euler(
+              "xyz",
+              [1, 2, 3],
+              degrees=True,
+          ).as_matrix()
+          assert matrix.shape == (3, 3)
+
+          import backend.app.main
+
+          print("All deployment smoke tests passed.")
           PY
                 
       # By default, when you enable GitHub CI/CD integration through the Azure portal, the platform automatically sets the SCM_DO_BUILD_DURING_DEPLOYMENT application setting to true. This triggers the use of Oryx, a build engine that handles application compilation and dependency installation (e.g., pip install) directly on the platform during deployment. Hence, we exclude the antenv virtual environment directory from the deployment artifact to reduce the payload size. 
