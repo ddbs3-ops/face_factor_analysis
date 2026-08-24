@@ -6,4 +6,8 @@ pandas==2.1.1
 fastapi==0.141.1
 uvicorn==0.52.4
 python-multipart==0.0.32
+absl-py==2.5.0
 certifi==2026.7.22
+flatbuffers==25.12.19
+matplotlib==3.11.1
+sounddevice==0.5.6
