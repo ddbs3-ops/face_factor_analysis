@@ -4,8 +4,10 @@ import AnalysisResultView from "./components/AnalysisResult"
 import ImageUpload from "./components/ImageUpload"
 import type { AnalysisResult, AnalysisStatus } from "./types/analysis"
 
-const ANALYZE_API_URL = "http://127.0.0.1:8000/analyze"
-const MEASURE_API_URL = "http://127.0.0.1:8000/measure"
+const API_BASE_URL = import.meta.env.VITE_API_URL
+
+const ANALYZE_API_URL = `${API_BASE_URL}/analyze`
+const MEASURE_API_URL = `${API_BASE_URL}/measure`
 
 function App() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null) // 선택된 이미지 파일
