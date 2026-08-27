@@ -37,6 +37,12 @@ export type JawWidthPoints = {
   right_jaw: PointRatio
 }
 
+export type JawAngleVisualPoints = {
+  intersection: PointRatio
+  upper_end: PointRatio
+  lower_end: PointRatio
+}
+
 export type AnalysisResult = {
   vertical_ratios: VerticalRatios
   vertical_points: VerticalPoints
@@ -44,9 +50,21 @@ export type AnalysisResult = {
   jaw_width_ratio: number
   jaw_width_points: JawWidthPoints
 
+  jaw_angles: {
+    left: number
+    right: number
+  }
+
+  jaw_angle_points: {
+    left: JawAngleVisualPoints
+    right: JawAngleVisualPoints
+  }
+
   rules: AnalysisRule[]
   merged_adjustments: Adjustments
   recommendations: Recommendation[]
 }
+
+
 
 export type AnalysisStatus = "idle" | "loading" | "success" | "error"

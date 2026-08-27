@@ -9,6 +9,7 @@ type Props = {
 type InspectionType =
   | "vertical"
   | "jaw-width"
+  | "jaw-angles"
   | null
 
 const inspectionMap: Record<string, InspectionType> = {

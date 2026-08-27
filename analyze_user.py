@@ -76,6 +76,7 @@ def analyze_user_image(
 
         "vertical_facepoints": image_analysis.vertical_facepoints,
         "image_height": image_analysis.image_height,
+        "image_width": image_analysis.image_width,
 
         "measurement_top_percentiles": measurement_top_percentiles,
         "quantized_measurements": quantized_measurements,

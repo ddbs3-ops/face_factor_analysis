@@ -9,6 +9,7 @@ from core.face_features import (
     calculate_face_height_to_width_ratio,
     calculate_jaw_to_cheekbone_width_ratio,
     calculate_vertical_face_ratios,
+    calculate_angle_visualization_points,
 )
 from core.frontality import evaluate_frontality
 from core.hairline import (
@@ -63,6 +64,7 @@ def analyze_image(
         vertical_facepoints=measurement.vertical_facepoints,
         hairline_y=hairline_y,
     )
+
 
     return ImageAnalysisResult(
         frontality_result=measurement.frontality_result,
@@ -260,6 +262,18 @@ def analyze_face_measurements(
         landmark.RIGHT_JAW_LOWER_LINE_INDICES,
     ) # 오른쪽 하악각 각도
 
+    left_jaw_visual_points = calculate_angle_visualization_points(
+        raw_face=raw_face,
+        upper_line_indices=landmark.LEFT_JAW_UPPER_LINE_INDICES,
+        lower_line_indices=landmark.LEFT_JAW_LOWER_LINE_INDICES,
+    )
+
+    right_jaw_visual_points = calculate_angle_visualization_points(
+        raw_face=raw_face,
+        upper_line_indices=landmark.RIGHT_JAW_UPPER_LINE_INDICES,
+        lower_line_indices=landmark.RIGHT_JAW_LOWER_LINE_INDICES,
+    )
+
     jaw_measurements = JawMeasurements(
         jaw_to_cheekbone_width_ratio=jaw_cheekbone_width_ratio,
         chin_contour_angles_deg=chin_contour,
@@ -268,6 +282,9 @@ def analyze_face_measurements(
         chin_angle_deg=chin_angle,
         left_jaw_angle_deg=left_jaw_angle,
         right_jaw_angle_deg=right_jaw_angle,
+
+        left_jaw_visual_points=left_jaw_visual_points,
+        right_jaw_visual_points=right_jaw_visual_points
     )
     
     return FaceMeasurements(

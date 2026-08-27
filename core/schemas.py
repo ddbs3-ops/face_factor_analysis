@@ -49,6 +49,11 @@ class HairlineResult:
     estimated_y : float
     final_y : float | None
 
+@dataclass
+class AngleVisualizationPoints:
+    intersection: Point2D
+    upper_end: Point2D
+    lower_end: Point2D
 
 @dataclass
 class JawMeasurements:
@@ -61,6 +66,9 @@ class JawMeasurements:
     chin_angle_deg: float
     left_jaw_angle_deg: float
     right_jaw_angle_deg: float
+
+    left_jaw_visual_points: AngleVisualizationPoints
+    right_jaw_visual_points: AngleVisualizationPoints
 
 
 @dataclass

@@ -42,6 +42,11 @@ async def analyze_uploaded_image(
         left_jaw = raw_face.points[172]
         right_jaw = raw_face.points[397]
 
+        jaw = result["face_measurements"].jaw
+
+        left_visual = jaw.left_jaw_visual_points
+        right_visual = jaw.right_jaw_visual_points
+
         return {
             "rules": result["rules"],
             "merged_adjustments": result["merged_adjustments"],
@@ -51,6 +56,7 @@ async def analyze_uploaded_image(
                 "middle" : result["face_measurements"].vertical_ratios.middle,
                 "lower" : result["face_measurements"].vertical_ratios.lower,              
             },
+
             "vertical_points": {
                 "hairline": hairline_y_ratio,
                 "glabella": (
@@ -91,7 +97,41 @@ async def analyze_uploaded_image(
                     "y": right_jaw.y,
                 },
             },
+            "jaw_angles": {
+                "left": jaw.left_jaw_angle_deg,
+                "right": jaw.right_jaw_angle_deg,
+            },
 
+            "jaw_angle_points": {
+                "left": {
+                    "intersection": {
+                        "x": left_visual.intersection.x / result["image_width"],
+                        "y": left_visual.intersection.y / result["image_height"],
+                    },
+                    "upper_end": {
+                        "x": left_visual.upper_end.x / result["image_width"],
+                        "y": left_visual.upper_end.y / result["image_height"],
+                    },
+                    "lower_end": {
+                        "x": left_visual.lower_end.x / result["image_width"],
+                        "y": left_visual.lower_end.y / result["image_height"],
+                    },
+                },
+                "right": {
+                    "intersection": {
+                        "x": right_visual.intersection.x / result["image_width"],
+                        "y": right_visual.intersection.y / result["image_height"],
+                    },
+                    "upper_end": {
+                        "x": right_visual.upper_end.x / result["image_width"],
+                        "y": right_visual.upper_end.y / result["image_height"],
+                    },
+                    "lower_end": {
+                        "x": right_visual.lower_end.x / result["image_width"],
+                        "y": right_visual.lower_end.y / result["image_height"],
+                    },
+                },
+            },
         }
 
     finally:

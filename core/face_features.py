@@ -170,4 +170,81 @@ def calculate_angle_between_landmark_lines(
         second_vector,
     )
 
-    
+def calculate_line_intersection(
+    first_slope: float,
+    first_intercept: float,
+    second_slope: float,
+    second_intercept: float,
+) -> Point2D:
+    if math.isclose(first_slope, second_slope):
+        raise ValueError("두 직선은 평행합니다. 교차점을 계산할 수 없습니다.")
+
+    x = (second_intercept - first_intercept) / (first_slope - second_slope)
+    y = first_slope * x + first_intercept
+
+    return Point2D(x=x, y=y)
+
+def calculate_angle_visualization_points(
+    raw_face: RawFace,
+    upper_line_indices: tuple[int, ...],
+    lower_line_indices: tuple[int, ...],
+):
+    upper_slope, upper_intercept = fit_line_to_points(
+        landmarks_number=upper_line_indices,
+        raw_face=raw_face,
+    )
+
+    lower_slope, lower_intercept = fit_line_to_points(
+        landmarks_number=lower_line_indices,
+        raw_face=raw_face,
+    )
+
+    intersection_point = calculate_line_intersection(
+        first_slope=upper_slope,
+        first_intercept=upper_intercept,
+        second_slope=lower_slope,
+        second_intercept=lower_intercept,
+    )
+
+    upper_points = [
+        get_pixel_point(raw_face, index)
+        for index in upper_line_indices
+    ]
+
+    upper_farthest_point = max(
+        upper_points,
+        key=lambda point: calculate_distance(
+            intersection_point,
+            point,
+        ),
+    )
+
+    upper_end_point = Point2D(
+        x=upper_farthest_point.x,
+        y=upper_slope * upper_farthest_point.x + upper_intercept,
+    )
+
+
+    lower_points = [
+        get_pixel_point(raw_face, index)
+        for index in lower_line_indices
+    ]
+
+    lower_farthest_point = max(
+        lower_points,
+        key=lambda point: calculate_distance(
+            intersection_point,
+            point,
+        ),
+    )
+
+    lower_end_point = Point2D(
+        x=lower_farthest_point.x,
+        y=lower_slope * lower_farthest_point.x + lower_intercept,
+    )
+
+    return AngleVisualizationPoints(
+        intersection=intersection_point,
+        upper_end=upper_end_point,
+        lower_end=lower_end_point,
+    )
