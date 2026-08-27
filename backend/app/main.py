@@ -23,4 +23,4 @@ app.include_router(analyze_router)
 
 @app.get("/")
 def root():
-    return {"message": "Hello FastAPI"}
+    return {"message": "Hello backend!"}
