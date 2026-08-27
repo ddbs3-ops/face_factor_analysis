@@ -1,7 +1,7 @@
 .venv
 .git
 .github
-frontend/node_modules
+frontend
 __pycache__
 *.pyc
 *.pyo
@@ -10,12 +10,7 @@ __pycache__
 .idea
 .DS_Store
 .env
-frontend/.env
 venv
-frontend/dist
-frontend/.vite
-frontend/.env.*
-!frontend/.env.example
 data/raw
 images
 sample
