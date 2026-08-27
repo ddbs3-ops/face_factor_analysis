@@ -25,12 +25,28 @@ export type VerticalPoints = {
   chin: number
 }
 
+export type PointRatio = {
+  x: number
+  y: number
+}
+
+export type JawWidthPoints = {
+  left_cheekbone: PointRatio
+  right_cheekbone: PointRatio
+  left_jaw: PointRatio
+  right_jaw: PointRatio
+}
+
 export type AnalysisResult = {
+  vertical_ratios: VerticalRatios
+  vertical_points: VerticalPoints
+
+  jaw_width_ratio: number
+  jaw_width_points: JawWidthPoints
+
   rules: AnalysisRule[]
   merged_adjustments: Adjustments
   recommendations: Recommendation[]
-  vertical_ratios: VerticalRatios
-  vertical_points: VerticalPoints
 }
 
 export type AnalysisStatus = "idle" | "loading" | "success" | "error"

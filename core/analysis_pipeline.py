@@ -66,6 +66,7 @@ def analyze_image(
 
     return ImageAnalysisResult(
         frontality_result=measurement.frontality_result,
+        raw_face=measurement.raw_face,
         face_measurements=face_measurements,
         vertical_facepoints=measurement.vertical_facepoints,
         hairline_result=measurement.hairline_result,

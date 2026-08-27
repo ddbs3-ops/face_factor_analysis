@@ -6,6 +6,16 @@ type Props = {
   previewUrl: string | null
 }
 
+type InspectionType =
+  | "vertical"
+  | "jaw-width"
+  | null
+
+const inspectionMap: Record<string, InspectionType> = {
+  vertical_face: "vertical",
+  lower_face: "jaw-width",
+}
+
 function scoreLabel(score: number) {
   if (score > 0) return "추천"
   if (score < 0) return "비추천"
@@ -13,8 +23,16 @@ function scoreLabel(score: number) {
 }
 
 function AnalysisResult({ result, previewUrl }: Props) {
-  const [hoveredRegion, setHoveredRegion] =
-  useState<"upper" | "middle" | "lower" | null>(null)
+  const [inspectionType, setInspectionType] =
+    useState<InspectionType>(null)
+
+  const activateInspection = (type: InspectionType) => {
+    setInspectionType(type)
+  }
+
+  const clearInspection = () => {
+    setInspectionType(null)
+  }
 
   const upperPercent = Math.round(result.vertical_ratios.upper * 100)
   const middlePercent = Math.round(result.vertical_ratios.middle * 100)
@@ -35,55 +53,160 @@ function AnalysisResult({ result, previewUrl }: Props) {
       </div>
 
       {previewUrl && (
-        <div
-          className={`result-face-preview ${
-            hoveredRegion ? "is-inspecting" : ""
-          }`}
-        >
+        <div className="result-face-preview">
           <img
             src={previewUrl}
             alt="분석된 얼굴"
           />
 
+          <svg
+            className={`jaw-width-overlay ${
+              inspectionType === "jaw-width" ? "is-active" : ""
+            }`}
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <line
+              x1={result.jaw_width_points.left_cheekbone.x * 100}
+              y1={result.jaw_width_points.left_cheekbone.y * 100}
+              x2={result.jaw_width_points.right_cheekbone.x * 100}
+              y2={result.jaw_width_points.right_cheekbone.y * 100}
+              className="jaw-width-line cheekbone-line"
+              onMouseEnter={() => activateInspection("jaw-width")}
+              onMouseLeave={clearInspection}
+            />
+
+            <line
+              x1={result.jaw_width_points.left_jaw.x * 100}
+              y1={result.jaw_width_points.left_jaw.y * 100}
+              x2={result.jaw_width_points.right_jaw.x * 100}
+              y2={result.jaw_width_points.right_jaw.y * 100}
+              className="jaw-width-line jaw-line"
+              onMouseEnter={() => activateInspection("jaw-width")}
+              onMouseLeave={clearInspection}
+            />
+
+            <circle
+              cx={result.jaw_width_points.left_cheekbone.x * 100}
+              cy={result.jaw_width_points.left_cheekbone.y * 100}
+              r="1.2"
+              className="jaw-width-point"
+            />
+
+            <circle
+              cx={result.jaw_width_points.right_cheekbone.x * 100}
+              cy={result.jaw_width_points.right_cheekbone.y * 100}
+              r="1.2"
+              className="jaw-width-point"
+            />
+
+            <circle
+              cx={result.jaw_width_points.left_jaw.x * 100}
+              cy={result.jaw_width_points.left_jaw.y * 100}
+              r="1.2"
+              className="jaw-width-point"
+            />
+
+            <circle
+              cx={result.jaw_width_points.right_jaw.x * 100}
+              cy={result.jaw_width_points.right_jaw.y * 100}
+              r="1.2"
+              className="jaw-width-point"
+            />
+          </svg>
+          
+          <div
+            className={`jaw-width-label cheekbone-label ${
+              inspectionType === "jaw-width" ? "is-active" : ""
+            }`}
+            style={{
+              left: `${
+                (
+                  result.jaw_width_points.left_cheekbone.x +
+                  result.jaw_width_points.right_cheekbone.x
+                ) / 2 * 100
+              }%`,
+              top: `${
+                (
+                  result.jaw_width_points.left_cheekbone.y +
+                  result.jaw_width_points.right_cheekbone.y
+                ) / 2 * 100
+              }%`,
+            }}
+          >
+            광대폭 1.00
+          </div>
+
+          <div
+            className={`jaw-width-label jaw-label ${
+              inspectionType === "jaw-width" ? "is-active" : ""
+            }`}
+            style={{
+              left: `${
+                (
+                  result.jaw_width_points.left_jaw.x +
+                  result.jaw_width_points.right_jaw.x
+                ) / 2 * 100
+              }%`,
+              top: `${
+                (
+                  result.jaw_width_points.left_jaw.y +
+                  result.jaw_width_points.right_jaw.y
+                ) / 2 * 100
+              }%`,
+            }}
+          >
+            턱폭 {result.jaw_width_ratio.toFixed(2)}
+          </div>
+
           <div
             className={`face-guide-line ${
-              hoveredRegion ? "is-active" : ""
+              inspectionType === "vertical" ? "is-active" : ""
             }`}
             style={{ top: `${result.vertical_points.hairline * 100}%` }}
+            onMouseEnter={() => activateInspection("vertical")}
+            onMouseLeave={clearInspection}
           >
             <span>헤어라인</span>
           </div>
 
           <div
             className={`face-guide-line ${
-              hoveredRegion ? "is-active" : ""
+              inspectionType === "vertical" ? "is-active" : ""
             }`}
             style={{ top: `${result.vertical_points.glabella * 100}%` }}
+            onMouseEnter={() => activateInspection("vertical")}
+            onMouseLeave={clearInspection}
           >
             <span>미간</span>
           </div>
 
           <div
             className={`face-guide-line ${
-              hoveredRegion ? "is-active" : ""
+              inspectionType === "vertical" ? "is-active" : ""
             }`}
             style={{ top: `${result.vertical_points.subnasale * 100}%` }}
+            onMouseEnter={() => activateInspection("vertical")}
+            onMouseLeave={clearInspection}
           >
             <span>코밑</span>
           </div>
 
           <div
             className={`face-guide-line ${
-              hoveredRegion ? "is-active" : ""
+              inspectionType === "vertical" ? "is-active" : ""
             }`}
             style={{ top: `${result.vertical_points.chin * 100}%` }}
+            onMouseEnter={() => activateInspection("vertical")}
+            onMouseLeave={clearInspection}
           >
             <span>턱끝</span>
           </div>
 
           <div
             className={`face-region-label ${
-              hoveredRegion ? "is-active" : ""
+              inspectionType === "vertical" ? "is-active" : ""
             }`}
             style={{ top: `${upperCenter * 100}%` }}
           >
@@ -92,7 +215,7 @@ function AnalysisResult({ result, previewUrl }: Props) {
 
           <div
             className={`face-region-label ${
-              hoveredRegion ? "is-active" : ""
+              inspectionType === "vertical" ? "is-active" : ""
             }`}
             style={{ top: `${middleCenter * 100}%` }}
           >
@@ -101,7 +224,7 @@ function AnalysisResult({ result, previewUrl }: Props) {
 
           <div
             className={`face-region-label ${
-              hoveredRegion ? "is-active" : ""
+              inspectionType === "vertical" ? "is-active" : ""
             }`}
             style={{ top: `${lowerCenter * 100}%` }}
           >
@@ -120,16 +243,13 @@ function AnalysisResult({ result, previewUrl }: Props) {
               <article
                 className="feature-item"
                 key={`${rule.source}-${index}`}
-                onMouseEnter={() => {
-                  if (
-                    rule.source === "vertical_face" &&
-                    rule.dominant_region
-                  ) {
-                    setHoveredRegion(rule.dominant_region)
-                  }
-                }}
-                onMouseLeave={() => setHoveredRegion(null)}
-              >
+                  onMouseEnter={() =>
+                  activateInspection(
+                    inspectionMap[rule.source] ?? null
+                  )
+                }
+                onMouseLeave={clearInspection}
+                >
                 <h4>{rule.feature}</h4>
                 <p>{rule.effect}</p>
               </article>

@@ -72,6 +72,7 @@ def analyze_user_image(
     final_result = {
         "frontality_result": image_analysis.frontality_result,
         "face_measurements": image_analysis.face_measurements,
+        "raw_face": image_analysis.raw_face,
 
         "vertical_facepoints": image_analysis.vertical_facepoints,
         "image_height": image_analysis.image_height,

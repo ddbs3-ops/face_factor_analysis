@@ -34,6 +34,14 @@ async def analyze_uploaded_image(
         if result is None:
             return None
 
+        raw_face = result["raw_face"]
+
+        left_cheekbone = raw_face.points[234]
+        right_cheekbone = raw_face.points[454]
+
+        left_jaw = raw_face.points[172]
+        right_jaw = raw_face.points[397]
+
         return {
             "rules": result["rules"],
             "merged_adjustments": result["merged_adjustments"],
@@ -58,6 +66,32 @@ async def analyze_uploaded_image(
                     / result["image_height"]
                 ),
             },
+
+            "jaw_width_ratio": (
+                result["face_measurements"]
+                .jaw
+                .jaw_to_cheekbone_width_ratio
+            ),
+
+            "jaw_width_points": {
+                "left_cheekbone": {
+                    "x": left_cheekbone.x,
+                    "y": left_cheekbone.y,
+                },
+                "right_cheekbone": {
+                    "x": right_cheekbone.x,
+                    "y": right_cheekbone.y,
+                },
+                "left_jaw": {
+                    "x": left_jaw.x,
+                    "y": left_jaw.y,
+                },
+                "right_jaw": {
+                    "x": right_jaw.x,
+                    "y": right_jaw.y,
+                },
+            },
+
         }
 
     finally:
