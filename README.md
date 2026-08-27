@@ -78,10 +78,47 @@ MediaPipe Face Landmarker를 이용해 얼굴 랜드마크를 추출하고,
 
 ---
 
+## 시스템 아키텍처
+
+현재 프로젝트는 얼굴 분석 로직과 웹 서비스 계층을 분리하여 구성합니다.
+
+```text
+React / Vite Frontend
+        ↓
+     FastAPI
+        ↓
+Face Analysis Pipeline
+        ↓
+Reference Database
+```
+
+프론트엔드는 사용자의 이미지 업로드와 분석 결과 표시를 담당하고,
+FastAPI 백엔드는 이미지 입력을 받아 기존 얼굴 분석 파이프라인을 호출합니다.
+
+백엔드 API 계층과 핵심 분석 로직을 분리하여,
+웹 환경과 무관하게 얼굴 분석 기능을 독립적으로 유지할 수 있도록 구성합니다.
+
+주요 디렉터리 역할은 다음과 같습니다.
+
+```text
+backend/      FastAPI API 계층
+frontend/     React / Vite 사용자 인터페이스
+core/         얼굴 측정 및 분석 핵심 로직
+database/     SQLite 저장 및 조회
+config/       모델 및 데이터 경로 설정
+models/       MediaPipe 모델 파일
+data/         기준 데이터베이스 및 분석 데이터
+docs/         알고리즘 및 배포 과정 문서
+```
+
+---
+
 ## 데이터셋
 
 현재 대규모 분석을 위해 AI Hub 안면 데이터셋을 사용합니다.
-출처 : https://aihub.or.kr/aihubdata/data/view.do?srchOptnCnd=OPTNCND001&currMenu=115&topMenu=100&searchKeyword=celeb-k&aihubDataSe=data&dataSetSn=71427
+
+출처:
+https://aihub.or.kr/aihubdata/data/view.do?srchOptnCnd=OPTNCND001&currMenu=115&topMenu=100&searchKeyword=celeb-k&aihubDataSe=data&dataSetSn=71427
 
 분석 대상은 다음 조건으로 선별합니다.
 
@@ -121,9 +158,18 @@ estimated hairline을 fallback으로 사용합니다.
 다만 짧은 내림머리처럼 실제 헤어라인이 가려진 경우에는
 자동 추정만으로 정확한 위치를 판단하기 어렵습니다.
 
-따라서 향후 사용자에게 분석 기능을 제공할 때는
-자동 추정 결과를 기본값으로 제시하되,
-사용자가 직접 헤어라인 위치를 확인하고 조정할 수 있는 UI를 함께 제공할 예정입니다.
+현재 웹 UI에서는 자동 추정된 헤어라인 위치를 이미지 위에 표시하고,
+사용자가 필요할 경우 직접 위치를 조정할 수 있도록 구성했습니다.
+
+분석 과정은 다음과 같습니다.
+
+```text
+이미지 업로드
+→ 자동 헤어라인 측정
+→ 추정 위치 표시
+→ 사용자 확인 또는 수정
+→ 최종 분석
+```
 
 상세한 설계 및 개선 과정은
 [`docs/hairline.md`](docs/hairline.md)에 정리합니다.
@@ -172,10 +218,110 @@ UI 구현에는 Codex를 활용한 바이브 코딩 방식을 사용했습니다
 
 ---
 
+## 개발 환경
+
+프론트엔드와 백엔드는 로컬 개발 환경에서 각각 실행할 수 있습니다.
+
+### Backend
+
+가상환경 활성화 후 FastAPI 서버를 실행합니다.
+
+```bash
+uvicorn backend.app.main:app --reload
+```
+
+기본 로컬 주소:
+
+```text
+http://127.0.0.1:8000
+```
+
+FastAPI 문서:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Vite 환경변수를 이용해 개발 환경과 운영 환경의 API 주소를 분리합니다.
+
+```text
+.env.development
+→ 로컬 FastAPI 서버
+
+.env.production
+→ Azure에 배포된 FastAPI 서버
+```
+
+프론트엔드 코드에서는 실행 환경에 관계없이 다음 환경변수를 사용합니다.
+
+```ts
+const API_BASE_URL = import.meta.env.VITE_API_URL
+```
+
+`npm run dev` 실행 시 development 환경이 사용되고,
+production build 시 production 환경변수가 적용됩니다.
+
+이를 통해 로컬 개발과 운영 환경에서 API 주소를 코드 내부에서 직접 변경하지 않고 관리할 수 있습니다.
+
+---
+
+## 배포 및 CI/CD
+
+백엔드는 Docker 기반으로 컨테이너화하여 Azure App Service에 배포합니다.
+
+현재 배포 흐름은 다음과 같습니다.
+
+```text
+Developer
+   ↓
+git push origin main
+   ↓
+GitHub Actions
+   ↓
+Docker Image Build
+   ↓
+Azure Container Registry
+   ↓
+Azure App Service
+   ↓
+FastAPI Backend
+```
+
+`main` 브랜치에 코드가 push되면 GitHub Actions가 자동으로 실행됩니다.
+
+GitHub Actions는 다음 작업을 수행합니다.
+
+1. 저장소 checkout
+2. Azure 로그인
+3. Docker 이미지 빌드
+4. Azure Container Registry에 이미지 push
+5. Azure App Service가 새 Docker 이미지를 사용하도록 설정
+6. App Service 재시작
+7. 배포된 API 응답 확인
+
+이를 통해 데스크탑이나 노트북 등 개발 장비가 변경되더라도
+동일한 Git 저장소를 기준으로 개발 및 배포할 수 있습니다.
+
+Docker 이미지는 FastAPI 백엔드 실행에 필요한 코드와 모델만 포함하며,
+React 프론트엔드는 별도 배포를 전제로 백엔드 Docker 이미지에서 제외합니다.
+
+배포 과정에서 발생한 주요 문제와 해결 과정은
+[`docs/azure_deployment_troubleshooting.md`](docs/azure_deployment_troubleshooting.md)에 정리합니다.
+
+---
+
 ## 향후 계획
 
 현재 구축한 얼굴 기하학적 측정 파이프라인을 기반으로
-다음 단계에서는 얼굴 특징과 헤어스타일 요소 사이의 관계를 데이터화합니다.
+얼굴 특징과 헤어스타일 요소 사이의 관계를 지속적으로 데이터화합니다.
 
 최종적으로는
 
@@ -196,6 +342,9 @@ UI 구현에는 Codex를 활용한 바이브 코딩 방식을 사용했습니다
 
 등을 이용한 보정 방법을 별도로 실험할 예정입니다.
 
+또한 현재 구축된 FastAPI 백엔드와 React 프론트엔드를 기반으로
+실제 사용자가 접근할 수 있는 MVP 형태의 웹 서비스를 완성하는 것을 목표로 합니다.
+
 ---
 
 ## Development History
@@ -204,3 +353,6 @@ UI 구현에는 Codex를 활용한 바이브 코딩 방식을 사용했습니다
 
 헤어라인 알고리즘의 상세한 시행착오와 설계 과정은
 [`docs/hairline.md`](docs/hairline.md)에서 확인할 수 있습니다.
+
+Azure 및 Docker 배포 과정의 주요 문제와 해결 과정은
+[`docs/azure_deployment_troubleshooting.md`](docs/azure_deployment_troubleshooting.md)에서 확인할 수 있습니다.
