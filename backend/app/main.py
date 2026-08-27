@@ -7,6 +7,7 @@ app = FastAPI()
 
 ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "https://icy-beach-065dc0000.7.azurestaticapps.net",
 ]
 
 app.add_middleware(
