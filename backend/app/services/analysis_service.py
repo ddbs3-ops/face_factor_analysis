@@ -38,6 +38,26 @@ async def analyze_uploaded_image(
             "rules": result["rules"],
             "merged_adjustments": result["merged_adjustments"],
             "recommendations": result["recommendations"],
+            "vertical_ratios": {
+                "upper" : result["face_measurements"].vertical_ratios.upper,
+                "middle" : result["face_measurements"].vertical_ratios.middle,
+                "lower" : result["face_measurements"].vertical_ratios.lower,              
+            },
+            "vertical_points": {
+                "hairline": hairline_y_ratio,
+                "glabella": (
+                    result["vertical_facepoints"].glabella_y
+                    / result["image_height"]
+                ),
+                "subnasale": (
+                    result["vertical_facepoints"].subnasale_y
+                    / result["image_height"]
+                ),
+                "chin": (
+                    result["vertical_facepoints"].chin_y
+                    / result["image_height"]
+                ),
+            },
         }
 
     finally:

@@ -90,6 +90,7 @@ class ImageAnalysisResult:
     frontality_result: FrontalityResult
     face_measurements: FaceMeasurements
     hairline_result: HairlineResult
+    vertical_facepoints: VerticalFacePoints
     image_width: int
     image_height: int
 

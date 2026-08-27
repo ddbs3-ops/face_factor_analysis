@@ -1,4 +1,4 @@
-import type { ChangeEvent } from "react"
+import type { ChangeEvent, DragEvent } from "react"
 import {useRef, useState,} from "react"
 
 type Props = {
@@ -12,7 +12,11 @@ type Props = {
 
 function ImageUpload({ selectedFile, previewUrl, disabled, hairlineYRatio, onHairlineChange, onFileChange }: Props) {
   const imageWrapperRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   const [isDragging, setIsDragging] = useState(false)
+  const [isFileDragging, setIsFileDragging] = useState(false)
+  
 
   console.log(isDragging)
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
@@ -38,13 +42,50 @@ function ImageUpload({ selectedFile, previewUrl, disabled, hairlineYRatio, onHai
   }
 
   function handlePointerUp(event: React.PointerEvent<HTMLDivElement>) {
-  setIsDragging(false)
-  event.currentTarget.releasePointerCapture(event.pointerId)
-}
+    setIsDragging(false)
+    event.currentTarget.releasePointerCapture(event.pointerId)
+  }
+
+  function handleStageClick() {
+    if (disabled) return
+
+    fileInputRef.current?.click()
+  }
+
+  function handleDragOver(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault()
+
+    if (disabled) return
+
+    setIsFileDragging(true)
+  }
+  function handleDragLeave() {
+    setIsFileDragging(false)
+  }
+  function handleDrop(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault()
+    setIsFileDragging(false)
+
+    if (disabled) return
+
+    const file = event.dataTransfer.files?.[0]
+
+    if (!file) return
+
+    if (!file.type.startsWith("image/")) return
+
+    onFileChange(file)
+  }
 
   return (
     <div className="image-upload">
-      <div className={`image-stage${previewUrl ? " has-image" : ""}`}>
+      <div
+        className={`image-stage${previewUrl ? " has-image" : ""}${isFileDragging ? " is-dragging" : ""}`}
+        onClick={handleStageClick}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
         {previewUrl ? (
           <div className="image-preview-wrapper"
           ref={imageWrapperRef}
@@ -60,7 +101,10 @@ function ImageUpload({ selectedFile, previewUrl, disabled, hairlineYRatio, onHai
                 style={{
                   top: `${hairlineYRatio * 100}%`,
                 }}
-                onPointerDown={handlePointerDown}
+                onPointerDown={(event) => {
+                  event.stopPropagation()
+                  handlePointerDown(event)
+                }}
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerUp}
               >
@@ -72,7 +116,8 @@ function ImageUpload({ selectedFile, previewUrl, disabled, hairlineYRatio, onHai
           <div className="upload-placeholder" aria-hidden="true">
             <span className="upload-icon">＋</span>
             <strong>분석할 사진을 선택하세요</strong>
-            <span>JPG, PNG 등 이미지 파일</span>
+            <span>클릭하거나 이미지를 드래그하세요</span>
+            <small>JPG, PNG 등 이미지파일</small>
           </div>
         )}
 
@@ -82,7 +127,7 @@ function ImageUpload({ selectedFile, previewUrl, disabled, hairlineYRatio, onHai
       <div className="file-controls">
         <label className={`file-button${disabled ? " is-disabled" : ""}`}>
           <span>{selectedFile ? "다른 사진 선택" : "사진 선택"}</span>
-          <input type="file" accept="image/*" disabled={disabled} onChange={handleChange} />
+          <input type="file" accept="image/*" disabled={disabled} onChange={handleChange} ref={fileInputRef} />
         </label>
         <p className="file-name">
           {selectedFile ? selectedFile.name : "선택된 파일이 없습니다."}

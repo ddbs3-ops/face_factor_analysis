@@ -72,6 +72,10 @@ def analyze_user_image(
     final_result = {
         "frontality_result": image_analysis.frontality_result,
         "face_measurements": image_analysis.face_measurements,
+
+        "vertical_facepoints": image_analysis.vertical_facepoints,
+        "image_height": image_analysis.image_height,
+
         "measurement_top_percentiles": measurement_top_percentiles,
         "quantized_measurements": quantized_measurements,
         "rules": hair_result["rules"],

@@ -63,6 +63,7 @@ function App() {
       console.log("자동 헤어라인:", result.hairline_y_ratio)
     } catch {
       setHairlineYRatio(null)
+      setErrorMessage("헤어라인을 찾지 못했습니다. 얼굴이 정면으로 잘 보이는 다른 사진을 선택해주세요.")
     } finally {
       setIsMeasuring(false)
     }
@@ -134,8 +135,13 @@ function App() {
         />
 
         <button className="analyze-button" type="button"
-          disabled={!selectedFile || isLoading} onClick={handleAnalyze}>
-          {isLoading ? "분석 중..." : "얼굴 분석하기"}
+          disabled={!selectedFile || isLoading || isMeasuring || hairlineYRatio === null} 
+          onClick={handleAnalyze}>
+          {isMeasuring
+            ? "헤어라인 찾는 중..."
+            : isLoading
+              ? "분석 중..."
+              : "얼굴 분석하기"}
         </button>
 
         <div className="status-message" aria-live="polite">
@@ -147,8 +153,10 @@ function App() {
       </section>
 
       {analysisStatus === "success" && analysisResult && (
-        <AnalysisResultView result={analysisResult} />
+        <AnalysisResultView result={analysisResult} previewUrl={previewUrl} />
       )}
+
+      
     </main>
   )
 }
