@@ -51,6 +51,7 @@ async def analyze_uploaded_image(
             "rules": result["rules"],
             "merged_adjustments": result["merged_adjustments"],
             "recommendations": result["recommendations"],
+            "measurement_stats": result["measurement_stats"],
             "vertical_ratios": {
                 "upper" : result["face_measurements"].vertical_ratios.upper,
                 "middle" : result["face_measurements"].vertical_ratios.middle,
@@ -96,10 +97,6 @@ async def analyze_uploaded_image(
                     "x": right_jaw.x,
                     "y": right_jaw.y,
                 },
-            },
-            "jaw_angles": {
-                "left": jaw.left_jaw_angle_deg,
-                "right": jaw.right_jaw_angle_deg,
             },
 
             "jaw_angle_points": {

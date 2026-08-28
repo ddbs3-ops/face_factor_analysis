@@ -348,6 +348,66 @@
   transform: translate(-50%, 40%) scale(1.05);
 }
 
+/* Jaw angle measurement */
+
+.jaw-angle-overlay {
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  pointer-events: none;
+
+  opacity: 0.15;
+  transition: opacity 180ms ease;
+}
+
+.jaw-angle-overlay.is-active {
+  opacity: 1;
+}
+
+.jaw-angle-line {
+  stroke: rgba(255, 255, 255, 0.8);
+  stroke-width: 0.8;
+
+  pointer-events: stroke;
+  cursor: pointer;
+}
+
+.jaw-angle-label {
+  position: absolute;
+
+  padding: 4px 8px;
+  border-radius: 7px;
+
+  background: rgba(0, 0, 0, 0.72);
+  color: white;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  white-space: nowrap;
+
+  opacity: 0;
+  pointer-events: none;
+
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.jaw-angle-label.is-active {
+  opacity: 1;
+}
+
+.left-jaw-angle-label {
+  transform: translate(-105%, -50%);
+}
+
+.right-jaw-angle-label {
+  transform: translate(5%, -50%);
+}
 
 .analyze-button:hover:not(:disabled) { background: var(--primary-dark); transform: translateY(-1px); }
 .analyze-button:disabled { background: #c8bec3; cursor: not-allowed; }

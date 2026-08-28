@@ -43,6 +43,27 @@ export type JawAngleVisualPoints = {
   lower_end: PointRatio
 }
 
+export type MeasurementStat = {
+  value: number
+  mean: number
+  top_percent: number
+}
+
+export type JawAngleStat = MeasurementStat & {
+  left_value: number
+  right_value: number
+}
+
+export type MeasurementStats = {
+  face_ratio: MeasurementStat
+  upper_ratio: MeasurementStat
+  middle_ratio: MeasurementStat
+  lower_ratio: MeasurementStat
+  jaw_width: MeasurementStat
+  chin_angle: MeasurementStat
+  jaw_angle: JawAngleStat
+}
+
 export type AnalysisResult = {
   vertical_ratios: VerticalRatios
   vertical_points: VerticalPoints
@@ -50,10 +71,7 @@ export type AnalysisResult = {
   jaw_width_ratio: number
   jaw_width_points: JawWidthPoints
 
-  jaw_angles: {
-    left: number
-    right: number
-  }
+  measurement_stats: MeasurementStats
 
   jaw_angle_points: {
     left: JawAngleVisualPoints

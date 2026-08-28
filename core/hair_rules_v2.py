@@ -303,12 +303,10 @@ def get_jaw_cheekbone_rule(
 def get_jaw_angle_rule(
     quantized_measurements,
 ):
-    left_level = quantized_measurements["left_jaw_angle"]
-    right_level = quantized_measurements["right_jaw_angle"]
+    jaw_angle_level = quantized_measurements["jaw_angle"]
 
     # 현재는 좌우 하악각의 평균적인 경향만 사용.
     # TODO: 좌우 차이는 향후 asymmetry 규칙에서 별도 처리.
-    jaw_angle_level = (left_level + right_level) / 2
 
     if jaw_angle_level >= 1:
         return {

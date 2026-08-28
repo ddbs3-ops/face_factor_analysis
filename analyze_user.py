@@ -69,6 +69,12 @@ def analyze_user_image(
         hair_result["merged_adjustments"]
     )
 
+    measurement_stats = calculate_measurement_stats(
+        reference_data,
+        image_analysis.face_measurements,
+        measurement_top_percentiles,
+    )
+
     final_result = {
         "frontality_result": image_analysis.frontality_result,
         "face_measurements": image_analysis.face_measurements,
@@ -78,8 +84,8 @@ def analyze_user_image(
         "image_height": image_analysis.image_height,
         "image_width": image_analysis.image_width,
 
-        "measurement_top_percentiles": measurement_top_percentiles,
-        "quantized_measurements": quantized_measurements,
+        "measurement_stats": measurement_stats,
+
         "rules": hair_result["rules"],
         "merged_adjustments": hair_result["merged_adjustments"],
         "recommendations": recommendations,
@@ -87,6 +93,117 @@ def analyze_user_image(
 
     return final_result
 
+def calculate_measurement_stats(
+    reference_data,
+    face_measurements,
+    measurement_top_percentiles,
+):
+
+    user_jaw_angle = (
+        face_measurements.jaw.left_jaw_angle_deg
+        + face_measurements.jaw.right_jaw_angle_deg
+    ) / 2
+
+    reference_jaw_angles = (
+        reference_data["left_jaw_angle"]
+        + reference_data["right_jaw_angle"]
+    ) / 2
+
+    return {
+        "face_ratio": {
+            "value": round(
+                face_measurements.height_to_width_ratio,
+                4,
+            ),
+            "mean": round(
+                reference_data["height_to_width_ratio"].mean(),
+                4,
+            ),
+            "top_percent": measurement_top_percentiles[
+                "height_to_width_ratio"
+            ],
+        },
+
+        "upper_ratio": {
+            "value": round(
+                face_measurements.vertical_ratios.upper,
+                4,
+            ),
+            "mean": round(
+                reference_data["upper_ratio"].mean(),
+                4,
+            ),
+            "top_percent": measurement_top_percentiles["upper_ratio"],
+        },
+
+        "middle_ratio": {
+            "value": round(
+                face_measurements.vertical_ratios.middle,
+                4,
+            ),
+            "mean": round(
+                reference_data["middle_ratio"].mean(),
+                4,
+            ),
+            "top_percent": measurement_top_percentiles["middle_ratio"],
+        },
+
+        "lower_ratio": {
+            "value": round(
+                face_measurements.vertical_ratios.lower,
+                4,
+            ),
+            "mean": round(
+                reference_data["lower_ratio"].mean(),
+                4,
+            ),
+            "top_percent": measurement_top_percentiles["lower_ratio"],
+        },
+
+        "jaw_width": {
+            "value": round(
+                face_measurements.jaw.jaw_to_cheekbone_width_ratio,
+                4,
+            ),
+            "mean": round(
+                reference_data[
+                    "jaw_to_cheekbone_width_ratio"
+                ].mean(),
+                4,
+            ),
+            "top_percent": measurement_top_percentiles[
+                "jaw_to_cheekbone_width_ratio"
+            ],
+        },
+
+        "chin_angle": {
+            "value": round(
+                face_measurements.jaw.chin_angle_deg,
+                2,
+            ),
+            "mean": round(
+                reference_data["chin_angle"].mean(),
+                2,
+            ),
+            "top_percent": measurement_top_percentiles[
+                "chin_angle"
+            ],
+        },
+
+        "jaw_angle": {
+            "value": round(user_jaw_angle, 2), # 왼쪽과 오른쪽의 평균값
+            "mean": round(reference_jaw_angles.mean(), 2),
+            "top_percent": measurement_top_percentiles["jaw_angle"],
+            "left_value": round(
+                face_measurements.jaw.left_jaw_angle_deg,
+                2,
+            ),
+            "right_value": round(
+                face_measurements.jaw.right_jaw_angle_deg,
+                2,
+            ),
+        },
+    }
 
 def load_reference_db():
     conn = sqlite3.connect(REFERENCE_DB_PATH)
@@ -151,15 +268,22 @@ def calculate_measurement_top_percentiles(
         face_measurements.jaw.chin_angle_deg,
     )
 
-    left_jaw_angle_top_percent = calculate_top_percentile(
-        reference_data["left_jaw_angle"],
-        face_measurements.jaw.left_jaw_angle_deg,
+    user_jaw_angle = (
+        face_measurements.jaw.left_jaw_angle_deg
+        + face_measurements.jaw.right_jaw_angle_deg
+    ) / 2
+
+    reference_jaw_angles = (
+        reference_data["left_jaw_angle"]
+        + reference_data["right_jaw_angle"]
+    ) / 2
+
+    jaw_angle_top_percent = calculate_top_percentile(
+        reference_jaw_angles,
+        user_jaw_angle,
     )
 
-    right_jaw_angle_top_percent = calculate_top_percentile(
-        reference_data["right_jaw_angle"],
-        face_measurements.jaw.right_jaw_angle_deg,
-    )
+    
 
     return {
         "height_to_width_ratio": round(height_to_width_top_percent, 2),
@@ -171,8 +295,7 @@ def calculate_measurement_top_percentiles(
             2,
         ),
         "chin_angle": round(chin_angle_top_percent, 2),
-        "left_jaw_angle": round(left_jaw_angle_top_percent, 2),
-        "right_jaw_angle": round(right_jaw_angle_top_percent, 2),
+        "jaw_angle": round(jaw_angle_top_percent, 2),
     }
 
 

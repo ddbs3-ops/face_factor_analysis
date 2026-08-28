@@ -7,14 +7,56 @@ type Props = {
 }
 
 type InspectionType =
+  | "face-ratio"
   | "vertical"
   | "jaw-width"
-  | "jaw-angles"
+  | "jaw-angle"
+  | "chin-angle"
   | null
 
 const inspectionMap: Record<string, InspectionType> = {
-  vertical_face: "vertical",
-  lower_face: "jaw-width",
+  face_ratio: "face-ratio",
+  vertical_ratio: "vertical",
+  jaw_width: "jaw-width",
+  jaw_angle: "jaw-angle",
+  chin_angle: "chin-angle",
+}
+
+function getMeasurementStat(
+  rule: Result["rules"][number],
+  measurementStats: Result["measurement_stats"],
+) {
+  if (rule.source === "face_ratio") {
+    return measurementStats.face_ratio
+  }
+
+  if (rule.source === "jaw_width") {
+    return measurementStats.jaw_width
+  }
+
+  if (rule.source === "jaw_angle") {
+    return measurementStats.jaw_angle
+  }
+
+  if (rule.source === "chin_angle") {
+    return measurementStats.chin_angle
+  }
+
+  if (rule.source === "vertical_ratio") {
+    if (rule.dominant_region === "upper") {
+      return measurementStats.upper_ratio
+    }
+
+    if (rule.dominant_region === "middle") {
+      return measurementStats.middle_ratio
+    }
+
+    if (rule.dominant_region === "lower") {
+      return measurementStats.lower_ratio
+    }
+  }
+
+  return null
 }
 
 function scoreLabel(score: number) {
@@ -59,7 +101,8 @@ function AnalysisResult({ result, previewUrl }: Props) {
             src={previewUrl}
             alt="분석된 얼굴"
           />
-
+          
+          {/* 1. 턱폭 시각화 */}
           <svg
             className={`jaw-width-overlay ${
               inspectionType === "jaw-width" ? "is-active" : ""
@@ -116,7 +159,6 @@ function AnalysisResult({ result, previewUrl }: Props) {
               className="jaw-width-point"
             />
           </svg>
-          
           <div
             className={`jaw-width-label cheekbone-label ${
               inspectionType === "jaw-width" ? "is-active" : ""
@@ -231,6 +273,89 @@ function AnalysisResult({ result, previewUrl }: Props) {
           >
             하안부 {lowerPercent}%
           </div>
+
+          {/* 하악각 시각화 */}
+          <svg
+            className={`jaw-angle-overlay ${
+              inspectionType === "jaw-angle" ? "is-active" : ""
+            }`}
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            {/* 왼쪽 하악각 */}
+            <line
+              x1={result.jaw_angle_points.left.intersection.x * 100}
+              y1={result.jaw_angle_points.left.intersection.y * 100}
+              x2={result.jaw_angle_points.left.upper_end.x * 100}
+              y2={result.jaw_angle_points.left.upper_end.y * 100}
+              className="jaw-angle-line"
+              onMouseEnter={() => activateInspection("jaw-angle")}
+              onMouseLeave={clearInspection}
+            />
+
+            <line
+              x1={result.jaw_angle_points.left.intersection.x * 100}
+              y1={result.jaw_angle_points.left.intersection.y * 100}
+              x2={result.jaw_angle_points.left.lower_end.x * 100}
+              y2={result.jaw_angle_points.left.lower_end.y * 100}
+              className="jaw-angle-line"
+              onMouseEnter={() => activateInspection("jaw-angle")}
+              onMouseLeave={clearInspection}
+            />
+
+            {/* 오른쪽 하악각 */}
+            <line
+              x1={result.jaw_angle_points.right.intersection.x * 100}
+              y1={result.jaw_angle_points.right.intersection.y * 100}
+              x2={result.jaw_angle_points.right.upper_end.x * 100}
+              y2={result.jaw_angle_points.right.upper_end.y * 100}
+              className="jaw-angle-line"
+              onMouseEnter={() => activateInspection("jaw-angle")}
+              onMouseLeave={clearInspection}
+            />
+
+            <line
+              x1={result.jaw_angle_points.right.intersection.x * 100}
+              y1={result.jaw_angle_points.right.intersection.y * 100}
+              x2={result.jaw_angle_points.right.lower_end.x * 100}
+              y2={result.jaw_angle_points.right.lower_end.y * 100}
+              className="jaw-angle-line"
+              onMouseEnter={() => activateInspection("jaw-angle")}
+              onMouseLeave={clearInspection}
+            />
+          </svg>
+          <div
+            className={`jaw-angle-label left-jaw-angle-label ${
+              inspectionType === "jaw-angle" ? "is-active" : ""
+            }`}
+            style={{
+              left: `${
+                result.jaw_angle_points.left.intersection.x * 100
+              }%`,
+              top: `${
+                result.jaw_angle_points.left.intersection.y * 100
+              }%`,
+            }}
+          >
+            왼쪽 하악각 {result.measurement_stats.jaw_angle.left_value.toFixed(1)}°
+          </div>
+
+          <div
+            className={`jaw-angle-label right-jaw-angle-label ${
+              inspectionType === "jaw-angle" ? "is-active" : ""
+            }`}
+            style={{
+              left: `${
+                result.jaw_angle_points.right.intersection.x * 100
+              }%`,
+              top: `${
+                result.jaw_angle_points.right.intersection.y * 100
+              }%`,
+            }}
+          >
+            오른쪽 하악각 {result.measurement_stats.jaw_angle.right_value.toFixed(1)}°
+          </div>
         </div>
       )}
 
@@ -240,21 +365,33 @@ function AnalysisResult({ result, previewUrl }: Props) {
           <div className="card-title"><span className="step-number" aria-hidden="true">02</span>
             <h3 id="features-title">얼굴 특징</h3></div>
           <div className="result-list">
-            {result.rules.map((rule, index) => (
-              <article
-                className="feature-item"
-                key={`${rule.source}-${index}`}
+            {result.rules.map((rule, index) => {
+              const stat = getMeasurementStat(
+                rule,
+                result.measurement_stats,
+              )
+
+              return (
+                <article
+                  className="feature-item"
+                  key={`${rule.source}-${index}`}
                   onMouseEnter={() =>
-                  activateInspection(
-                    inspectionMap[rule.source] ?? null
-                  )
-                }
-                onMouseLeave={clearInspection}
+                    activateInspection(
+                      inspectionMap[rule.source] ?? null
+                    )
+                  }
+                  onMouseLeave={clearInspection}
                 >
-                <h4>{rule.feature}</h4>
-                <p>{rule.effect}</p>
-              </article>
-            ))}
+                  <h4>{rule.feature}</h4>
+
+                  {stat && (
+                    <p>
+                      내 측정값 {stat.value} · 평균 {stat.mean}
+                    </p>
+                  )}
+                </article>
+              )
+            })}
           </div>
         </section>
         <section className="result-card" aria-labelledby="recommendations-title">
