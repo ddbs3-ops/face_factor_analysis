@@ -3,7 +3,7 @@ from core.mediapipe_tasks import (
     create_face_landmarker,
     create_selfie_segmenter,
 )
-from core.hair_rules import (
+from core.hair_rules_v2 import (
     get_hair_rules,
     merge_hair_rules,
     build_hair_recommendation,
