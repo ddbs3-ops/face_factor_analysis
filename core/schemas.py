@@ -56,6 +56,11 @@ class AngleVisualizationPoints:
     lower_end: Point2D
 
 @dataclass
+class FaceHeightToWidthVisualizationPoints:
+    top: Point2D
+    bottom: Point2D
+
+@dataclass
 class JawMeasurements:
     jaw_to_cheekbone_width_ratio: float
 
@@ -102,6 +107,7 @@ class ImageAnalysisResult:
     vertical_facepoints: VerticalFacePoints
     image_width: int
     image_height: int
+    effective_hairline_y: float
 
 @dataclass
 class ImageMeasurementResult:

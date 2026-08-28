@@ -14,6 +14,12 @@ type InspectionType =
   | "chin-angle"
   | null
 
+type HoveredGuide =
+  | "cheekbone"
+  | "jaw"
+  | "face-height"
+  | null
+
 const inspectionMap: Record<string, InspectionType> = {
   face_ratio: "face-ratio",
   vertical_ratio: "vertical",
@@ -76,6 +82,7 @@ function AnalysisResult({ result, previewUrl }: Props) {
   const clearInspection = () => {
     setInspectionType(null)
   }
+  const [hoveredGuide, setHoveredGuide] =useState<HoveredGuide>(null)
 
   const upperPercent = Math.round(result.vertical_ratios.upper * 100)
   const middlePercent = Math.round(result.vertical_ratios.middle * 100)
@@ -105,7 +112,9 @@ function AnalysisResult({ result, previewUrl }: Props) {
           {/* 1. 턱폭 시각화 */}
           <svg
             className={`jaw-width-overlay ${
-              inspectionType === "jaw-width" ? "is-active" : ""
+              inspectionType === "jaw-width" ||
+              inspectionType === "face-ratio"
+                ? "is-active" : ""
             }`}
             viewBox="0 0 100 100"
             preserveAspectRatio="none"
@@ -116,9 +125,17 @@ function AnalysisResult({ result, previewUrl }: Props) {
               y1={result.jaw_width_points.left_cheekbone.y * 100}
               x2={result.jaw_width_points.right_cheekbone.x * 100}
               y2={result.jaw_width_points.right_cheekbone.y * 100}
-              className="jaw-width-line cheekbone-line"
-              onMouseEnter={() => activateInspection("jaw-width")}
-              onMouseLeave={clearInspection}
+              className={`jaw-width-line cheekbone-line ${
+              hoveredGuide === "cheekbone" ||
+              hoveredGuide === "jaw" ||
+              hoveredGuide === "face-height" ||
+              inspectionType === "jaw-width" ||
+              inspectionType === "face-ratio"
+                ? "is-active"
+                : ""
+            }`}
+              onMouseEnter={() => setHoveredGuide("cheekbone")}
+              onMouseLeave={() => setHoveredGuide(null)}  
             />
 
             <line
@@ -126,42 +143,25 @@ function AnalysisResult({ result, previewUrl }: Props) {
               y1={result.jaw_width_points.left_jaw.y * 100}
               x2={result.jaw_width_points.right_jaw.x * 100}
               y2={result.jaw_width_points.right_jaw.y * 100}
-              className="jaw-width-line jaw-line"
-              onMouseEnter={() => activateInspection("jaw-width")}
-              onMouseLeave={clearInspection}
+              className={`jaw-width-line jaw-line ${
+                hoveredGuide === "jaw" ||
+                hoveredGuide === "cheekbone" ||
+                inspectionType === "jaw-width"
+                  ? "is-active"
+                  : ""
+              }`}
+              onMouseEnter={() => setHoveredGuide("jaw")}
+              onMouseLeave={() => setHoveredGuide(null)}
             />
 
-            <circle
-              cx={result.jaw_width_points.left_cheekbone.x * 100}
-              cy={result.jaw_width_points.left_cheekbone.y * 100}
-              r="1.2"
-              className="jaw-width-point"
-            />
-
-            <circle
-              cx={result.jaw_width_points.right_cheekbone.x * 100}
-              cy={result.jaw_width_points.right_cheekbone.y * 100}
-              r="1.2"
-              className="jaw-width-point"
-            />
-
-            <circle
-              cx={result.jaw_width_points.left_jaw.x * 100}
-              cy={result.jaw_width_points.left_jaw.y * 100}
-              r="1.2"
-              className="jaw-width-point"
-            />
-
-            <circle
-              cx={result.jaw_width_points.right_jaw.x * 100}
-              cy={result.jaw_width_points.right_jaw.y * 100}
-              r="1.2"
-              className="jaw-width-point"
-            />
           </svg>
           <div
             className={`jaw-width-label cheekbone-label ${
-              inspectionType === "jaw-width" ? "is-active" : ""
+              inspectionType === "jaw-width" ||
+              hoveredGuide === "jaw" ||
+              hoveredGuide === "cheekbone"
+                ? "is-active"
+                : ""
             }`}
             style={{
               left: `${
@@ -183,7 +183,11 @@ function AnalysisResult({ result, previewUrl }: Props) {
 
           <div
             className={`jaw-width-label jaw-label ${
-              inspectionType === "jaw-width" ? "is-active" : ""
+              inspectionType === "jaw-width" ||
+              hoveredGuide === "jaw" ||
+              hoveredGuide === "cheekbone"
+                ? "is-active"
+                : ""
             }`}
             style={{
               left: `${
@@ -355,6 +359,56 @@ function AnalysisResult({ result, previewUrl }: Props) {
             }}
           >
             오른쪽 하악각 {result.measurement_stats.jaw_angle.right_value.toFixed(1)}°
+          </div>
+          <svg
+            className={`face-ratio-overlay ${
+              inspectionType === "face-ratio" ||
+              hoveredGuide === "face-height"
+                ? "is-active" : ""
+            }`}
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <line
+              x1={result.height_width_ratio_visual_points.top.x * 100}
+              y1={result.height_width_ratio_visual_points.top.y * 100}
+              x2={result.height_width_ratio_visual_points.bottom.x * 100}
+              y2={result.height_width_ratio_visual_points.bottom.y * 100}
+              className={`face-height-line ${
+                hoveredGuide === "face-height" ||
+                hoveredGuide === "cheekbone" ||
+                inspectionType === "face-ratio"
+                  ? "is-active"
+                  : ""
+              }`}
+              onMouseEnter={() => setHoveredGuide("face-height")}
+              onMouseLeave={() => setHoveredGuide(null)}
+            />
+          </svg>
+          <div
+            className={`face-ratio-label ${
+              inspectionType === "face-ratio" ||
+              hoveredGuide === "face-height"
+                ? "is-active"
+                : ""
+            }`}
+            style={{
+              left: `${
+                (
+                  result.height_width_ratio_visual_points.top.x +
+                  result.height_width_ratio_visual_points.bottom.x
+                ) / 2 * 100
+              }%`,
+              top: `${
+                (
+                  result.height_width_ratio_visual_points.top.y +
+                  result.height_width_ratio_visual_points.bottom.y
+                ) / 2 * 100
+              }%`,
+            }}
+          >
+            얼굴 길이 {result.measurement_stats.face_ratio.value.toFixed(2)}
           </div>
         </div>
       )}

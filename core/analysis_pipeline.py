@@ -72,6 +72,7 @@ def analyze_image(
         face_measurements=face_measurements,
         vertical_facepoints=measurement.vertical_facepoints,
         hairline_result=measurement.hairline_result,
+        effective_hairline_y=hairline_y,
         image_width=measurement.image_width,
         image_height=measurement.image_height,
     )

@@ -14,6 +14,9 @@ from config.settings import (
     FACE_LANDMARKER_MODEL_PATH,
     REFERENCE_DB_PATH,
 )
+from core.face_features import (
+    calculate_height_width_ratio_visualization_points
+)
 
 import sqlite3
 import pandas as pd
@@ -75,6 +78,12 @@ def analyze_user_image(
         measurement_top_percentiles,
     )
 
+    height_width_ratio_visual_points = calculate_height_width_ratio_visualization_points(
+            image_analysis.effective_hairline_y,
+            image_analysis.raw_face,
+        )
+    
+
     final_result = {
         "frontality_result": image_analysis.frontality_result,
         "face_measurements": image_analysis.face_measurements,
@@ -83,6 +92,8 @@ def analyze_user_image(
         "vertical_facepoints": image_analysis.vertical_facepoints,
         "image_height": image_analysis.image_height,
         "image_width": image_analysis.image_width,
+
+        "height_width_ratio_visual_points": height_width_ratio_visual_points,
 
         "measurement_stats": measurement_stats,
 

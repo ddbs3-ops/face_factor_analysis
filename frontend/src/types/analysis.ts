@@ -64,6 +64,11 @@ export type MeasurementStats = {
   jaw_angle: JawAngleStat
 }
 
+export type HeightWidthRatioVisualPoints = {
+  top: PointRatio
+  bottom: PointRatio
+}
+
 export type AnalysisResult = {
   vertical_ratios: VerticalRatios
   vertical_points: VerticalPoints
@@ -77,7 +82,8 @@ export type AnalysisResult = {
     left: JawAngleVisualPoints
     right: JawAngleVisualPoints
   }
-
+  height_width_ratio_visual_points: HeightWidthRatioVisualPoints
+  
   rules: AnalysisRule[]
   merged_adjustments: Adjustments
   recommendations: Recommendation[]

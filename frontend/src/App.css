@@ -287,8 +287,6 @@
 
   pointer-events: none;
 
-  opacity: 0.15;
-  transition: opacity 180ms ease;
 }
 
 .jaw-width-overlay.is-active {
@@ -300,11 +298,13 @@
   stroke-width: 0.7;
   pointer-events: stroke;
   cursor: pointer;
+
+  opacity: 0.15;
+  transition: opacity 180ms ease;
 }
 
-.jaw-width-point {
-  fill: rgba(255, 255, 255, 0.8);
-  pointer-events: none;
+.jaw-width-line.is-active {
+  opacity: 1;
 }
 
 
@@ -407,6 +407,48 @@
 
 .right-jaw-angle-label {
   transform: translate(5%, -50%);
+}
+
+.face-ratio-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.face-height-line {
+  stroke: rgba(255, 255, 255, 0.8);
+  stroke-width: 0.8;
+  pointer-events: stroke;
+  cursor: pointer;
+  
+  opacity: 0.15;
+  transition: opacity 180ms ease;
+}
+
+.face-height-line.is-active {
+  opacity: 1;
+}
+
+.face-ratio-label {
+  position: absolute;
+  transform: translate(10%, -50%);
+  padding: 4px 8px;
+  border-radius: 7px;
+  background: rgba(0, 0, 0, 0.72);
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+}
+
+.face-ratio-label.is-active {
+  opacity: 1;
 }
 
 .analyze-button:hover:not(:disabled) { background: var(--primary-dark); transform: translateY(-1px); }

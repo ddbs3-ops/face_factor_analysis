@@ -47,6 +47,8 @@ async def analyze_uploaded_image(
         left_visual = jaw.left_jaw_visual_points
         right_visual = jaw.right_jaw_visual_points
 
+        face_height_to_width_visual = result["height_width_ratio_visual_points"]
+
         return {
             "rules": result["rules"],
             "merged_adjustments": result["merged_adjustments"],
@@ -127,6 +129,17 @@ async def analyze_uploaded_image(
                         "x": right_visual.lower_end.x / result["image_width"],
                         "y": right_visual.lower_end.y / result["image_height"],
                     },
+                },
+            },
+
+            "height_width_ratio_visual_points": {
+                "top": {
+                    "x": face_height_to_width_visual.top.x / result["image_width"],
+                    "y": face_height_to_width_visual.top.y / result["image_height"],
+                },
+                "bottom": {
+                    "x": face_height_to_width_visual.bottom.x / result["image_width"],
+                    "y": face_height_to_width_visual.bottom.y / result["image_height"],
                 },
             },
         }

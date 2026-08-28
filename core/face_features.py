@@ -33,6 +33,49 @@ def calculate_face_height_to_width_ratio(
 
     return round(face_height / face_width , 4)
 
+def calculate_height_width_ratio_visualization_points(
+    hairline_y: float,
+    raw_face: RawFace,
+):
+    chin_point = get_pixel_point(raw_face, 152)
+    left_cheekbone = get_pixel_point(raw_face, 234)
+    right_cheekbone = get_pixel_point(raw_face, 454)
+
+    center_point_x = (
+        left_cheekbone.x + right_cheekbone.x
+    ) / 2
+
+    center_point_y = (
+        left_cheekbone.y + right_cheekbone.y
+    ) / 2
+
+    t = (
+        hairline_y - center_point_y
+    ) / (
+        chin_point.y - center_point_y
+    )
+
+    hairline_x = (
+        center_point_x
+        + t * (chin_point.x - center_point_x)
+    )
+
+    top_point = Point2D(
+        x=hairline_x,
+        y=hairline_y,
+    )
+
+    bottom_point = Point2D(
+        x=chin_point.x,
+        y=chin_point.y,
+    )
+
+    return FaceHeightToWidthVisualizationPoints(
+        top=top_point,
+        bottom=bottom_point,
+    )
+
+
 def calculate_jaw_to_cheekbone_width_ratio(
         raw_face : RawFace
 ):
