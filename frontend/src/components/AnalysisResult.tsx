@@ -158,8 +158,10 @@ function AnalysisResult({ result, previewUrl }: Props) {
           <div
             className={`jaw-width-label cheekbone-label ${
               inspectionType === "jaw-width" ||
+              inspectionType === "face-ratio" ||
               hoveredGuide === "jaw" ||
-              hoveredGuide === "cheekbone"
+              hoveredGuide === "cheekbone" ||
+              hoveredGuide === "face-height"
                 ? "is-active"
                 : ""
             }`}
@@ -389,7 +391,8 @@ function AnalysisResult({ result, previewUrl }: Props) {
           <div
             className={`face-ratio-label ${
               inspectionType === "face-ratio" ||
-              hoveredGuide === "face-height"
+              hoveredGuide === "face-height" ||
+              hoveredGuide === "cheekbone"
                 ? "is-active"
                 : ""
             }`}

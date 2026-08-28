@@ -17,6 +17,7 @@ function App() {
   const [errorMessage, setErrorMessage] = useState("")
   const [hairlineYRatio, setHairlineYRatio] = useState<number | null>(null)
   const [isMeasuring, setIsMeasuring] = useState(false)
+  const [showFrontalityWarning, setShowFrontalityWarning] = useState(false)
 
   useEffect(() => {
     if (!selectedFile) { // 선택된 파일이 없으면 미리보기 URL을 null로 설정
@@ -91,6 +92,9 @@ function App() {
 
       const result: AnalysisResult = await response.json()
       setAnalysisResult(result)
+      if (!result.frontality_result.is_frontal) {
+        setShowFrontalityWarning(true)
+      }
       setAnalysisStatus("success")
     } catch {
       setAnalysisResult(null)
@@ -151,6 +155,46 @@ function App() {
           )}
         </div>
       </section>
+      {showFrontalityWarning && analysisResult && (
+        <div className="frontality-warning-backdrop">
+          <div className="frontality-warning-modal">
+            <h3>사진이 조금 기울어져 있어요 🙈</h3>
+
+            <ul className="frontality-warning-list">
+              {analysisResult.frontality_result.messages.map((message) => (
+                <li key={message}>{message}</li>
+              ))}
+            </ul>
+
+            <p>
+              정면 사진일수록 더 정확하게 분석할 수 있어요.
+              <br />
+              현재 사진은 일부 측정값에 오차가 있을 수 있어요.
+            </p>
+
+            <div className="frontality-warning-actions">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowFrontalityWarning(false)
+                  setSelectedFile(null)
+                  setAnalysisResult(null)
+                  setAnalysisStatus("idle")
+                }}
+              >
+                다른 사진 선택
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowFrontalityWarning(false)}
+              >
+                그래도 결과 보기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {analysisStatus === "success" && analysisResult && (
         <AnalysisResultView result={analysisResult} previewUrl={previewUrl} />

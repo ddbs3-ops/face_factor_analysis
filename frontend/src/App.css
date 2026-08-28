@@ -310,7 +310,7 @@
 
 .jaw-width-label {
   position: absolute;
-  transform: translate(-50%, -50%);
+  transform: translate(0%, 0%);
   padding: 4px 8px;
   border-radius: 7px;
 
@@ -329,23 +329,23 @@
 
 .jaw-width-label.is-active {
   opacity: 1;
-  transform: translate(-50%, -50%) scale(1.05);
+  transform: translate(0%, 0%) scale(1.05);
 }
 
 .cheekbone-label {
-  transform: translate(-50%, -140%);
+  transform: translate(130%, 0%);
 }
 
 .jaw-label {
-  transform: translate(-50%, 40%);
+  transform: translate(100%, 0%);
 }
 
 .cheekbone-label.is-active {
-  transform: translate(-50%, -140%) scale(1.05);
+  transform: translate(130%, 0%) scale(1.05);
 }
 
 .jaw-label.is-active {
-  transform: translate(-50%, 40%) scale(1.05);
+  transform: translate(100%, 0%) scale(1.05);
 }
 
 /* Jaw angle measurement */
@@ -433,7 +433,7 @@
 
 .face-ratio-label {
   position: absolute;
-  transform: translate(10%, -50%);
+  transform: translate(10%, -500%);
   padding: 4px 8px;
   border-radius: 7px;
   background: rgba(0, 0, 0, 0.72);
@@ -449,6 +449,61 @@
 
 .face-ratio-label.is-active {
   opacity: 1;
+}
+
+.frontality-warning-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 1000;
+}
+
+.frontality-warning-modal {
+  width: min(90%, 420px);
+  background: white;
+  border-radius: 20px;
+  padding: 24px;
+
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.frontality-warning-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.frontality-warning-actions button {
+  flex: 1;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+}
+
+.frontality-warning-list {
+  list-style: none;
+  margin: 14px 0;
+  padding: 0;
+  text-align: left;
+}
+
+.frontality-warning-list li {
+  position: relative;
+  padding-left: 18px;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.frontality-warning-list li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
 }
 
 .analyze-button:hover:not(:disabled) { background: var(--primary-dark); transform: translateY(-1px); }

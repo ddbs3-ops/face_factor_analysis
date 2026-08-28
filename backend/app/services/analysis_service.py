@@ -48,8 +48,22 @@ async def analyze_uploaded_image(
         right_visual = jaw.right_jaw_visual_points
 
         face_height_to_width_visual = result["height_width_ratio_visual_points"]
+        frontality = result["frontality_result"]
+
 
         return {
+            
+            "frontality_result": {
+                "is_frontal": frontality.is_frontal,
+                "pose": {
+                    "yaw_deg": frontality.pose.yaw_deg,
+                    "pitch_deg": frontality.pose.pitch_deg,
+                    "roll_deg": frontality.pose.roll_deg,
+                },
+                "messages": list(frontality.messages),
+                "reasons": list(frontality.reasons),
+            },
+
             "rules": result["rules"],
             "merged_adjustments": result["merged_adjustments"],
             "recommendations": result["recommendations"],

@@ -69,7 +69,20 @@ export type HeightWidthRatioVisualPoints = {
   bottom: PointRatio
 }
 
+export type FrontalityResult = {
+  is_frontal: boolean
+  pose: {
+    yaw_deg: number
+    pitch_deg: number
+    roll_deg: number
+  }
+  messages: string[]
+  reasons: string[]
+}
+
 export type AnalysisResult = {
+  frontality_result: FrontalityResult
+  
   vertical_ratios: VerticalRatios
   vertical_points: VerticalPoints
 

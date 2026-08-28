@@ -55,17 +55,53 @@ def evaluate_frontality(
     # 값을 갖고 갈 reasons에는 핵심만 담아 "roll 초과 : 몇도, 기준값 : 몇도"이런식으로 리스트를 만들고 튜플로 묶어 반환한다.
 
 
-    if abs(pose.pitch_deg) > MAX_PITCH_DEG:
-        messages += ["고개가 위 아래로 기울어져 있습니다. 고개를 바로 세워 주세요"]
-        reasons += [f"pitch 초과 : {pose.pitch_deg:.2f}°, 허용범위 : ±{MAX_PITCH_DEG}"]
+    if pose.pitch_deg > MAX_PITCH_DEG:
+        messages.append(
+            "고개를 아래로 숙이고 있어요."
+        )
+        reasons.append(
+            f"pitch 초과 : {pose.pitch_deg:.2f}°, 허용범위 : ±{MAX_PITCH_DEG}"
+        )
 
-    if abs(pose.roll_deg) > MAX_ROLL_DEG:
-        messages += ["머리가 한쪽으로 기울어져 있습니다. 머리를 수평으로 맞춰주세요"]
-        reasons += [f"roll 초과 : {pose.roll_deg:.2f}°, 허용범위 : ±{MAX_ROLL_DEG}"]
+    elif pose.pitch_deg < -MAX_PITCH_DEG:
+        messages.append(
+            "고개를 위로 들고 있어요."
+        )
+        reasons.append(
+            f"pitch 초과 : {pose.pitch_deg:.2f}°, 허용범위 : ±{MAX_PITCH_DEG}"
+        )
 
-    if abs(pose.yaw_deg) > MAX_YAW_DEG:
-        messages += ["얼굴이 옆으로 돌아가 있습니다. 카메라를 정면으로 바라봐 주세요"]
-        reasons += [f"yaw 초과 : {pose.yaw_deg:.2f}°, 허용범위 ±{MAX_YAW_DEG}"]
+    if pose.roll_deg > MAX_ROLL_DEG:
+        messages.append(
+            "머리가 사진 기준 왼쪽으로 기울어져 있어요."
+        )
+        reasons.append(
+            f"roll 초과 : {pose.roll_deg:.2f}°, 허용범위 : ±{MAX_ROLL_DEG}"
+        )
+
+    elif pose.roll_deg < -MAX_ROLL_DEG:
+        messages.append(
+            "머리가 사진 기준 오른쪽으로 기울어져 있어요."
+        )
+        reasons.append(
+            f"roll 초과 : {pose.roll_deg:.2f}°, 허용범위 : ±{MAX_ROLL_DEG}"
+        )
+
+    if pose.yaw_deg > MAX_YAW_DEG:
+        messages.append(
+            "얼굴이 사진 기준 오른쪽을 향하고 있어요."
+        )
+        reasons.append(
+            f"yaw 초과 : {pose.yaw_deg:.2f}°, 허용범위 : ±{MAX_YAW_DEG}"
+        )
+
+    elif pose.yaw_deg < -MAX_YAW_DEG:
+        messages.append(
+            "얼굴이 사진 기준 왼쪽을 향하고 있어요."
+        )
+        reasons.append(
+            f"yaw 초과 : {pose.yaw_deg:.2f}°, 허용범위 : ±{MAX_YAW_DEG}"
+        )
     
 
     from core.schemas import FrontalityResult

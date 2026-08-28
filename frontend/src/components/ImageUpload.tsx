@@ -101,6 +101,9 @@ function ImageUpload({ selectedFile, previewUrl, disabled, hairlineYRatio, onHai
                 style={{
                   top: `${hairlineYRatio * 100}%`,
                 }}
+                 onClick={(event) => {
+                  event.stopPropagation()
+                }}
                 onPointerDown={(event) => {
                   event.stopPropagation()
                   handlePointerDown(event)
