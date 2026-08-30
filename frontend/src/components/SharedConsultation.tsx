@@ -26,32 +26,62 @@ function SharedConsultation() {
   }, [shareId])
 
   if (!consultation) {
-    return <p>상담 결과를 불러오는 중...</p>
+    return (
+      <main className="shared-consultation-page shared-consultation-loading">
+        <p>상담 결과를 불러오는 중...</p>
+      </main>
+    )
   }
 
   return (
-    <main className="app-shell">
-      <h1>헤어 상담 요청</h1>
+    <main className="shared-consultation-page">
+      <header className="shared-header">
+        <p className="shared-eyebrow">HAIR CONSULTATION</p>
+        <h1>헤어 상담 요청</h1>
+        <p className="shared-header-description">
+          고객이 원하는 헤어 방향을 빠르게 확인해주세요.
+        </p>
+      </header>
 
-      <section>
-        <h2>추천 방향</h2>
-        <p>{consultation.summary}</p>
-      </section>
+      <section className="shared-primary-card" aria-labelledby="shared-requests-title">
+        <div className="shared-section-heading">
+          <span className="shared-section-number">01</span>
+          <h2 id="shared-requests-title">핵심 요청사항</h2>
+        </div>
 
-      <section>
-        <h2>핵심 요청사항</h2>
-        <ul>
+        <div className="shared-request-list">
           {consultation.key_requests.map((request: any) => (
-            <li key={`${request.element}-${request.score}`}>
-              {request.text}
-            </li>
+            <div
+              className="shared-request-item"
+              key={`${request.element}-${request.score}`}
+            >
+              <span className="shared-request-category">
+                {request.element.replaceAll("_", " ")}
+              </span>
+              <p>{request.text}</p>
+            </div>
           ))}
-        </ul>
+        </div>
       </section>
 
-      <section>
-        <h2>상담 내용</h2>
-        <p>{consultation.consultation_text}</p>
+      <section className="shared-card" aria-labelledby="shared-summary-title">
+        <div className="shared-section-heading">
+          <span className="shared-section-number">02</span>
+          <h2 id="shared-summary-title">추천 방향 요약</h2>
+        </div>
+
+        <p className="shared-summary">{consultation.summary}</p>
+      </section>
+
+      <section className="shared-script-card" aria-labelledby="shared-script-title">
+        <div className="shared-section-heading">
+          <span className="shared-section-number">03</span>
+          <h2 id="shared-script-title">고객이 직접 전하는 요청</h2>
+        </div>
+
+        <blockquote className="shared-script">
+          {consultation.consultation_text}
+        </blockquote>
       </section>
     </main>
   )

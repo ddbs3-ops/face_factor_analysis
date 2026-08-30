@@ -833,3 +833,184 @@
   .consultation-create-button { transition: none; }
 }
 
+/* Shared consultation: mobile-first salon handoff */
+
+.shared-consultation-page {
+  width: min(680px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 48px 0 72px;
+  color: var(--text);
+}
+
+.shared-consultation-loading {
+  display: grid;
+  min-height: 70vh;
+  place-items: center;
+  color: var(--muted);
+}
+
+.shared-header {
+  margin-bottom: 28px;
+}
+
+.shared-eyebrow {
+  margin: 0 0 10px;
+  color: var(--primary);
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+}
+
+.shared-header h1 {
+  margin: 0;
+  font-size: clamp(2rem, 7vw, 2.8rem);
+  line-height: 1.16;
+  letter-spacing: -.04em;
+}
+
+.shared-header-description {
+  margin: 12px 0 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.shared-primary-card,
+.shared-card,
+.shared-script-card {
+  padding: 26px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+}
+
+.shared-primary-card {
+  border-color: rgba(148, 91, 120, .34);
+  box-shadow: 0 10px 28px rgba(52, 36, 46, .07);
+}
+
+.shared-card,
+.shared-script-card {
+  margin-top: 16px;
+}
+
+.shared-section-heading {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.shared-section-heading h2 {
+  margin: 0;
+  font-size: 1.12rem;
+  line-height: 1.4;
+  letter-spacing: -.02em;
+}
+
+.shared-section-number {
+  display: grid;
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--primary);
+  background: var(--primary-soft);
+  font-size: .68rem;
+  font-weight: 800;
+}
+
+.shared-request-list {
+  display: grid;
+  gap: 10px;
+}
+
+.shared-request-item {
+  padding: 16px;
+  border: 1px solid #eee8eb;
+  border-radius: 13px;
+  background: #faf8f9;
+}
+
+.shared-request-category {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--primary);
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.shared-request-item p {
+  margin: 0;
+  color: var(--text);
+  font-size: 1.02rem;
+  font-weight: 650;
+  line-height: 1.65;
+}
+
+.shared-summary {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+.shared-script-card {
+  background: #faf8f9;
+}
+
+.shared-script {
+  position: relative;
+  margin: 0;
+  padding: 2px 0 2px 20px;
+  border-left: 3px solid var(--primary);
+  color: var(--text);
+  font-size: 1.05rem;
+  font-weight: 550;
+  line-height: 1.85;
+  white-space: pre-line;
+}
+
+.shared-script::before {
+  content: "“";
+  margin-right: 3px;
+  color: var(--primary);
+  font-size: 1.35em;
+  line-height: 0;
+}
+
+.shared-script::after {
+  content: "”";
+  margin-left: 3px;
+  color: var(--primary);
+  font-size: 1.35em;
+  line-height: 0;
+}
+
+@media (max-width: 480px) {
+  .shared-consultation-page {
+    width: min(100% - 24px, 680px);
+    padding: 32px 0 48px;
+  }
+
+  .shared-header {
+    margin-bottom: 22px;
+  }
+
+  .shared-primary-card,
+  .shared-card,
+  .shared-script-card {
+    padding: 20px;
+    border-radius: 17px;
+  }
+
+  .shared-section-heading {
+    margin-bottom: 16px;
+  }
+
+  .shared-request-item {
+    padding: 14px;
+  }
+}
+
