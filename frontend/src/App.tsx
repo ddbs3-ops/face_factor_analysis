@@ -211,6 +211,7 @@ function App() {
 
             {analysisStatus === "success" && analysisResult && (
               <button
+                className="consultation-create-button"
                 type="button"
                 onClick={() => navigate("/consultation",{
                   state: {

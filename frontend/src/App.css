@@ -675,6 +675,35 @@
 .score-negative { color: #9a3d3d; background: #f9eaea; }
 .score-neutral { color: #665f68; background: #eeecef; }
 
+.consultation-create-button {
+  display: inline-flex;
+  min-height: 46px;
+  margin-top: 24px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+  border: 1px solid var(--primary);
+  border-radius: 12px;
+  color: #fff;
+  background: var(--primary);
+  box-shadow: 0 8px 20px rgba(52, 36, 46, .12);
+  font: inherit;
+  font-size: .95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.consultation-create-button:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.consultation-create-button:focus-visible {
+  outline: 3px solid var(--primary-soft);
+  outline-offset: 3px;
+}
+
 /* Consultation report */
 
 .consultation-header {
@@ -796,6 +825,11 @@
   .consultation-card,
   .consultation-script-card { padding: 19px; }
   .consultation-script { font-size: 1rem; }
+  .consultation-create-button { width: 100%; }
 }
 
-@media (prefers-reduced-motion: reduce) { .analyze-button { transition: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .analyze-button,
+  .consultation-create-button { transition: none; }
+}
+
