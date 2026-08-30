@@ -75,11 +75,11 @@ function ConsultationResult() {
         <h2>핵심 요청사항</h2>
 
         <ul className="consultation-request-list">
-        {keyRequests.map((request) => (
-        <li key={`${request.element}-${request.score}`}>
-            {request.text}
-        </li>
-        ))}
+            {keyRequests.map((request) => (
+            <li key={`${request.element}-${request.score}`}>
+                {request.text}
+            </li>
+            ))}
         </ul>
     </section>
 
