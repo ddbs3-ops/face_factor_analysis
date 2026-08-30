@@ -5,6 +5,7 @@ import ImageUpload from "./components/ImageUpload"
 import type { AnalysisResult, AnalysisStatus } from "./types/analysis"
 import { Routes, Route, useNavigate } from "react-router-dom"
 import ConsultationResult from "./components/ConsultationResult"
+import SharedConsultation from "./components/SharedConsultation"
 
 const API_BASE_URL = import.meta.env.VITE_API_URL
 
@@ -230,6 +231,10 @@ function App() {
         element={
           <ConsultationResult />
         }
+      />
+      <Route
+        path="/share/:shareId"
+        element={<SharedConsultation />}
       />
     </Routes>  
   )

@@ -1,4 +1,4 @@
-from backend.app.schemas.consultation import RecommendationItem
+from backend.app.schemas.consultation import RecommendationItem, ConsultationKeyRequest
 
 def build_summary(
     recommendations: list[RecommendationItem],
@@ -21,14 +21,20 @@ def build_summary(
 
 def build_key_requests(
     recommendations: list[RecommendationItem],
-) -> list[str]:
+) -> list[ConsultationKeyRequest]:
     requests = []
 
     for recommendation in recommendations:
         sentence = build_consultation_sentence(recommendation)
 
         if sentence:
-            requests.append(sentence)
+            requests.append(
+                ConsultationKeyRequest(
+                    element=recommendation.element,
+                    score=recommendation.score,
+                    text=sentence,
+                )
+            )
 
     return requests
 

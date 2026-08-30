@@ -1,18 +1,32 @@
 import type { AnalysisResult } from "../types/analysis"
 import { useState, useEffect } from "react"
 import { useLocation } from "react-router-dom"
+import { QRCodeSVG } from "qrcode.react"
 
 type ConsultationLocationState = {
   result: AnalysisResult
   previewUrl: string | null
 }
 
+type ConsultationKeyRequest = {
+  element: string
+  score: number
+  text: string
+}
+
 function ConsultationResult() {
   const location = useLocation()  
   const state = location.state as ConsultationLocationState
   const [summary, setSummary] = useState("")
-  const [keyRequests, setKeyRequests] = useState<string[]>([])
+  const [keyRequests, setKeyRequests] =
+  useState<ConsultationKeyRequest[]>([])
   const [consultationText, setConsultationText] = useState("")
+  const [shareId, setShareId] = useState("")
+
+  const shareUrl = shareId
+  ? `${window.location.origin}/share/${shareId}`
+  : ""
+
 
   const API_BASE_URL = import.meta.env.VITE_API_URL
   const CONSULTATION_API_URL = `${API_BASE_URL}/consultation`
@@ -36,6 +50,8 @@ function ConsultationResult() {
     setSummary(data.summary)
     setKeyRequests(data.key_requests)
     setConsultationText(data.consultation_text)
+    setShareId(data.share_id)
+
   }
 
   useEffect(() => {
@@ -60,7 +76,9 @@ function ConsultationResult() {
 
         <ul className="consultation-request-list">
         {keyRequests.map((request) => (
-            <li key={request}>{request}</li>
+        <li key={`${request.element}-${request.score}`}>
+            {request.text}
+        </li>
         ))}
         </ul>
     </section>
@@ -70,6 +88,24 @@ function ConsultationResult() {
         <p className="consultation-script">{consultationText}</p>
     </section>
     </div>
+    {shareUrl && (
+    <section className="consultation-share-card">
+        <div className="consultation-share-header">
+        <h2>미용사에게 공유하기</h2>
+        <p>
+            QR 코드를 스캔하면 상담 내용을 바로 확인할 수 있어요.
+        </p>
+        </div>
+
+        <div className="consultation-qr-frame">
+        <QRCodeSVG
+            value={shareUrl}
+            size={180}
+        />
+        </div>
+    </section>
+    )}
+    
     </main>
   )
 }
