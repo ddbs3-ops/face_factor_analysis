@@ -72,6 +72,7 @@ class JawMeasurements:
     left_jaw_angle_deg: float
     right_jaw_angle_deg: float
 
+    chin_visual_points: AngleVisualizationPoints
     left_jaw_visual_points: AngleVisualizationPoints
     right_jaw_visual_points: AngleVisualizationPoints
 

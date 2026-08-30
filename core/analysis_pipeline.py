@@ -251,6 +251,12 @@ def analyze_face_measurements(
         landmark.CHIN_RIGHT_LINE_INDICES,
     ) # 턱 끝 각도
 
+    chin_visual_points = calculate_angle_visualization_points(
+        raw_face=raw_face,
+        upper_line_indices=landmark.CHIN_LEFT_LINE_INDICES,
+        lower_line_indices=landmark.CHIN_RIGHT_LINE_INDICES,
+    )
+
     left_jaw_angle = calculate_angle_between_landmark_lines(
         raw_face,
         landmark.LEFT_JAW_UPPER_LINE_INDICES,
@@ -280,10 +286,12 @@ def analyze_face_measurements(
         chin_contour_angles_deg=chin_contour,
         left_jaw_contour_angles_deg=left_jaw_contour,
         right_jaw_contour_angles_deg=right_jaw_contour,
+
         chin_angle_deg=chin_angle,
         left_jaw_angle_deg=left_jaw_angle,
         right_jaw_angle_deg=right_jaw_angle,
 
+        chin_visual_points=chin_visual_points,
         left_jaw_visual_points=left_jaw_visual_points,
         right_jaw_visual_points=right_jaw_visual_points
     )

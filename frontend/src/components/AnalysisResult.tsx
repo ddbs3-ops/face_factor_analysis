@@ -413,6 +413,52 @@ function AnalysisResult({ result, previewUrl }: Props) {
           >
             얼굴 길이 {result.measurement_stats.face_ratio.value.toFixed(2)}
           </div>
+          <svg 
+            className={`chin-angle-overlay ${
+              inspectionType === "chin-angle" ? "is-active" : ""
+            }`}
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+
+            <line
+              x1={result.chin_angle_points.intersection.x * 100}
+              y1={result.chin_angle_points.intersection.y * 100}
+              x2={result.chin_angle_points.left_end.x * 100}
+              y2={result.chin_angle_points.left_end.y * 100}
+              className="chin-angle-line"
+              onMouseEnter={() => activateInspection("chin-angle")}
+              onMouseLeave={clearInspection}
+            />
+
+            <line
+              x1={result.chin_angle_points.intersection.x * 100}
+              y1={result.chin_angle_points.intersection.y * 100}
+              x2={result.chin_angle_points.right_end.x * 100}
+              y2={result.chin_angle_points.right_end.y * 100}
+              className="chin-angle-line"
+              onMouseEnter={() => activateInspection("chin-angle")}
+              onMouseLeave={clearInspection}
+            />           
+          </svg>
+
+          <div
+              className={`chin-angle-label ${
+                inspectionType === "chin-angle" ? "is-active" : ""
+              }`}
+              style={{
+                left: `${
+                  result.chin_angle_points.intersection.x * 100
+                }%`,
+                top: `${
+                  result.chin_angle_points.intersection.y * 100
+                }%`,
+              }}
+            >
+            턱끝 {result.measurement_stats.chin_angle.value}°
+          </div>
+
         </div>
       )}
 

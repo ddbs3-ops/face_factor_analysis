@@ -36,32 +36,29 @@ def calculate_face_height_to_width_ratio(
 def calculate_height_width_ratio_visualization_points(
     hairline_y: float,
     raw_face: RawFace,
-):
+):  
+    # 얼굴 중앙축을 따라 위치한 랜드마크들
+    # yaw의 영향을 크게 받는 코 돌출부는 제외
+    center_indices = (
+        10, 9, 164, 0, 17, 200, 175, 152
+    )
+
+    center_points = [
+        get_pixel_point(raw_face, index)
+        for index in center_indices
+    ]
+
+    ys = np.array([point.y for point in center_points])
+    xs = np.array([point.x for point in center_points])
+
+    slope, intercept = np.polyfit(ys, xs, 1)
+
     chin_point = get_pixel_point(raw_face, 152)
-    left_cheekbone = get_pixel_point(raw_face, 234)
-    right_cheekbone = get_pixel_point(raw_face, 454)
 
-    center_point_x = (
-        left_cheekbone.x + right_cheekbone.x
-    ) / 2
-
-    center_point_y = (
-        left_cheekbone.y + right_cheekbone.y
-    ) / 2
-
-    t = (
-        hairline_y - center_point_y
-    ) / (
-        chin_point.y - center_point_y
-    )
-
-    hairline_x = (
-        center_point_x
-        + t * (chin_point.x - center_point_x)
-    )
+    top_x = slope * hairline_y + intercept
 
     top_point = Point2D(
-        x=hairline_x,
+        x=top_x,
         y=hairline_y,
     )
 
@@ -73,7 +70,7 @@ def calculate_height_width_ratio_visualization_points(
     return FaceHeightToWidthVisualizationPoints(
         top=top_point,
         bottom=bottom_point,
-    )
+    ) # 검증 필요
 
 
 def calculate_jaw_to_cheekbone_width_ratio(

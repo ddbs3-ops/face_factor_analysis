@@ -47,6 +47,8 @@ async def analyze_uploaded_image(
         left_visual = jaw.left_jaw_visual_points
         right_visual = jaw.right_jaw_visual_points
 
+        chin_visual = jaw.chin_visual_points
+
         face_height_to_width_visual = result["height_width_ratio_visual_points"]
         frontality = result["frontality_result"]
 
@@ -143,6 +145,21 @@ async def analyze_uploaded_image(
                         "x": right_visual.lower_end.x / result["image_width"],
                         "y": right_visual.lower_end.y / result["image_height"],
                     },
+                },
+            },
+
+            "chin_angle_points": {
+                "intersection": {
+                    "x": chin_visual.intersection.x / result["image_width"],
+                    "y": chin_visual.intersection.y / result["image_height"],
+                },
+                "left_end": {
+                    "x": chin_visual.upper_end.x / result["image_width"],
+                    "y": chin_visual.upper_end.y / result["image_height"],
+                },
+                "right_end": {
+                    "x": chin_visual.lower_end.x / result["image_width"],
+                    "y": chin_visual.lower_end.y / result["image_height"],
                 },
             },
 

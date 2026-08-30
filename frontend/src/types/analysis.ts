@@ -80,6 +80,12 @@ export type FrontalityResult = {
   reasons: string[]
 }
 
+export type ChinAnglePoints = {
+  intersection: PointRatio
+  left_end: PointRatio
+  right_end: PointRatio
+}
+
 export type AnalysisResult = {
   frontality_result: FrontalityResult
   
@@ -95,6 +101,9 @@ export type AnalysisResult = {
     left: JawAngleVisualPoints
     right: JawAngleVisualPoints
   }
+
+  chin_angle_points: ChinAnglePoints
+
   height_width_ratio_visual_points: HeightWidthRatioVisualPoints
   
   rules: AnalysisRule[]
