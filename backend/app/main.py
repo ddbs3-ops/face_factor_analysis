@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.app.routes.analyze import router as analyze_router
+from backend.app.routes.consultation import router as consultation_router
 
 app = FastAPI()
 
@@ -20,8 +21,12 @@ app.add_middleware(
 
 
 app.include_router(analyze_router)
-
+app.include_router(consultation_router)
 
 @app.get("/")
 def root():
-    return {"message": "Hello backend!"}
+    return {
+        "service": "Face Factor Analysis API",
+        "version": "0.1.0",
+        "status": "running",
+    }

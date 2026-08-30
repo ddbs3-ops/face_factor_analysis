@@ -8,7 +8,7 @@ from core.dataset_loader import (
     find_json_files,
     select_first_frontal_samples,
 )
-from database.database import (
+from database.create_face_tables import (
     create_table,
     face_measurement_exists,
     save_face_measurement,

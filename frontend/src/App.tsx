@@ -3,6 +3,8 @@ import "./App.css"
 import AnalysisResultView from "./components/AnalysisResult"
 import ImageUpload from "./components/ImageUpload"
 import type { AnalysisResult, AnalysisStatus } from "./types/analysis"
+import { Routes, Route, useNavigate } from "react-router-dom"
+import ConsultationResult from "./components/ConsultationResult"
 
 const API_BASE_URL = import.meta.env.VITE_API_URL
 
@@ -18,6 +20,8 @@ function App() {
   const [hairlineYRatio, setHairlineYRatio] = useState<number | null>(null)
   const [isMeasuring, setIsMeasuring] = useState(false)
   const [showFrontalityWarning, setShowFrontalityWarning] = useState(false)
+
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (!selectedFile) { // 선택된 파일이 없으면 미리보기 URL을 null로 설정
@@ -106,102 +110,128 @@ function App() {
   const isLoading = analysisStatus === "loading"
 
   return (
-    <main className="app-shell">
-      <section className="hero" aria-labelledby="page-title">
-        <p className="eyebrow">FACE FACTOR ANALYSIS</p>
-        <h1 id="page-title">내 얼굴에 어울리는 헤어 방향 찾기</h1>
-        <p className="hero-description">
-          정면 사진 한 장으로 얼굴의 비율과 특징을 분석하고, 균형을 살리는
-          헤어스타일 방향을 확인해보세요.
-        </p>
-      </section>
+    <Routes>
+      <Route 
+        path = "/"
+        element = {
+          <main className="app-shell">
+            <section className="hero" aria-labelledby="page-title">
+              <p className="eyebrow">FACE FACTOR ANALYSIS</p>
+              <h1 id="page-title">내 얼굴에 어울리는 헤어 방향 찾기</h1>
+              <p className="hero-description">
+                정면 사진 한 장으로 얼굴의 비율과 특징을 분석하고, 균형을 살리는
+                헤어스타일 방향을 확인해보세요.
+              </p>
+            </section>
 
-      <section className="upload-card" aria-labelledby="upload-title">
-        <div className="section-heading">
-          <span className="step-number" aria-hidden="true">01</span>
-          <div>
-            <h2 id="upload-title">사진 업로드</h2>
-            <p>얼굴이 정면으로 잘 보이는 밝은 사진을 선택해주세요.</p>
-            <p>자동으로 표시된 선이 실제 헤어라인과 다르면 위아래로 조정해주세요.</p>
-          </div>
-          {isMeasuring && (
-            <p>헤어라인을 찾는 중...</p>
-          )}
-        </div>
+            <section className="upload-card" aria-labelledby="upload-title">
+              <div className="section-heading">
+                <span className="step-number" aria-hidden="true">01</span>
+                <div>
+                  <h2 id="upload-title">사진 업로드</h2>
+                  <p>얼굴이 정면으로 잘 보이는 밝은 사진을 선택해주세요.</p>
+                  <p>자동으로 표시된 선이 실제 헤어라인과 다르면 위아래로 조정해주세요.</p>
+                </div>
+                {isMeasuring && (
+                  <p>헤어라인을 찾는 중...</p>
+                )}
+              </div>
 
-        <ImageUpload
-          selectedFile={selectedFile}
-          previewUrl={previewUrl}
-          disabled={isLoading}
-          hairlineYRatio={hairlineYRatio}
-          onHairlineChange={setHairlineYRatio}
-          onFileChange={handleFileChange}
-        />
+              <ImageUpload
+                selectedFile={selectedFile}
+                previewUrl={previewUrl}
+                disabled={isLoading}
+                hairlineYRatio={hairlineYRatio}
+                onHairlineChange={setHairlineYRatio}
+                onFileChange={handleFileChange}
+              />
 
-        <button className="analyze-button" type="button"
-          disabled={!selectedFile || isLoading || isMeasuring || hairlineYRatio === null} 
-          onClick={handleAnalyze}>
-          {isMeasuring
-            ? "헤어라인 찾는 중..."
-            : isLoading
-              ? "분석 중..."
-              : "얼굴 분석하기"}
-        </button>
-
-        <div className="status-message" aria-live="polite">
-          {isLoading && <p>얼굴 특징을 분석하고 있습니다.</p>}
-          {analysisStatus === "error" && (
-            <p className="error-message" role="alert">{errorMessage}</p>
-          )}
-        </div>
-      </section>
-      {showFrontalityWarning && analysisResult && (
-        <div className="frontality-warning-backdrop">
-          <div className="frontality-warning-modal">
-            <h3>사진이 조금 기울어져 있어요 🙈</h3>
-
-            <ul className="frontality-warning-list">
-              {analysisResult.frontality_result.messages.map((message) => (
-                <li key={message}>{message}</li>
-              ))}
-            </ul>
-
-            <p>
-              정면 사진일수록 더 정확하게 분석할 수 있어요.
-              <br />
-              현재 사진은 일부 측정값에 오차가 있을 수 있어요.
-            </p>
-
-            <div className="frontality-warning-actions">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowFrontalityWarning(false)
-                  setSelectedFile(null)
-                  setAnalysisResult(null)
-                  setAnalysisStatus("idle")
-                }}
-              >
-                다른 사진 선택
+              <button className="analyze-button" type="button"
+                disabled={!selectedFile || isLoading || isMeasuring || hairlineYRatio === null} 
+                onClick={handleAnalyze}>
+                {isMeasuring
+                  ? "헤어라인 찾는 중..."
+                  : isLoading
+                    ? "분석 중..."
+                    : "얼굴 분석하기"}
               </button>
 
+              <div className="status-message" aria-live="polite">
+                {isLoading && <p>얼굴 특징을 분석하고 있습니다.</p>}
+                {analysisStatus === "error" && (
+                  <p className="error-message" role="alert">{errorMessage}</p>
+                )}
+              </div>
+            </section>
+            {showFrontalityWarning && analysisResult && (
+              <div className="frontality-warning-backdrop">
+                <div className="frontality-warning-modal">
+                  <h3>사진이 조금 기울어져 있어요 🙈</h3>
+
+                  <ul className="frontality-warning-list">
+                    {analysisResult.frontality_result.messages.map((message) => (
+                      <li key={message}>{message}</li>
+                    ))}
+                  </ul>
+
+                  <p>
+                    정면 사진일수록 더 정확하게 분석할 수 있어요.
+                    <br />
+                    현재 사진은 일부 측정값에 오차가 있을 수 있어요.
+                  </p>
+
+                  <div className="frontality-warning-actions">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowFrontalityWarning(false)
+                        setSelectedFile(null)
+                        setAnalysisResult(null)
+                        setAnalysisStatus("idle")
+                      }}
+                    >
+                      다른 사진 선택
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowFrontalityWarning(false)}
+                    >
+                      그래도 결과 보기
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {analysisStatus === "success" && analysisResult && (
+              <AnalysisResultView result={analysisResult} previewUrl={previewUrl} />
+            )}
+
+            {analysisStatus === "success" && analysisResult && (
               <button
                 type="button"
-                onClick={() => setShowFrontalityWarning(false)}
+                onClick={() => navigate("/consultation",{
+                  state: {
+                    result:analysisResult,
+                    previewUrl: previewUrl,
+                  },
+                }
+                )}
               >
-                그래도 결과 보기
+                상담문 생성하기
               </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {analysisStatus === "success" && analysisResult && (
-        <AnalysisResultView result={analysisResult} previewUrl={previewUrl} />
-      )}
-
-      
-    </main>
+            )}            
+          </main>
+        }
+      />  
+      <Route
+        path="/consultation"
+        element={
+          <ConsultationResult />
+        }
+      />
+    </Routes>  
   )
 }
 
