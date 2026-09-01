@@ -20,6 +20,7 @@ venv/
 images/
 data/raw/
 sample/
+data/app.db
 
 # MediaPipe 모델 파일
 models/

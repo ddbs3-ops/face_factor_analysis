@@ -1,9 +1,15 @@
 import sqlite3
 import uuid
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-DB_PATH = BASE_DIR / "data" / "app.db"
+DB_PATH = Path(
+    os.getenv(
+        "APP_DB_PATH",
+        str(BASE_DIR / "data" / "app.db"),
+    )
+)
 
 
 def save_consultation(

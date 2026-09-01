@@ -1,9 +1,14 @@
 import sqlite3
-
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-DB_PATH = BASE_DIR / "data" / "app.db"
+DB_PATH = Path(
+    os.getenv(
+        "APP_DB_PATH",
+        str(BASE_DIR / "data" / "app.db"),
+    )
+)
 
 
 def create_consultation_tables():
@@ -18,6 +23,7 @@ def create_consultation_tables():
             share_id TEXT NOT NULL UNIQUE,
             summary TEXT NOT NULL,
             consultation_text TEXT NOT NULL,
+            personal_request TEXT,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             expires_at DATETIME
         )
