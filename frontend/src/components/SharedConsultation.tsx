@@ -5,25 +5,59 @@ function SharedConsultation() {
   const { shareId } = useParams()
 
   const [consultation, setConsultation] = useState<any>(null)
+  const [error, setError] = useState("")
 
   const API_BASE_URL = import.meta.env.VITE_API_URL
 
   useEffect(() => {
     async function fetchSharedConsultation() {
-      const response = await fetch(
-        `${API_BASE_URL}/consultations/${shareId}`
-      )
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/consultations/${shareId}`
+        )
+        
+        if(response.status === 404) {
+          setError("존재하지 않거나 만료된 상담 입니다.")
+        }
+        if (!response.ok) {
+          setError("상담 결과를 불러오지 못했습니다.")
+        }
 
-      if (!response.ok) {
-        throw new Error("상담 결과를 불러오지 못했습니다.")
+        const data = await response.json()
+        setConsultation(data)
+
+      } catch {
+        setError("서버에 연결할 수 없습니다.")
       }
-
-      const data = await response.json()
-      setConsultation(data)
     }
 
     fetchSharedConsultation()
   }, [shareId])
+
+  if (error) {
+    return (
+      <main className="shared-consultation-page shared-consultation-error">
+        <section className="shared-error-card">
+          <div className="shared-error-icon" aria-hidden="true">
+            !
+          </div>
+
+          <p className="shared-eyebrow">HAIR CONSULTATION</p>
+
+          <h1>상담 결과를 확인할 수 없습니다</h1>
+
+          <p className="shared-error-message">
+            {error}
+          </p>
+
+          <p className="shared-error-guide">
+            공유 링크를 다시 확인하거나 상담을 생성한 사용자에게
+            새로운 링크를 요청해주세요.
+          </p>
+        </section>
+      </main>
+  )
+}
 
   if (!consultation) {
     return (

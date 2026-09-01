@@ -951,3 +951,72 @@
   }
 }
 
+.shared-consultation-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh;
+}
+
+.shared-error-card {
+  width: 100%;
+  max-width: 520px;
+  padding: 42px 32px;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background: var(--surface);
+  text-align: center;
+  box-shadow: 0 12px 32px rgba(52, 36, 46, 0.06);
+}
+
+.shared-error-icon {
+  display: grid;
+  place-items: center;
+
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 20px;
+
+  border-radius: 50%;
+
+  background: var(--primary-soft);
+  color: var(--primary);
+
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.shared-error-card h1 {
+  margin: 8px 0 12px;
+  color: var(--text);
+  font-size: 1.6rem;
+  line-height: 1.35;
+  letter-spacing: -0.03em;
+}
+
+.shared-error-message {
+  margin: 0;
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.7;
+}
+
+.shared-error-guide {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+@media (max-width: 480px) {
+  .shared-error-card {
+    padding: 34px 22px;
+    border-radius: 18px;
+  }
+
+  .shared-error-card h1 {
+    font-size: 1.4rem;
+  }
+}
+
