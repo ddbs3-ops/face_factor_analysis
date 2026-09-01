@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import "./App.css"
 import AnalysisResultView from "./components/AnalysisResult"
-import ImageUpload from "./components/ImageUpload"
+import ImageUpload, { type ImageUploadHandle } from "./components/ImageUpload"
 import type { AnalysisResult, AnalysisStatus } from "./types/analysis"
 import { Routes, Route, useNavigate } from "react-router-dom"
 import ConsultationResult from "./components/ConsultationResult"
@@ -21,6 +21,7 @@ function App() {
   const [hairlineYRatio, setHairlineYRatio] = useState<number | null>(null)
   const [isMeasuring, setIsMeasuring] = useState(false)
   const [showFrontalityWarning, setShowFrontalityWarning] = useState(false)
+  const imageUploadRef = useRef<ImageUploadHandle>(null)
 
   const navigate = useNavigate()
 
@@ -139,6 +140,7 @@ function App() {
               </div>
 
               <ImageUpload
+                ref={imageUploadRef}
                 selectedFile={selectedFile}
                 previewUrl={previewUrl}
                 disabled={isLoading}
@@ -186,9 +188,7 @@ function App() {
                       type="button"
                       onClick={() => {
                         setShowFrontalityWarning(false)
-                        setSelectedFile(null)
-                        setAnalysisResult(null)
-                        setAnalysisStatus("idle")
+                        imageUploadRef.current?.openFilePicker()
                       }}
                     >
                       다른 사진 선택
