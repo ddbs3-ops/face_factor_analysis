@@ -3,8 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from backend.app.routes.analyze import router as analyze_router
 from backend.app.routes.consultation import router as consultation_router
+from database.create_consultation_tables import create_consultation_tables
 
 app = FastAPI()
+create_consultation_tables()
 
 ALLOWED_ORIGINS = [
     "http://localhost:5173",

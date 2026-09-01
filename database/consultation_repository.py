@@ -10,8 +10,9 @@ DB_PATH = Path(
         str(BASE_DIR / "data" / "app.db"),
     )
 )
+DB_PATH.parent.mkdir(parents=True, exist_ok=True)
 
-
+    
 def save_consultation(
     summary: str,
     consultation_text: str,

@@ -10,6 +10,7 @@ DB_PATH = Path(
     )
 )
 
+DB_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 def create_consultation_tables():
     conn = sqlite3.connect(DB_PATH)
