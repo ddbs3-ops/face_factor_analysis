@@ -100,6 +100,13 @@ function SharedConsultation() {
             ))}
         </div>
         </section>
+        
+        {consultation.personal_request && (
+          <section className="shared-personal-request">
+            <h2>고객의 추가 요청</h2>
+            <p>{consultation.personal_request}</p>
+          </section>
+        )}
     </main>
     )
 }

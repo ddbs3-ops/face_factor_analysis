@@ -1,9 +1,12 @@
 from fastapi import APIRouter,HTTPException
 
 from backend.app.schemas.consultation import (
-    ConsultationRequest,
-    ConsultationResponse,
+    ConsultationGenerateRequest,
+    ConsultationGenerateResponse,
+    ConsultationShareRequest,
+    ConsultationShareResponse,
 )
+
 from backend.app.services.consultation_service import (
     build_summary,
     build_key_requests,
@@ -19,12 +22,12 @@ router = APIRouter()
 
 
 @router.post(
-    "/consultation",
-    response_model=ConsultationResponse,
+    "/consultation/generate",
+    response_model=ConsultationGenerateResponse,
 )
 def create_consultation(
-    request: ConsultationRequest,
-) -> ConsultationResponse:
+    request: ConsultationGenerateRequest,
+) -> ConsultationGenerateResponse:
     summary = build_summary(request.recommendations)
 
     key_requests = build_key_requests(
@@ -34,25 +37,37 @@ def create_consultation(
     consultation_text = generate_consultation_text(
         request.recommendations
     )
-    share_id = save_consultation(
+
+    return ConsultationGenerateResponse(
         summary=summary,
+        key_requests=key_requests,
         consultation_text=consultation_text,
+    )
+
+@router.post(
+    "/consultation/share",
+    response_model=ConsultationShareResponse,
+)
+def share_consultation(
+    request: ConsultationShareRequest,
+) -> ConsultationShareResponse:
+    share_id = save_consultation(
+        summary=request.summary,
+        consultation_text=request.consultation_text,
+        personal_request=request.personal_request,
         key_requests=[
             {
                 "element": item.element,
                 "score": item.score,
                 "text": item.text,
             }
-            for item in key_requests
-        ],
+            for item in request.key_requests
+        ], #db 저장
     )
 
-    return ConsultationResponse(
-        summary=summary,
-        key_requests=key_requests,
-        consultation_text=consultation_text,
+    return ConsultationShareResponse(
         share_id=share_id,
-    )
+    ) #공유가능한 id 돌려줌
 
 @router.get("/consultations/{share_id}")
 def get_shared_consultation(share_id: str):

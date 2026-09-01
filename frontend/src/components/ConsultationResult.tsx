@@ -22,17 +22,19 @@ function ConsultationResult() {
   useState<ConsultationKeyRequest[]>([])
   const [consultationText, setConsultationText] = useState("")
   const [shareId, setShareId] = useState("")
+  const [personalRequest, setPersonalRequest] = useState("")
+  const [isSharing, setIsSharing] = useState(false)
 
   const shareUrl = shareId
   ? `${window.location.origin}/share/${shareId}`
   : ""
 
-
   const API_BASE_URL = import.meta.env.VITE_API_URL
-  const CONSULTATION_API_URL = `${API_BASE_URL}/consultation`
+  const GENERATE_API_URL = `${API_BASE_URL}/consultation/generate`
+  const SHARE_API_URL = `${API_BASE_URL}/consultation/share`
 
   async function fetchConsultation() {
-    const response = await fetch(CONSULTATION_API_URL, {
+    const response = await fetch(GENERATE_API_URL, {
         method: "POST",
         headers: {
         "Content-Type": "application/json",
@@ -50,9 +52,45 @@ function ConsultationResult() {
     setSummary(data.summary)
     setKeyRequests(data.key_requests)
     setConsultationText(data.consultation_text)
-    setShareId(data.share_id)
 
   }
+
+  async function shareConsultation() {
+  if (isSharing || shareId) {
+    return
+  }
+
+  setIsSharing(true)
+
+  try {
+    const response = await fetch(SHARE_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        summary: summary,
+        key_requests: keyRequests,
+        consultation_text: consultationText,
+        personal_request: personalRequest || null,
+      }),
+    })
+
+    if (!response.ok) {
+      throw new Error("상담 공유에 실패했습니다.")
+    }
+
+    const data = await response.json()
+    setShareId(data.share_id)
+
+  } finally {
+    setIsSharing(false)
+  }
+}
+
+async function copyShareLink() {
+  await navigator.clipboard.writeText(shareUrl)
+}
 
   useEffect(() => {
     fetchConsultation()
@@ -88,6 +126,29 @@ function ConsultationResult() {
         <p className="consultation-script">{consultationText}</p>
     </section>
     </div>
+    
+    <section className="consultation-card">
+      <h2>추가 요청사항</h2>
+
+      <textarea
+        className="consultation-personal-request"
+        value={personalRequest}
+        onChange={(e) => setPersonalRequest(e.target.value)}
+        placeholder="ex: 앞머리 기장은 꼭 눈썹 가리도록 해주세요."
+      />
+    </section>
+    
+    <button 
+      className="consultation-share-button"
+      onClick={shareConsultation}
+      disabled={isSharing || !!shareId}>
+      {isSharing
+        ? "공유 준비 중..."
+        : shareId
+          ? "공유 링크 생성 완료"
+          : "공유하기"}
+    </button>
+
     {shareUrl && (
     <section className="consultation-share-card">
         <div className="consultation-share-header">
@@ -103,6 +164,17 @@ function ConsultationResult() {
             size={180}
         />
         </div>
+
+        <div className="consultation-share-link">
+          <p>{shareUrl}</p>
+        </div>
+
+        <button
+          type="button"
+          onClick={copyShareLink}
+        >
+          링크 복사
+        </button>
     </section>
     )}
     
