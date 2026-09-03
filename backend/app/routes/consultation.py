@@ -18,6 +18,10 @@ from database.consultation_repository import (
     get_consultation_by_share_id,
 )
 
+from backend.app.services.consultation_flow_service import (
+    load_consultation_flow,
+)
+
 router = APIRouter()
 
 
@@ -80,3 +84,7 @@ def get_shared_consultation(share_id: str):
         )
 
     return consultation
+
+@router.get("/consultation/flow")
+def get_consultation_flow():
+    return load_consultation_flow()

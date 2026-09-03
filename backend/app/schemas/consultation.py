@@ -31,3 +31,7 @@ class ConsultationShareRequest(BaseModel):
 
 class ConsultationShareResponse(BaseModel):
     share_id: str
+
+class ConsultationGenerateRequest(BaseModel):
+    recommendations: list[RecommendationItem]
+    guided_answers: dict[str, str | list[str]] | None = None

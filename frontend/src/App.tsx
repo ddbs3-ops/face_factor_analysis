@@ -4,8 +4,8 @@ import AnalysisResultView from "./components/AnalysisResult"
 import ImageUpload, { type ImageUploadHandle } from "./components/ImageUpload"
 import type { AnalysisResult, AnalysisStatus } from "./types/analysis"
 import { Routes, Route, useNavigate } from "react-router-dom"
-import ConsultationResult from "./components/ConsultationResult"
 import SharedConsultation from "./components/SharedConsultation"
+import ConsultationPage from "./components/ConsultationPage"
 
 const API_BASE_URL = import.meta.env.VITE_API_URL
 
@@ -21,6 +21,7 @@ function App() {
   const [hairlineYRatio, setHairlineYRatio] = useState<number | null>(null)
   const [isMeasuring, setIsMeasuring] = useState(false)
   const [showFrontalityWarning, setShowFrontalityWarning] = useState(false)
+  const [showConsultationModeModal, setShowConsultationModeModal] = useState(false)
   const imageUploadRef = useRef<ImageUploadHandle>(null)
 
   const navigate = useNavigate()
@@ -213,16 +214,57 @@ function App() {
               <button
                 className="consultation-create-button"
                 type="button"
-                onClick={() => navigate("/consultation",{
-                  state: {
-                    result:analysisResult,
-                    previewUrl: previewUrl,
-                  },
-                }
-                )}
+                onClick={() => setShowConsultationModeModal(true)}
               >
                 상담문 생성하기
               </button>
+            )}
+
+            {showConsultationModeModal && analysisResult && (
+              <div className="frontality-warning-backdrop">
+                <div className="frontality-warning-modal">
+                  <h3>어떤 방식으로 상담을 준비할까요?</h3>
+
+                  <div className="frontality-warning-actions">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        navigate("/consultation", {
+                          state: {
+                            mode: "quick",
+                            result: analysisResult,
+                            previewUrl: previewUrl,
+                          },
+                        })
+                      }
+                    >
+                      빠르게 상담문 만들기
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        navigate("/consultation", {
+                          state: {
+                            mode: "guided",
+                            result: analysisResult,
+                            previewUrl: previewUrl,
+                          },
+                        })
+                      }
+                    >
+                      내 스타일 자세히 정하기
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowConsultationModeModal(false)}
+                  >
+                    닫기
+                  </button>
+                </div>
+              </div>
             )}            
           </main>
         }
@@ -230,7 +272,7 @@ function App() {
       <Route
         path="/consultation"
         element={
-          <ConsultationResult />
+          <ConsultationPage />
         }
       />
       <Route

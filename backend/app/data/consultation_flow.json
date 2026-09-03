@@ -1,0 +1,520 @@
+{
+
+    "version": "1.0",
+    "root": "service_type", 
+    "nodes":{
+        "service_type":{
+            "id": "service_type",
+            "type": "single",
+            "text": "어떤 머리를 하고싶으세요?",
+            "options":[
+                {
+                    "value": "cut",
+                    "label": "커트",
+                    "next": "cut_style_knowledge"
+                },
+                {
+                    "value": "perm",
+                    "label": "펌",
+                    "next": "complete"
+                }
+            ]
+        },
+
+        "cut_style_knowledge":{
+            "id": "cut_style_knowledge",
+            "type": "single",
+            "text": "원하는 커트 스타일이 정해져있나요?",
+            "options":[
+                {
+                    "value": "know_name",
+                    "label": "네, 원하는 스타일의 이름을 알고 있어요",
+                    "next": "cut_style_select"
+                },
+                {
+                    "value": "know_feeling",
+                    "label": "이름은 모르지만 원하는 느낌은 있어요",
+                    "next": "cut_growing_hair"
+                },
+                {
+                    "value": "dont_know",
+                    "label": "아직 잘 모르겠어요",
+                    "next": "complete"
+                }
+            ]
+        },
+        "cut_style_select" :{
+            "id": "cut_style_select",
+            "type": "single",
+            "text": "원하는 커트 스타일을 선택해주세요",
+            "options": [
+                {
+                "value": "textured_crop",
+                "label": "텍스처드 크롭컷",
+                "next": "cut_growing_hair"
+                },
+                {
+                "value": "see_through_dandy",
+                "label": "시스루 댄디컷",
+                "next": "cut_growing_hair"
+                },
+                {
+                "value": "leaf_cut",
+                "label": "리프컷",
+                "next": "cut_growing_hair"
+                },
+                {
+                "value": "gail_cut",
+                "label": "가일컷",
+                "next": "cut_growing_hair"
+                },
+                {
+                "value": "drop_cut",
+                "label": "드롭컷",
+                "next": "cut_growing_hair"
+                },
+                {
+                "value": "ivy_league_cut",
+                "label": "아이비리그컷",
+                "next": "cut_growing_hair"
+                },
+                {
+                "value": "soft_two_block",
+                "label": "소프트 투블럭컷",
+                "next": "cut_growing_hair"
+                },
+                {
+                "value": "other",
+                "label": "여기에 없어요",
+                "next": "cut_style_custom"
+                }
+            ]
+        },
+        "cut_style_custom" :{
+            "id": "cut_style_custom",
+            "type": "text",
+            "text": "원하는 커트 스타일의 이름이 뭔가요? (예: 텍스처드 크롭컷, 시스루 댄디컷 등)",
+            "next" : "cut_growing_hair"
+        },
+
+        "cut_growing_hair": {
+            "id": "cut_growing_hair",
+            "type": "single",
+            "text": "현재 머리를 기르고 계신가요?",
+            "options": [
+                {
+                "value": "yes",
+                "label": "네, 머리를 기르고 있어요",
+                "next": "cut_bangs_style"
+                },
+                {
+                "value": "no",
+                "label": "아니요, 딱히 그렇지 않아요",
+                "next": "cut_bangs_style"
+                }
+            ]
+        },
+
+        "cut_bangs_style": {
+            "id": "cut_bangs_style",
+            "type": "single",
+            "text": "앞머리는 어떻게 연출하고 싶으신가요?",
+            "options": [
+                {
+                "value": "up",
+                "label": "올림머리",
+                "next": "cut_bangs_up_style"
+                },
+                {
+                "value": "parted",
+                "label": "가르마",
+                "next": "cut_bangs_part_style"
+                },
+                {
+                "value": "down",
+                "label": "내림머리",
+                "next": "cut_bangs_down_style"
+                }
+            ]
+        },
+
+        "cut_bangs_up_style": {
+            "id": "cut_bangs_up_style",
+            "type": "single",
+            "text": "올림머리는 어떤 스타일을 원하시나요?",
+            "options": [
+                {
+                "value": "short_pomade",
+                "label": "짧은 포마드 스타일",
+                "next": "cut_fade_preference"
+                },
+                {
+                "value": "no_part_all_back",
+                "label": "가르마 없는 올백 스타일",
+                "next": "cut_fade_preference"
+                },
+                {
+                "value": "parted_up",
+                "label": "가르마 있는 스타일",
+                "next": "cut_fade_preference"
+                }
+            ]
+        },
+
+        "cut_bangs_part_style": {
+            "id": "cut_bangs_part_style",
+            "type": "single",
+            "text": "가르마 스타일은 어떤 느낌을 원하시나요?",
+            "options": [
+                {
+                "value": "gail_style",
+                "label": "가일 스타일",
+                "next": "cut_bangs_length"
+                },
+                {
+                "value": "aez_style",
+                "label": "애즈 스타일",
+                "next": "cut_bangs_length"
+                },
+                {
+                "value": "leaf_style",
+                "label": "리프 스타일",
+                "next": "cut_bangs_length"
+                },
+                {
+                "value": "classic_style",
+                "label": "클래식 스타일",
+                "next": "cut_bangs_length"
+                }
+            ]
+        },
+
+        "cut_bangs_down_style": {
+            "id": "cut_bangs_down_style",
+            "type": "single",
+            "text": "내림머리의 앞머리 무게감은 어떻게 하고 싶으신가요?",
+            "options": [
+                {
+                "value": "light",
+                "label": "숱을 많이 쳐서 가볍게",
+                "next": "cut_bangs_length"
+                },
+                {
+                "value": "heavy",
+                "label": "숱은 치지 않고 무겁게",
+                "next": "cut_bangs_length"
+                },
+                {
+                "value": "medium",
+                "label": "너무 가볍지도 않고, 무겁지도 않게",
+                "next": "cut_bangs_length"
+                }
+            ]
+        },
+        "cut_bangs_length": {
+            "id": "cut_bangs_length",
+            "type": "single",
+            "text": "앞머리 길이는 어느 정도를 원하시나요?",
+            "options": [
+                {
+                "value": "above_eyebrows",
+                "label": "눈썹 위",
+                "next": "cut_side_section_style"
+                },
+                {
+                "value": "eyebrow_line",
+                "label": "눈썹선",
+                "next": "cut_side_section_style"
+                },
+                {
+                "value": "below_eyebrows_above_eyes",
+                "label": "눈썹 아래~눈 위",
+                "next": "cut_side_section_style"
+                },
+                {
+                "value": "near_eyes",
+                "label": "눈 가까이",
+                "next": "cut_side_section_style"
+                },
+                {
+                "value": "keep_current_length",
+                "label": "현재 길이 최대한 유지",
+                "next": "cut_side_section_style"
+                },
+                {
+                "value": "dont_know",
+                "label": "잘 모르겠어요",
+                "next": "cut_side_section_style"
+                }
+            ]
+        },
+
+        "cut_side_section_style": {
+            "id": "cut_side_section_style",
+            "type": "single",
+            "text": "옆머리는 어떤 방식으로 정리하고 싶으신가요?",
+            "options": [
+                {
+                "value": "semi_two_block",
+                "label": "세미 투블럭 (18mm~)",
+                "next": "cut_down_perm"
+                },
+                {
+                "value": "two_block",
+                "label": "투블럭 (~15mm)",
+                "next": "cut_two_block_length"
+                },
+                {
+                "value": "one_block",
+                "label": "원블럭",
+                "next": "cut_down_perm"
+                }
+            ]
+        },
+
+        "cut_two_block_length": {
+            "id": "cut_two_block_length",
+            "type": "single",
+            "text": "투블럭 길이는 어느 정도를 원하시나요?",
+            "options": [
+                {
+                "value": "6mm",
+                "label": "6mm",
+                "next": "cut_down_perm"
+                },
+                {
+                "value": "9mm",
+                "label": "9mm",
+                "next": "cut_down_perm"
+                },
+                {
+                "value": "12mm",
+                "label": "12mm",
+                "next": "cut_down_perm"
+                },
+                {
+                "value": "15mm",
+                "label": "15mm",
+                "next": "cut_down_perm"
+                }
+            ]
+        },
+
+        "cut_down_perm": {
+            "id": "cut_down_perm",
+            "type": "single",
+            "text": "다운펌도 함께 고려하시나요?",
+            "options": [
+                {
+                "value": "stylist_recommendation",
+                "label": "미용사님에게 추천 받을래요",
+                "next": "cut_back_length_style"
+                },
+                {
+                "value": "yes",
+                "label": "다운펌 할게요",
+                "next": "cut_back_length_style"
+                },
+                {
+                "value": "no",
+                "label": "다운펌 안 할게요",
+                "next": "cut_back_length_style"
+                }
+            ]
+        },
+
+        "cut_back_length_style": {
+            "id": "cut_back_length_style",
+            "type": "single",
+            "text": "뒷머리는 어떻게 하고 싶으신가요?",
+            "options": [
+                {
+                "value": "long",
+                "label": "길게 남기고 싶어요",
+                "next": "cut_back_long_style"
+                },
+                {
+                "value": "short",
+                "label": "짧게 정리하고 싶어요",
+                "next": "cut_back_short_style"
+                }
+            ]
+        },
+
+        "cut_back_long_style": {
+            "id": "cut_back_long_style",
+            "type": "single",
+            "text": "긴 뒷머리는 어떤 스타일을 원하시나요?",
+            "options": [
+                {
+                "value": "curved_toward_ears",
+                "label": "귀 쪽으로 자연스럽게 말리는 스타일",
+                "next": "cut_styling_method"
+                },
+                {
+                "value": "long_down_perm",
+                "label": "길게 내려서 다운펌하는 스타일",
+                "next": "cut_styling_method"
+                }
+            ]
+        },
+
+        "cut_back_short_style": {
+            "id": "cut_back_short_style",
+            "type": "single",
+            "text": "짧은 뒷머리는 어떤 스타일을 원하시나요?",
+            "options": [
+                {
+                "value": "match_side_length",
+                "label": "옆머리와 같은 길이로 정리",
+                "next": "cut_styling_method"
+                },
+                {
+                "value": "fade",
+                "label": "페이드 스타일",
+                "next": "cut_styling_method"
+                }
+            ]
+        },
+
+        "cut_fade_preference": {
+            "id": "cut_fade_preference",
+            "type": "single",
+            "text": "페이드를 원하시나요?",
+            "options": [
+                {
+                "value": "yes",
+                "label": "페이드 O",
+                "next": "cut_part_line"
+                },
+                {
+                "value": "no",
+                "label": "페이드 X",
+                "next": "cut_part_line"
+                }
+            ]
+        },
+
+            "cut_part_line": {
+            "id": "cut_part_line",
+            "type": "single",
+            "text": "가르마 라인은 어떻게 하고 싶으신가요?",
+            "options": [
+                {
+                "value": "shaved",
+                "label": "가르마 라인을 굵게 파주세요",
+                "next": "cut_styling_method"
+                },
+                {
+                "value": "not_shaved",
+                "label": "가르마 라인은 파지 말아주세요",
+                "next": "cut_styling_method"
+                }
+            ]
+        },
+
+        "cut_styling_method": {
+            "id": "cut_styling_method",
+            "type": "single",
+            "text": "평소에는 머리를 어떻게 스타일링하시나요?",
+            "options": [
+                {
+                "value": "dry_only",
+                "label": "머리만 말려요",
+                "next": "complete"
+                },
+                {
+                "value": "blow_dry_only",
+                "label": "드라이로만 모양을 어느 정도 잡아요",
+                "next": "complete"
+                },
+                {
+                "value": "blow_dry_and_product",
+                "label": "드라이 + 제품까지 사용해요",
+                "next": "cut_styling_products"
+                },
+                {
+                "value": "active_styling",
+                "label": "고데기나 여러 제품을 써서 적극적으로 스타일링해요",
+                "next": "cut_styling_tools"
+                }
+            ]
+            },
+
+            "cut_styling_tools": {
+            "id": "cut_styling_tools",
+            "type": "multi",
+            "text": "평소 어떤 스타일링 도구를 사용하시나요?",
+            "options": [
+                {
+                "value": "hair_dryer",
+                "label": "드라이기"
+                },
+                {
+                "value": "flat_iron",
+                "label": "고데기"
+                },
+                {
+                "value": "brush_iron",
+                "label": "빗모양 고데기"
+                },
+                {
+                "value": "round_brush",
+                "label": "롤빗"
+                },
+                {
+                "value": "other",
+                "label": "기타"
+                }
+            ],
+            "next": "cut_styling_products"
+            },
+
+            "cut_styling_products": {
+            "id": "cut_styling_products",
+            "type": "multi",
+            "text": "평소 어떤 스타일링 제품을 사용하시나요?",
+            "options": [
+                {
+                "value": "essence_oil",
+                "label": "에센스, 오일"
+                },
+                {
+                "value": "curl_cream",
+                "label": "컬크림"
+                },
+                {
+                "value": "wax",
+                "label": "왁스"
+                },
+                {
+                "value": "pomade",
+                "label": "포마드"
+                },
+                {
+                "value": "spray",
+                "label": "스프레이"
+                },
+                {
+                "value": "other",
+                "label": "기타"
+                }
+            ],
+            "next": "complete"
+        },
+
+        "complete": {
+            "id": "complete",
+            "type": "complete"
+        }
+
+
+
+        
+
+
+
+
+
+    }
+}

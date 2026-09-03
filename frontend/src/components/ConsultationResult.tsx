@@ -14,7 +14,11 @@ type ConsultationKeyRequest = {
   text: string
 }
 
-function ConsultationResult() {
+type ConsultationResultProps = {
+  guidedAnswers?: Record<string, string | string[]>
+}
+
+function ConsultationResult({ guidedAnswers }: ConsultationResultProps) {
   const location = useLocation()  
   const state = location.state as ConsultationLocationState
   const [summary, setSummary] = useState("")
@@ -41,6 +45,7 @@ function ConsultationResult() {
         },
         body: JSON.stringify({
         recommendations: state.result.recommendations,
+        guided_answers: guidedAnswers,
         }),
     })
 
