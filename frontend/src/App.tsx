@@ -221,12 +221,13 @@ function App() {
             )}
 
             {showConsultationModeModal && analysisResult && (
-              <div className="frontality-warning-backdrop">
-                <div className="frontality-warning-modal">
+              <div className="frontality-warning-backdrop consultation-mode-backdrop">
+                <div className="frontality-warning-modal consultation-mode-modal">
                   <h3>어떤 방식으로 상담을 준비할까요?</h3>
 
-                  <div className="frontality-warning-actions">
+                  <div className="frontality-warning-actions consultation-mode-actions">
                     <button
+                      className="consultation-mode-option consultation-mode-quick"
                       type="button"
                       onClick={() =>
                         navigate("/consultation", {
@@ -242,6 +243,7 @@ function App() {
                     </button>
 
                     <button
+                      className="consultation-mode-option consultation-mode-guided"
                       type="button"
                       onClick={() =>
                         navigate("/consultation", {
@@ -258,6 +260,7 @@ function App() {
                   </div>
 
                   <button
+                    className="consultation-mode-close"
                     type="button"
                     onClick={() => setShowConsultationModeModal(false)}
                   >

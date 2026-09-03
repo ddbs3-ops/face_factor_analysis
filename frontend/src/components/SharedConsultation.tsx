@@ -78,32 +78,41 @@ function SharedConsultation() {
         </header>
 
         <section
-        className="shared-primary-card"
-        aria-labelledby="shared-requests-title"
+          className="shared-primary-card shared-ai-card"
+          aria-labelledby="shared-requests-title"
         >
-        <div className="shared-section-heading">
-            <h2 id="shared-requests-title">핵심 요청사항</h2>
-        </div>
+          <div className="shared-section-heading">
+              <h2 id="shared-requests-title">AI 추천 요청사항</h2>
+          </div>
 
-        <div className="shared-request-list">
-            {consultation.key_requests.map((request: any) => (
-            <div
-                className="shared-request-item"
-                key={`${request.element}-${request.score}`}
-            >
-                <span className="shared-request-category">
-                {request.element.replaceAll("_", " ")}
-                </span>
+          <div className="shared-request-list">
+              {consultation.key_requests.map((request: any) => (
+              <div
+                  className="shared-request-item"
+                  key={`${request.element}-${request.score}`}
+              >
+                  <span className="shared-request-category">
+                  {request.element.replaceAll("_", " ")}
+                  </span>
 
-                <p>{request.text}</p>
-            </div>
-            ))}
-        </div>
+                  <p>{request.text}</p>
+              </div>
+              ))}
+          </div>
+
+          {consultation.consultation_text && (
+            <section className="shared-personal-request shared-guided-request">
+              <h2>고객 희망사항</h2>
+              <p className="consultation-script">
+                {consultation.consultation_text}
+              </p>
+            </section>
+          )}
         </section>
         
         {consultation.personal_request && (
-          <section className="shared-personal-request">
-            <h2>고객의 추가 요청</h2>
+          <section className="shared-personal-request shared-additional-request">
+            <h2>추가 요청사항</h2>
             <p>{consultation.personal_request}</p>
           </section>
         )}

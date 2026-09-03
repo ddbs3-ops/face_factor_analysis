@@ -20,6 +20,7 @@ from database.consultation_repository import (
 
 from backend.app.services.consultation_flow_service import (
     load_consultation_flow,
+    resolve_guided_answers,
 )
 
 router = APIRouter()
@@ -32,6 +33,13 @@ router = APIRouter()
 def create_consultation(
     request: ConsultationGenerateRequest,
 ) -> ConsultationGenerateResponse:
+
+    guided_answers = None
+
+    if request.guided_answers:
+        guided_answers = resolve_guided_answers(
+            request.guided_answers
+        )
     summary = build_summary(request.recommendations)
 
     key_requests = build_key_requests(
@@ -39,7 +47,7 @@ def create_consultation(
     )
 
     consultation_text = generate_consultation_text(
-        request.recommendations
+        guided_answers=guided_answers
     )
 
     return ConsultationGenerateResponse(

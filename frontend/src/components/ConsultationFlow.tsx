@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 type QuestionOption = {
   value: string
@@ -35,9 +35,15 @@ function ConsultationFlow({ onComplete }: ConsultationFlowProps) {
 
   const [textInputs, setTextInputs] = useState<Record<string, string>>({})
   const [multiInputs, setMultiInputs] = useState<Record<string, string[]>>({})
+  const latestQuestionRef = useRef<HTMLDivElement>(null)
+  const latestQuestionId = history[history.length - 1]
+
+  const API_BASE_URL = import.meta.env.VITE_API_URL
+  const FLOW_API_URL = `${API_BASE_URL}/consultation/flow`
+
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/consultation/flow")
+    fetch(FLOW_API_URL)
       .then((response) => {
         if (!response.ok) {
           throw new Error("상담 질문을 불러오지 못했습니다.")
@@ -53,6 +59,15 @@ function ConsultationFlow({ onComplete }: ConsultationFlowProps) {
         console.error(error)
       })
   }, [])
+
+  useEffect(() => {
+    if (history.length > 1) {
+      latestQuestionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      })
+    }
+  }, [history.length, latestQuestionId])
 
   function handleSingleAnswer(
     nodeId: string,
@@ -185,12 +200,12 @@ function ConsultationFlow({ onComplete }: ConsultationFlowProps) {
   }
 
   if (!flow) {
-    return <div>상담 질문을 불러오는 중...</div>
+    return <div className="consultation-flow-loading">상담 질문을 불러오는 중...</div>
   }
 
   return (
-    <div>
-      {history.map((nodeId) => {
+    <div className="consultation-flow">
+      {history.map((nodeId, index) => {
         const node = flow.nodes[nodeId]
 
         if (!node) {
@@ -198,35 +213,44 @@ function ConsultationFlow({ onComplete }: ConsultationFlowProps) {
         }
 
         return (
-          <div key={node.id}>
+          <div
+            className="consultation-question-card"
+            key={node.id}
+            ref={index === history.length - 1 ? latestQuestionRef : undefined}
+          >
             {node.text && <h2>{node.text}</h2>}
 
-            {node.type === "single" &&
-              node.options?.map((option) => {
-                const isSelected =
-                  answers[node.id] === option.value
+            {node.type === "single" && (
+              <div className="consultation-option-list">
+                {node.options?.map((option) => {
+                  const isSelected =
+                    answers[node.id] === option.value
 
-                return (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() =>
-                      handleSingleAnswer(
-                        node.id,
-                        option.value,
-                        option.next,
-                      )
-                    }
-                  >
-                    {option.label}
-                    {isSelected ? " ✓" : ""}
-                  </button>
-                )
-              })}
+                  return (
+                    <button
+                      className={`consultation-option-button${isSelected ? " is-selected" : ""}`}
+                      key={option.value}
+                      type="button"
+                      onClick={() =>
+                        handleSingleAnswer(
+                          node.id,
+                          option.value,
+                          option.next,
+                        )
+                      }
+                    >
+                      {option.label}
+                      {isSelected ? " ✓" : ""}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
 
             {node.type === "text" && (
-              <div>
+              <div className="consultation-text-answer">
                 <input
+                  className="consultation-answer-input"
                   type="text"
                   value={textInputs[node.id] ?? ""}
                   onChange={(event) =>
@@ -238,6 +262,7 @@ function ConsultationFlow({ onComplete }: ConsultationFlowProps) {
                 />
 
                 <button
+                  className="consultation-next-button"
                   type="button"
                   onClick={() => handleTextAnswer(node.id, node.next)}
                 >
@@ -247,32 +272,36 @@ function ConsultationFlow({ onComplete }: ConsultationFlowProps) {
             )}
 
             {node.type === "multi" && (
-              <div>
-                {node.options?.map((option) => {
-                  const selectedValues =
-                    multiInputs[node.id] ?? []
+              <div className="consultation-multi-answer">
+                <div className="consultation-option-list">
+                  {node.options?.map((option) => {
+                    const selectedValues =
+                      multiInputs[node.id] ?? []
 
-                  const isSelected =
-                    selectedValues.includes(option.value)
+                    const isSelected =
+                      selectedValues.includes(option.value)
 
-                  return (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() =>
-                        toggleMultiAnswer(
-                          node.id,
-                          option.value,
-                        )
-                      }
-                    >
-                      {option.label}
-                      {isSelected ? " ✓" : ""}
-                    </button>
-                  )
-                })}
+                    return (
+                      <button
+                        className={`consultation-option-button${isSelected ? " is-selected" : ""}`}
+                        key={option.value}
+                        type="button"
+                        onClick={() =>
+                          toggleMultiAnswer(
+                            node.id,
+                            option.value,
+                          )
+                        }
+                      >
+                        {option.label}
+                        {isSelected ? " ✓" : ""}
+                      </button>
+                    )
+                  })}
+                </div>
 
                 <button
+                  className="consultation-next-button"
                   type="button"
                   onClick={() =>
                     handleMultiAnswer(

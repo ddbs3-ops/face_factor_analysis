@@ -11,11 +11,6 @@ class ConsultationKeyRequest(BaseModel):
     score: int
     text: str
 
-
-class ConsultationGenerateRequest(BaseModel):
-    recommendations: list[RecommendationItem]
-
-
 class ConsultationGenerateResponse(BaseModel):
     summary: str
     key_requests: list[ConsultationKeyRequest]

@@ -390,7 +390,7 @@
                 {
                 "value": "no",
                 "label": "페이드 X",
-                "next": "cut_part_line"
+                "next": "cut_side_section_style"
                 }
             ]
         },

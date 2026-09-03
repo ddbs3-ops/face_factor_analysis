@@ -1,4 +1,5 @@
 from backend.app.schemas.consultation import RecommendationItem, ConsultationKeyRequest
+from backend.app.services.consultation_flow_service import build_guided_consultation_sentences
 
 def build_summary(
     recommendations: list[RecommendationItem],
@@ -89,14 +90,13 @@ def build_consultation_sentence(
     return ""
 
 def generate_consultation_text(
-    recommendations: list[RecommendationItem],
+    guided_answers: dict[str, str | list[str]] | None = None,
 ) -> str:
-    sentences = []
+    if not guided_answers:
+        return ""
 
-    for recommendation in recommendations:
-        sentence = build_consultation_sentence(recommendation)
+    guided_sentences = build_guided_consultation_sentences(
+        guided_answers
+    )
 
-        if sentence:
-            sentences.append(sentence)
-
-    return " ".join(sentences)
+    return "\n".join(guided_sentences)
