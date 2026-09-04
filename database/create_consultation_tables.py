@@ -25,6 +25,7 @@ def create_consultation_tables():
             summary TEXT NOT NULL,
             consultation_text TEXT NOT NULL,
             personal_request TEXT,
+            reference_image_blob_name TEXT,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             expires_at DATETIME
         )

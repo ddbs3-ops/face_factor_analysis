@@ -109,6 +109,17 @@ function SharedConsultation() {
             </section>
           )}
         </section>
+
+        {consultation.reference_image_blob_name && (
+          <section className="shared-reference-image">
+            <h2>참고 헤어사진</h2>
+
+            <img
+              src={`${API_BASE_URL}/consultations/${shareId}/reference-image`}
+              alt="고객 참고 헤어스타일"
+            />
+          </section>
+        )}
         
         {consultation.personal_request && (
           <section className="shared-personal-request shared-additional-request">

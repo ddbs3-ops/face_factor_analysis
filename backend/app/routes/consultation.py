@@ -1,9 +1,11 @@
 from fastapi import APIRouter,HTTPException, UploadFile, File
 from pathlib import Path
 from uuid import uuid4
+from fastapi.responses import Response
 
 from backend.app.services.blob_storage_service import (
     upload_reference_image,
+    download_reference_image,
 )
 
 
@@ -83,6 +85,7 @@ def share_consultation(
             }
             for item in request.key_requests
         ], #db 저장
+        reference_image_blob_name=request.reference_image_blob_name,
     )
 
     return ConsultationShareResponse(
@@ -104,6 +107,34 @@ def get_shared_consultation(share_id: str):
 @router.get("/consultation/flow")
 def get_consultation_flow():
     return load_consultation_flow()
+
+
+@router.get("/consultations/{share_id}/reference-image")
+def get_reference_image(share_id: str):
+    consultation = get_consultation_by_share_id(share_id)
+
+    if consultation is None:
+        raise HTTPException(
+            status_code=404,
+            detail="공유된 상담을 찾을 수 없습니다.",
+        )
+
+    blob_name = consultation["reference_image_blob_name"]
+
+    if not blob_name:
+        raise HTTPException(
+            status_code=404,
+            detail="참고 이미지가 없습니다.",
+        )
+
+    content, content_type = download_reference_image(
+        blob_name
+    )
+
+    return Response(
+        content=content,
+        media_type=content_type,
+    )
 
 
 @router.post("/consultation/reference-image")

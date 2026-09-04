@@ -36,3 +36,23 @@ def upload_reference_image(
     )
 
     return blob_name
+
+
+def download_reference_image(
+    blob_name: str,
+) -> tuple[bytes, str]:
+    blob_client = blob_service_client.get_blob_client(
+        container=CONTAINER_NAME,
+        blob=blob_name,
+    )
+
+    properties = blob_client.get_blob_properties()
+
+    content = blob_client.download_blob().readall()
+
+    content_type = (
+        properties.content_settings.content_type
+        or "application/octet-stream"
+    )
+
+    return content, content_type

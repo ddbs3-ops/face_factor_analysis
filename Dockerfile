@@ -25,7 +25,9 @@ RUN python -m pip install \
     certifi==2026.7.22 \
     flatbuffers==25.12.19 \
     matplotlib==3.11.1 \
-    sounddevice==0.5.6
+    sounddevice==0.5.6 \
+    azure-storage-blob==12.30.1 \
+    azure-identity==1.25.3
 
 RUN python -m pip install \
     --only-binary=:all: \

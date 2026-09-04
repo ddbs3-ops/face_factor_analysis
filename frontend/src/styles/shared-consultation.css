@@ -77,6 +77,41 @@
   line-height: 1.7;
   white-space: pre-wrap;
 }
+.shared-reference-image {
+  margin-top: 16px;
+  padding: 22px 24px 24px;
+  border: 1px solid var(--border);
+  border-left: 4px solid #9b9299;
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: 0 8px 24px rgba(52, 36, 46, .05);
+}
+.shared-reference-image::before {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: .7rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  content: "REFERENCE IMAGE";
+}
+.shared-reference-image h2 {
+  margin: 0 0 14px;
+  color: var(--primary);
+  font-size: 1.05rem;
+  line-height: 1.4;
+  letter-spacing: -.02em;
+}
+.shared-reference-image img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: min(68vh, 620px);
+  margin: 0 auto;
+  border-radius: 12px;
+  object-fit: contain;
+}
 .shared-consultation-error { display: flex; min-height: 70vh; align-items: center; justify-content: center; }
 .shared-error-card {
   width: 100%;
@@ -112,6 +147,8 @@
   .shared-request-item { padding: 14px; }
   .shared-personal-request { margin-top: 12px; padding: 18px 17px; border-radius: 14px; }
   .shared-personal-request p { font-size: .98rem; }
+  .shared-reference-image { margin-top: 12px; padding: 18px 17px; border-radius: 14px; }
+  .shared-reference-image img { max-height: min(64vh, 480px); border-radius: 10px; }
   .shared-error-card { padding: 34px 22px; border-radius: 18px; }
   .shared-error-card h1 { font-size: 1.4rem; }
 }

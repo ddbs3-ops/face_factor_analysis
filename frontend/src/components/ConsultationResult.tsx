@@ -28,6 +28,9 @@ function ConsultationResult({ guidedAnswers }: ConsultationResultProps) {
   const [shareId, setShareId] = useState("")
   const [personalRequest, setPersonalRequest] = useState("")
   const [isSharing, setIsSharing] = useState(false)
+  const [referenceImage, setReferenceImage] = useState<File | null>(null)
+  const [referenceImagePreview, setReferenceImagePreview] = useState<string | null>(null)
+  const [shareError, setShareError] = useState("")
 
   const shareUrl = shareId
   ? `${window.location.origin}/share/${shareId}`
@@ -36,6 +39,50 @@ function ConsultationResult({ guidedAnswers }: ConsultationResultProps) {
   const API_BASE_URL = import.meta.env.VITE_API_URL
   const GENERATE_API_URL = `${API_BASE_URL}/consultation/generate`
   const SHARE_API_URL = `${API_BASE_URL}/consultation/share`
+
+  function handleReferenceImageChange(event: React.ChangeEvent<HTMLInputElement>,) {
+    const file = event.target.files?.[0]
+
+    if (!file) {
+      return
+    }
+
+    const previewUrl = URL.createObjectURL(file)
+
+    setReferenceImage(file)
+    setReferenceImagePreview(previewUrl)
+  }
+
+  function handleRemoveReferenceImage() {
+    if (referenceImagePreview) {
+      URL.revokeObjectURL(referenceImagePreview)
+    }
+
+    setReferenceImage(null)
+    setReferenceImagePreview(null)
+  }
+
+  async function uploadReferenceImage(file: File) {
+    const formData = new FormData()
+
+    formData.append("image", file)
+
+    const response = await fetch(
+      `${API_BASE_URL}/consultation/reference-image`,
+      {
+        method: "POST",
+        body: formData,
+      },
+    )
+
+    if (!response.ok) {
+      throw new Error("참고 이미지 업로드에 실패했습니다.")
+    }
+
+    const data = await response.json()
+
+    return data.blob_name
+  }
 
   async function fetchConsultation() {
     const response = await fetch(GENERATE_API_URL, {
@@ -61,41 +108,60 @@ function ConsultationResult({ guidedAnswers }: ConsultationResultProps) {
   }
 
   async function shareConsultation() {
-  if (isSharing || shareId) {
-    return
+    if (isSharing || shareId) {
+      return
   }
+    setIsSharing(true)
 
-  setIsSharing(true)
+    try {
+      let referenceImageBlobName: string | null = null
 
-  try {
-    const response = await fetch(SHARE_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        summary: summary,
-        key_requests: keyRequests,
-        consultation_text: consultationText,
-        personal_request: personalRequest || null,
-      }),
-    })
+      if (referenceImage) {
+        referenceImageBlobName =
+          await uploadReferenceImage(referenceImage)
+      }
 
-    if (!response.ok) {
-      throw new Error("상담 공유에 실패했습니다.")
+      const response = await fetch(SHARE_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          summary: summary,
+          key_requests: keyRequests,
+          consultation_text: consultationText,
+          personal_request: personalRequest || null,
+          reference_image_blob_name: referenceImageBlobName,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("상담 공유에 실패했습니다.")
+      }
+
+      const data = await response.json()
+      setShareId(data.share_id)
+
+    } catch (error) {
+      console.error(error)
+      setShareError("상담 공유에 실패했습니다. 다시 시도해주세요.")
+    } finally {
+      setIsSharing(false)
     }
-
-    const data = await response.json()
-    setShareId(data.share_id)
-
-  } finally {
-    setIsSharing(false)
   }
-}
 
 async function copyShareLink() {
   await navigator.clipboard.writeText(shareUrl)
 }
+  useEffect(() => {
+    if (!referenceImagePreview) {
+      return
+    }
+
+    return () => {
+      URL.revokeObjectURL(referenceImagePreview)
+    }
+  }, [referenceImagePreview])
 
   useEffect(() => {
     fetchConsultation()
@@ -128,6 +194,39 @@ async function copyShareLink() {
           </section>
         )}
       </div>
+      
+      <section className="reference-image-section">
+        <h2>참고 헤어사진</h2>
+
+        <p>
+          원하는 헤어스타일이 있다면 사진 1장을 추가해주세요.
+        </p>
+
+        <input
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          onChange={handleReferenceImageChange}
+          disabled={isSharing || !!shareId}
+        />
+
+        {referenceImagePreview && (
+          <div className="reference-image-preview">
+            <img
+              src={referenceImagePreview}
+              alt="참고 헤어스타일 미리보기"
+            />
+
+            <button
+              type="button"
+              onClick={handleRemoveReferenceImage}
+              disabled={isSharing || !!shareId}
+            >
+              사진 삭제
+            </button>
+          </div>
+        )}
+      </section>
+
 
       <section className="consultation-card consultation-personal-card">
         <h2>추가 요청사항</h2>
@@ -150,6 +249,12 @@ async function copyShareLink() {
             ? "공유 링크 생성 완료"
             : "공유하기"}
       </button>
+
+      {shareError && (
+        <p className="consultation-share-error">
+          {shareError}
+        </p>
+      )}
 
       {shareUrl && (
       <section className="consultation-share-card">

@@ -17,7 +17,8 @@ def save_consultation(
     summary: str,
     consultation_text: str,
     key_requests: list[dict],
-    personal_request: str | None = None
+    personal_request: str | None = None,
+    reference_image_blob_name: str | None = None,
 ) -> str:
     conn = sqlite3.connect(DB_PATH)
     conn.execute("PRAGMA foreign_keys = ON")
@@ -31,15 +32,17 @@ def save_consultation(
                 share_id,
                 summary,
                 consultation_text,
-                personal_request
+                personal_request,
+                reference_image_blob_name
             )
-            VALUES (?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?)
             """,
             (
                 share_id,
                 summary,
                 consultation_text,
                 personal_request,
+                reference_image_blob_name
             ),
         )
 
@@ -91,6 +94,7 @@ def get_consultation_by_share_id(share_id: str):
                 summary,
                 consultation_text,
                 personal_request,
+                reference_image_blob_name,
                 created_at,
                 expires_at
             FROM consultations
@@ -121,6 +125,7 @@ def get_consultation_by_share_id(share_id: str):
             "summary": consultation["summary"],
             "consultation_text": consultation["consultation_text"],
             "personal_request": consultation["personal_request"],
+            "reference_image_blob_name": consultation["reference_image_blob_name"],
             "created_at": consultation["created_at"],
             "expires_at": consultation["expires_at"],
             "key_requests": [

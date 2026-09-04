@@ -22,6 +22,7 @@ class ConsultationShareRequest(BaseModel):
     key_requests: list[ConsultationKeyRequest]
     consultation_text: str
     personal_request: str | None = None
+    reference_image_blob_name: str | None = None
 
 
 class ConsultationShareResponse(BaseModel):
