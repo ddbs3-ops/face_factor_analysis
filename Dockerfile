@@ -36,4 +36,4 @@ RUN python -m pip install \
 
 ENV MPLBACKEND=Agg
 
-CMD ["python", "-m", "uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "python -m database.migrations.run && exec python -m uvicorn backend.app.main:app --host 0.0.0.0 --port 8000"]
