@@ -39,7 +39,7 @@
                 {
                     "value": "dont_know",
                     "label": "아직 잘 모르겠어요",
-                    "next": "complete"
+                    "next": "cut_dont_know"
                 }
             ]
         },
@@ -501,12 +501,8 @@
                 }
             ],
             "next": "complete"
-        },
-
-        "complete": {
-            "id": "complete",
-            "type": "complete"
         }
+
 
 
 

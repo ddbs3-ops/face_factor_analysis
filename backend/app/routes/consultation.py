@@ -1,4 +1,11 @@
-from fastapi import APIRouter,HTTPException
+from fastapi import APIRouter,HTTPException, UploadFile, File
+from pathlib import Path
+from uuid import uuid4
+
+from backend.app.services.blob_storage_service import (
+    upload_reference_image,
+)
+
 
 from backend.app.schemas.consultation import (
     ConsultationGenerateRequest,
@@ -24,6 +31,7 @@ from backend.app.services.consultation_flow_service import (
 )
 
 router = APIRouter()
+
 
 
 @router.post(
@@ -96,3 +104,42 @@ def get_shared_consultation(share_id: str):
 @router.get("/consultation/flow")
 def get_consultation_flow():
     return load_consultation_flow()
+
+
+@router.post("/consultation/reference-image")
+async def upload_consultation_reference_image(
+    image: UploadFile = File(...),
+):
+    allowed_content_types = {
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+    }
+
+    if image.content_type not in allowed_content_types:
+        raise HTTPException(
+            status_code=400,
+            detail="JPG, PNG, WEBP 이미지만 업로드할 수 있습니다.",
+        )
+
+    content = await image.read()
+
+    MAX_IMAGE_SIZE = 5 * 1024 * 1024
+
+    if len(content) > MAX_IMAGE_SIZE:
+        raise HTTPException(
+            status_code=400,
+            detail="이미지는 최대 5MB까지 업로드할 수 있습니다.",
+        )
+
+    extension = Path(image.filename or "").suffix.lower()
+
+    blob_name = upload_reference_image(
+        content=content,
+        content_type=image.content_type,
+        extension=extension,
+    )
+
+    return {
+        "blob_name": blob_name,
+    }
