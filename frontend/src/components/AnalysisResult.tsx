@@ -102,7 +102,9 @@ function AnalysisResult({ result, previewUrl }: Props) {
         <p>얼굴의 특징과 이를 보완하는 헤어 방향을 정리했어요.</p>
       </div>
 
+      <div className="result-layout">
       {previewUrl && (
+        <div className="result-photo-panel">
         <div className="result-face-preview">
           <img
             src={previewUrl}
@@ -460,10 +462,9 @@ function AnalysisResult({ result, previewUrl }: Props) {
           </div>
 
         </div>
+        </div>
       )}
 
-
-      <div className="result-grid">
         <section className="result-card" aria-labelledby="features-title">
           <div className="card-title"><span className="step-number" aria-hidden="true">02</span>
             <h3 id="features-title">얼굴 특징</h3></div>
@@ -497,6 +498,9 @@ function AnalysisResult({ result, previewUrl }: Props) {
             })}
           </div>
         </section>
+      </div>
+
+      <div className="result-grid">
         <section className="result-card" aria-labelledby="recommendations-title">
           <div className="card-title"><span className="step-number" aria-hidden="true">03</span>
             <h3 id="recommendations-title">헤어 추천</h3></div>

@@ -1,10 +1,13 @@
 .result-layout {
   display: grid;
-  grid-template-columns: minmax(280px, .9fr) minmax(360px, 1.1fr);
-  gap: 20px;
-  align-items: start;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+  margin-bottom: 20px;
 }
+.result-layout > * { min-width: 0; }
+.result-layout > .result-card:only-child { grid-column: 1 / -1; }
 .result-face-preview { position: relative; width: 100%; max-width: 420px; margin: 0 auto 24px; }
+.result-layout .result-face-preview { margin-bottom: 0; }
 .result-face-preview img { display: block; width: 100%; border-radius: 18px; }
 
 .face-guide-line {
@@ -121,6 +124,7 @@
 .result-header h2 { margin: 0; color: var(--text); font-size: 2rem; letter-spacing: -.03em; }
 .result-header > p:last-child { margin: 8px 0 0; }
 .result-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: start; }
+.result-layout + .result-grid { grid-template-columns: minmax(0, 1fr); }
 .result-card { padding: 28px; }
 .card-title { align-items: center; margin-bottom: 22px; }
 .card-title h3 { font-size: 1.25rem; }
@@ -135,6 +139,25 @@
 .score-positive { color: #276242; background: #e8f4ed; }
 .score-negative { color: #9a3d3d; background: #f9eaea; }
 .score-neutral { color: #665f68; background: #eeecef; }
+
+@media (min-width: 961px) {
+  .result-layout {
+    grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr);
+    align-items: stretch;
+  }
+  .result-photo-panel {
+    padding: 24px;
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    background: var(--surface);
+    box-shadow: 0 16px 50px rgba(52, 36, 46, .06);
+  }
+  .result-layout > .result-card { display: flex; flex-direction: column; padding: 24px; }
+  .result-layout .card-title { margin-bottom: 16px; }
+  .result-layout .result-list { flex: 1; grid-auto-rows: minmax(min-content, 1fr); gap: 10px; }
+  .result-layout .feature-item { display: flex; flex-direction: column; justify-content: center; padding: 12px 16px; overflow-wrap: anywhere; }
+  .result-layout .feature-item h4 { margin-bottom: 6px; }
+}
 
 @media (max-width: 760px) {
   .result-grid { grid-template-columns: 1fr; }
