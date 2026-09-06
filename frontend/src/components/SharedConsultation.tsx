@@ -99,16 +99,19 @@ function SharedConsultation() {
               </div>
               ))}
           </div>
-
-          {consultation.consultation_text && (
-            <section className="shared-personal-request shared-guided-request">
-              <h2>고객 희망사항</h2>
-              <p className="consultation-script">
-                {consultation.consultation_text}
-              </p>
-            </section>
-          )}
         </section>
+
+        {consultation.consultation_text && (
+          <section
+            className="shared-customer-request"
+            aria-labelledby="shared-customer-request-title"
+          >
+            <h2 id="shared-customer-request-title">고객 희망사항</h2>
+            <p className="consultation-script">
+              {consultation.consultation_text}
+            </p>
+          </section>
+        )}
 
         {consultation.reference_image_blob_name && (
           <section className="shared-reference-image">

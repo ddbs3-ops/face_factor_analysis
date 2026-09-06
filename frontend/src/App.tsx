@@ -133,11 +133,14 @@ function App() {
                 <div>
                   <h2 id="upload-title">사진 업로드</h2>
                   <p>얼굴이 정면으로 잘 보이는 밝은 사진을 선택해주세요.</p>
-                  <p>자동으로 표시된 선이 실제 헤어라인과 다르면 위아래로 조정해주세요.</p>
+                  <p className="section-heading-tip">자동으로 표시된 선이 실제 헤어라인과 다르면 위아래로 조정해주세요.</p>
+                  {isMeasuring && (
+                    <p className="measuring-indicator">
+                      <span className="measuring-dot" aria-hidden="true" />
+                      헤어라인을 찾는 중...
+                    </p>
+                  )}
                 </div>
-                {isMeasuring && (
-                  <p>헤어라인을 찾는 중...</p>
-                )}
               </div>
 
               <ImageUpload
@@ -186,6 +189,7 @@ function App() {
 
                   <div className="frontality-warning-actions">
                     <button
+                      className="warning-action-secondary"
                       type="button"
                       onClick={() => {
                         setShowFrontalityWarning(false)
@@ -196,6 +200,7 @@ function App() {
                     </button>
 
                     <button
+                      className="warning-action-primary"
                       type="button"
                       onClick={() => setShowFrontalityWarning(false)}
                     >
