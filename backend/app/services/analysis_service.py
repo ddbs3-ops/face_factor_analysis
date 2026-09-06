@@ -67,7 +67,7 @@ async def analyze_uploaded_image(
             },
 
             "rules": result["rules"],
-            "merged_adjustments": result["merged_adjustments"],
+            "merged_rules": result["merged_rules"],
             "recommendations": result["recommendations"],
             "measurement_stats": result["measurement_stats"],
             "vertical_ratios": {

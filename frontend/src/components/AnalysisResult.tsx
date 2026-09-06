@@ -73,11 +73,6 @@ function getMeasurementStat(
   return null
 }
 
-function scoreLabel(score: number) {
-  if (score > 0) return "추천"
-  if (score < 0) return "비추천"
-  return "보통"
-}
 
 function AnalysisResult({ result, previewUrl }: Props) {
   const [inspectionType, setInspectionType] =
@@ -129,7 +124,8 @@ function AnalysisResult({ result, previewUrl }: Props) {
       jaw_width: ["넓은 턱", "보통", "갸름한 턱"],
       jaw_angle: ["각진 턱", "보통", "완만한 턱"],
       chin_angle: ["둥근 턱끝", "보통", "뾰족한 턱끝"],
-  }
+  } 
+  const [openElement, setOpenElement] = useState<string | null>(null)
 
   const upperPercent = Math.round(result.vertical_ratios.upper * 100)
   const middlePercent = Math.round(result.vertical_ratios.middle * 100)
@@ -703,17 +699,58 @@ function AnalysisResult({ result, previewUrl }: Props) {
 
       <div className="result-grid">
         <section className="result-card" aria-labelledby="recommendations-title">
-          <div className="card-title"><span className="step-number" aria-hidden="true">03</span>
-            <h3 id="recommendations-title">헤어 추천</h3></div>
+          <div className="card-title">
+            <span className="step-number" aria-hidden="true">03</span>
+            <h3 id="recommendations-title">헤어 추천</h3>
+          </div>
+
           <div className="result-list">
             {result.recommendations.map((item) => {
-              const kind = item.score > 0 ? "positive" : item.score < 0 ? "negative" : "neutral"
-              return <article className="recommendation-item" key={item.element}>
-                <p>{item.text}</p>
-                <span className={`score-badge score-${kind}`} aria-label={`추천 점수 ${item.score}`}>
-                  {scoreLabel(item.score)} {item.score > 0 ? "+" : ""}{item.score}
-                </span>
-              </article>
+              const isOpen = openElement === item.element
+
+              return (
+                <article
+                  className="recommendation-item"
+                  key={item.element}
+                >
+                  <button
+                    type="button"
+                    className="recommendation-button"
+                    onClick={() =>
+                      setOpenElement(isOpen ? null : item.element)
+                    }
+                  >
+                    <span>{item.text}</span>
+                    <span aria-hidden="true">
+                      {isOpen ? "▲" : "▼"}
+                    </span>
+                  </button>
+
+                  {isOpen && (
+                    <div className="recommendation-detail">
+                      <div>
+                        <strong>추천에 영향을 준 특징</strong>
+
+                        {item.reasons.map((reason) => (
+                          <p key={`${reason.source}-${reason.feature}`}>
+                            {reason.feature}
+                          </p>
+                        ))}
+                      </div>
+
+                      <div>
+                        <strong>왜 이런 방향인가요?</strong>
+
+                        {item.reasons.map((reason) => (
+                          <p key={`${reason.source}-${reason.reason}`}>
+                            {reason.reason}
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </article>
+              )
             })}
           </div>
         </section>

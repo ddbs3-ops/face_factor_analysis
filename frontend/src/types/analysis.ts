@@ -1,4 +1,20 @@
-export type Adjustments = Record<string, number>
+export type HairElement =
+  | "top_volume"
+  | "side_volume"
+  | "forehead_exposure"
+  | "bangs_length"
+  | "bangs_weight"
+  | "parting_asymmetry"
+  | "curl_strength"
+
+export type EvidenceStrength = "direct"
+
+export type RuleContribution = {
+  element: HairElement
+  value: number
+  reason: string
+  evidence_strength: EvidenceStrength
+}
 
 export type AnalysisRule = {
   source: string
@@ -6,11 +22,41 @@ export type AnalysisRule = {
   dominant_region?: "upper" | "middle" | "lower"
   feature: string
   feature_level: number
-  adjustments: Adjustments
+  contributions: RuleContribution[]
   effect: string
 }
 
-export type Recommendation = { element: string; score: number; text: string }
+export type RecommendationReason = {
+  source: string
+  feature: string
+  feature_level: number
+  contribution: number
+  reason: string
+  evidence_strength: EvidenceStrength
+}
+
+export type Recommendation = {
+  element: HairElement
+  score: number
+  text: string
+  reasons: RecommendationReason[]
+}
+
+export type MergedContribution = {
+  source: string
+  feature: string
+  feature_level: number
+  value: number
+  reason: string
+  evidence_strength: EvidenceStrength
+}
+
+export type MergedRule = {
+  score: number
+  contributions: MergedContribution[]
+}
+
+export type MergedRules = Record<HairElement, MergedRule>
 
 export type VerticalRatios = {
   upper: number
@@ -88,13 +134,10 @@ export type ChinAnglePoints = {
 
 export type AnalysisResult = {
   frontality_result: FrontalityResult
-  
   vertical_ratios: VerticalRatios
   vertical_points: VerticalPoints
-
   jaw_width_ratio: number
   jaw_width_points: JawWidthPoints
-
   measurement_stats: MeasurementStats
 
   jaw_angle_points: {
@@ -103,14 +146,12 @@ export type AnalysisResult = {
   }
 
   chin_angle_points: ChinAnglePoints
-
   height_width_ratio_visual_points: HeightWidthRatioVisualPoints
-  
+
   rules: AnalysisRule[]
-  merged_adjustments: Adjustments
+  merged_rules: MergedRules
   recommendations: Recommendation[]
 }
-
 
 
 export type AnalysisStatus = "idle" | "loading" | "success" | "error"

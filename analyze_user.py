@@ -3,7 +3,7 @@ from core.mediapipe_tasks import (
     create_face_landmarker,
     create_selfie_segmenter,
 )
-from core.hair_rules_v2 import (
+from core.hair_rules_v3 import (
     get_hair_rules,
     merge_hair_rules,
     build_hair_recommendation,
@@ -66,10 +66,10 @@ def analyze_user_image(
         quantized_measurements,
     )
 
-    hair_result = merge_hair_rules(hair_rules)
+    merged_rules = merge_hair_rules(hair_rules)
 
     recommendations = build_hair_recommendation(
-        hair_result["merged_adjustments"]
+        merged_rules
     )
 
     measurement_stats = calculate_measurement_stats(
@@ -97,8 +97,8 @@ def analyze_user_image(
 
         "measurement_stats": measurement_stats,
 
-        "rules": hair_result["rules"],
-        "merged_adjustments": hair_result["merged_adjustments"],
+        "rules": hair_rules,
+        "merged_rules": merged_rules,
         "recommendations": recommendations,
     }
 
