@@ -15,6 +15,10 @@ venv/
 # IDE 설정
 .vscode/
 .idea/
+.claude/settings.local.json
+
+# Node.js 의존성
+node_modules/
 
 # 테스트 이미지 / 개인 이미지
 images/
