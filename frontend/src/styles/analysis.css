@@ -185,6 +185,97 @@
   box-shadow: 0 4px 14px rgba(124, 70, 96, .14);
 }
 
+.feature-scale,
+.vertical-ratio-visual {
+  margin-top: 10px;
+  padding: 0 7px;
+}
+
+.feature-scale-labels {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 10px;
+  color: var(--muted);
+  font-size: .75rem;
+  line-height: 1.5;
+}
+.feature-scale-labels > span:nth-child(2) { text-align: center; }
+.feature-scale-labels > span:last-child { text-align: right; }
+
+.feature-scale-track {
+  position: relative;
+  height: 6px;
+  background: var(--border);
+  border-radius: 999px;
+}
+
+.feature-scale-marker {
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--surface);
+  border-radius: 50%;
+  background: var(--primary);
+  transform: translate(-50%, -50%);
+}
+.vertical-ratio-info {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+.vertical-ratio-info-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.vertical-ratio-info-item > span {
+  color: var(--muted);
+  font-size: .75rem;
+  line-height: 1.5;
+}
+.vertical-ratio-info-item > strong {
+  color: var(--muted);
+  font-size: .9375rem;
+  font-weight: 600;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+}
+.vertical-ratio-info-item.is-largest > span,
+.vertical-ratio-info-item.is-largest > strong {
+  color: var(--primary);
+  font-weight: 700;
+}
+.vertical-ratio-bar {
+  display: flex;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--border);
+}
+
+.vertical-ratio-segment {
+  position: relative;
+  min-width: 0;
+  background: var(--border);
+}
+.vertical-ratio-segment.is-largest {
+  background: var(--primary);
+}
+.vertical-ratio-segment + .vertical-ratio-segment::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 2px;
+  background: var(--surface);
+  content: "";
+}
+
 .results { margin-top: 64px; }
 .result-header { margin-bottom: 24px; }
 .result-header h2 { margin: 0; color: var(--text); font-size: 2rem; letter-spacing: -.03em; }

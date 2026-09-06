@@ -121,6 +121,16 @@ function AnalysisResult({ result, previewUrl }: Props) {
     )
     .filter((rule) => rule !== undefined)
 
+
+  const featureScaleLabels: Partial<
+    Record<FeatureSource, [string, string, string]>
+  > = {
+      face_ratio: ["긴 얼굴", "보통", "둥근 얼굴"],
+      jaw_width: ["넓은 턱", "보통", "갸름한 턱"],
+      jaw_angle: ["각진 턱", "보통", "완만한 턱"],
+      chin_angle: ["둥근 턱끝", "보통", "뾰족한 턱끝"],
+  }
+
   const upperPercent = Math.round(result.vertical_ratios.upper * 100)
   const middlePercent = Math.round(result.vertical_ratios.middle * 100)
   const lowerPercent = Math.round(result.vertical_ratios.lower * 100)
@@ -604,10 +614,85 @@ function AnalysisResult({ result, previewUrl }: Props) {
                 >
                   <h4>{rule.feature}</h4>
 
-                  {stat && (
-                    <p>
-                      내 측정값 {stat.value} · 평균 {stat.mean}
-                    </p>
+                  {rule.source === "vertical_ratio" ? (
+                    <div className="vertical-ratio-visual">
+                      <div className="vertical-ratio-info">
+                        <div
+                          className={`vertical-ratio-info-item${
+                            upperPercent === Math.max(upperPercent, middlePercent, lowerPercent)
+                              ? " is-largest" : ""
+                          }`}
+                          style={{ flex: upperPercent }}
+                        >
+                          <span>상안부</span>
+                          <strong>{upperPercent}%</strong>
+                        </div>
+
+                        <div
+                          className={`vertical-ratio-info-item${
+                            middlePercent === Math.max(upperPercent, middlePercent, lowerPercent)
+                              ? " is-largest" : ""
+                          }`}
+                          style={{ flex: middlePercent }}
+                        >
+                          <span>중안부</span>
+                          <strong>{middlePercent}%</strong>
+                        </div>
+
+                        <div
+                          className={`vertical-ratio-info-item${
+                            lowerPercent === Math.max(upperPercent, middlePercent, lowerPercent)
+                              ? " is-largest" : ""
+                          }`}
+                          style={{ flex: lowerPercent }}
+                        >
+                          <span>하안부</span>
+                          <strong>{lowerPercent}%</strong>
+                        </div>
+                      </div>
+
+                      <div className="vertical-ratio-bar">
+                        <div
+                          className={`vertical-ratio-segment${
+                            upperPercent === Math.max(upperPercent, middlePercent, lowerPercent)
+                              ? " is-largest" : ""
+                          }`}
+                          style={{ flex: upperPercent }}
+                        />
+                        <div
+                          className={`vertical-ratio-segment${
+                            middlePercent === Math.max(upperPercent, middlePercent, lowerPercent)
+                              ? " is-largest" : ""
+                          }`}
+                          style={{ flex: middlePercent }}
+                        />
+                        <div
+                          className={`vertical-ratio-segment${
+                            lowerPercent === Math.max(upperPercent, middlePercent, lowerPercent)
+                              ? " is-largest" : ""
+                          }`}
+                          style={{ flex: lowerPercent }}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    stat &&
+                    featureScaleLabels[rule.source as FeatureSource] && (
+                      <div className="feature-scale">
+                        <div className="feature-scale-labels">
+                          <span>{featureScaleLabels[rule.source as FeatureSource]?.[0]}</span>
+                          <span>{featureScaleLabels[rule.source as FeatureSource]?.[1]}</span>
+                          <span>{featureScaleLabels[rule.source as FeatureSource]?.[2]}</span>
+                        </div>
+
+                        <div className="feature-scale-track">
+                          <div
+                            className="feature-scale-marker"
+                            style={{ left: `${stat.top_percent}%` }}
+                          />
+                        </div>
+                      </div>
+                    )
                   )}
                 </motion.article>
               )
