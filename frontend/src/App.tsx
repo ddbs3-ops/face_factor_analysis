@@ -119,11 +119,11 @@ function App() {
         element = {
           <main className="app-shell">
             <section className="hero" aria-labelledby="page-title">
-              <p className="eyebrow">FACE FACTOR ANALYSIS</p>
-              <h1 id="page-title">내 얼굴에 어울리는 헤어 방향 찾기</h1>
+              <p className="eyebrow">모답 · MODAP</p>
+              <h1 id="page-title">나만의 헤어 스타일 찾기</h1>
               <p className="hero-description">
-                정면 사진 한 장으로 얼굴의 비율과 특징을 분석하고, 균형을 살리는
-                헤어스타일 방향을 확인해보세요.
+                얼굴의 비율과 윤곽을 분석해
+                나에게 어울리는 헤어스타일과 그 이유를 알려드려요.
               </p>
             </section>
 
@@ -133,7 +133,7 @@ function App() {
                 <div>
                   <h2 id="upload-title">사진 업로드</h2>
                   <p>얼굴이 정면으로 잘 보이는 밝은 사진을 선택해주세요.</p>
-                  <p className="section-heading-tip">자동으로 표시된 선이 실제 헤어라인과 다르면 위아래로 조정해주세요.</p>
+                  <p>🔒 분석용 얼굴 사진은 처리 후 삭제하며, 별도로 보관하지 않아요.</p>
                   {isMeasuring && (
                     <p className="measuring-indicator">
                       <span className="measuring-dot" aria-hidden="true" />
@@ -152,6 +152,10 @@ function App() {
                 onHairlineChange={setHairlineYRatio}
                 onFileChange={handleFileChange}
               />
+
+              { selectedFile && !isMeasuring && hairlineYRatio !== null && (
+                <p className="hairline-guide-tip"> 헤어라인이 실제 위치와 다르면 선을 위아래로 드래그해 맞춰주세요. </p>
+              )}
 
               <button className="analyze-button" type="button"
                 disabled={!selectedFile || isLoading || isMeasuring || hairlineYRatio === null} 

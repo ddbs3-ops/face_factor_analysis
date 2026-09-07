@@ -6,7 +6,7 @@
   padding: 72px 0 96px;
 }
 
-.hero { max-width: 720px; margin-bottom: 48px; }
+.hero { max-width: 1000px; margin-bottom: 48px; }
 .eyebrow {
   margin: 0 0 12px;
   color: var(--primary);
@@ -25,7 +25,7 @@
   color: var(--muted);
   line-height: 1.7;
 }
-.hero-description { max-width: 620px; margin: 20px 0 0; font-size: 1.05rem; }
+.hero-description { max-width: 1000px; margin: 20px 0 0; font-size: 1.2rem; }
 
 .upload-card, .result-card {
   border: 1px solid var(--border);
@@ -38,8 +38,20 @@
 .section-heading { margin-bottom: 26px; }
 .section-heading h2, .card-title h3 { margin: 0; color: var(--text); }
 .section-heading h2 { font-size: 1.35rem; letter-spacing: -.02em; }
-.section-heading p { margin: 6px 0 0; font-size: .95rem; }
-.section-heading-tip { color: var(--muted); font-size: .88rem !important; }
+.section-heading p { margin: 6px 0 0; font-size: .1.2rem; }
+.hairline-guide-tip {
+  margin: 16px 0 0;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--primary);
+  border-radius: 8px;
+  color: var(--primary-dark);
+  background: var(--primary-soft);
+  font-size: 1.05rem;
+  font-weight: 500;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
 .measuring-indicator {
   display: flex;
   align-items: center;

@@ -566,9 +566,11 @@ function AnalysisResult({ result, previewUrl }: Props) {
               턱끝각
             </button>
           </div>
+          <p className="feature-controls-hint">
+            위 항목을 선택하면 해당 얼굴 특징을 자세히 볼 수 있어요.
+          </p>
         </div>
       )}
-
         <section className="result-card" aria-labelledby="features-title">
           <div className="card-title"><span className="step-number" aria-hidden="true">02</span>
             <h3 id="features-title">얼굴 특징</h3></div>

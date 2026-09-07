@@ -1,6 +1,6 @@
 .image-upload {
   display: grid;
-  grid-template-columns: minmax(260px, .85fr) 1fr;
+  grid-template-columns: minmax(260px, 1.5fr) 1fr;
   gap: 28px;
   align-items: center;
 }
