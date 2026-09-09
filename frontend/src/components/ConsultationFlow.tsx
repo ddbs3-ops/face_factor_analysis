@@ -1,26 +1,11 @@
 import { useEffect, useRef, useState } from "react"
-
-type QuestionOption = {
-  value: string
-  label: string
-  next?: string
-}
-
-type QuestionNode = {
-  id: string
-  type: "single" | "multi" | "text" | "complete"
-  text?: string
-  options?: QuestionOption[]
-  next?: string
-}
-
-type FlowDefinition = {
-  version: string
-  root: string
-  nodes: Record<string, QuestionNode>
-}
-
-type AnswerValue = string | string[]
+import {
+  canSubmitMulti,
+  clearNodeAnswers,
+  collectMultiAnswers,
+  getSelectedCustomInputs,
+} from "../utils/consultationFlow"
+import type { AnswerValue, FlowDefinition } from "../utils/consultationFlow"
 
 type ConsultationFlowProps = {
   onComplete: (answers: Record<string, AnswerValue>) => void
@@ -58,7 +43,7 @@ function ConsultationFlow({ onComplete }: ConsultationFlowProps) {
       .catch((error) => {
         console.error(error)
       })
-  }, [])
+  }, [FLOW_API_URL])
 
   useEffect(() => {
     if (history.length > 1) {
@@ -69,32 +54,34 @@ function ConsultationFlow({ onComplete }: ConsultationFlowProps) {
     }
   }, [history.length, latestQuestionId])
 
-  function handleSingleAnswer(
-    nodeId: string,
-    value: string,
-    nextId?: string,
-  ) {
+  function prepareQuestion(nodeId: string) {
     if (!flow) return
 
     const nodeIndex = history.indexOf(nodeId)
 
     if (nodeIndex === -1) return
 
-    // 현재 질문까지의 경로만 남김
     const newHistory = history.slice(0, nodeIndex + 1)
-
-    // 기존 answers 복사
-    const newAnswers = { ...answers }
-
-    // 현재 질문보다 뒤에 있던 답변들은 삭제
     const removedNodeIds = history.slice(nodeIndex + 1)
+    const newAnswers = clearNodeAnswers(answers, flow.nodes, [nodeId, ...removedNodeIds])
 
-    removedNodeIds.forEach((oldNodeId) => {
-      delete newAnswers[oldNodeId]
-    })
+    // Keep the current question's drafts for reselection; discard abandoned paths.
+    setTextInputs((prev) => clearNodeAnswers(prev, flow.nodes, removedNodeIds))
+    setMultiInputs((prev) => clearNodeAnswers(prev, flow.nodes, removedNodeIds))
+    setAnswers(newAnswers)
+    setHistory(newHistory)
+    return { newHistory, newAnswers }
+  }
 
-    // 현재 질문의 새 답변 저장
-    newAnswers[nodeId] = value
+  function submitAnswer(
+    nodeId: string,
+    submittedAnswers: Record<string, AnswerValue>,
+    nextId?: string,
+  ) {
+    const prepared = prepareQuestion(nodeId)
+    if (!prepared) return
+    const newAnswers = { ...prepared.newAnswers, ...submittedAnswers }
+    const newHistory = [...prepared.newHistory]
 
     // complete가 아니면 다음 질문 추가
     if (nextId === "complete") {
@@ -112,42 +99,18 @@ function ConsultationFlow({ onComplete }: ConsultationFlowProps) {
     setHistory(newHistory)
   }
 
+  function handleSingleAnswer(nodeId: string, value: string, nextId?: string) {
+    submitAnswer(nodeId, { [nodeId]: value }, nextId)
+  }
+
   function handleTextAnswer(nodeId: string, nextId?: string) {
-    if (!flow) return
-
     const value = textInputs[nodeId]?.trim()
-
     if (!value) return
-
-    const nodeIndex = history.indexOf(nodeId)
-
-    if (nodeIndex === -1) return
-
-    const newHistory = history.slice(0, nodeIndex + 1)
-    const newAnswers = { ...answers }
-
-    history.slice(nodeIndex + 1).forEach((oldNodeId) => {
-      delete newAnswers[oldNodeId]
-    })
-
-    newAnswers[nodeId] = value
-
-    if (nextId === "complete") {
-      setAnswers(newAnswers)
-      setHistory(newHistory)
-      onComplete(newAnswers)
-      return
-    }
-
-    if (nextId) {
-      newHistory.push(nextId)
-    }
-
-    setAnswers(newAnswers)
-    setHistory(newHistory)
+    submitAnswer(nodeId, { [nodeId]: value }, nextId)
   }
 
   function toggleMultiAnswer(nodeId: string, value: string) {
+    if (!prepareQuestion(nodeId)) return
     setMultiInputs((prev) => {
       const currentValues = prev[nodeId] ?? []
 
@@ -165,38 +128,16 @@ function ConsultationFlow({ onComplete }: ConsultationFlowProps) {
   }
 
   function handleMultiAnswer(nodeId: string, nextId?: string) {
-    if (!flow) return
-
+    const node = flow?.nodes[nodeId]
+    if (!node) return
     const values = multiInputs[nodeId] ?? []
+    if (!canSubmitMulti(node, values, textInputs)) return
+    submitAnswer(nodeId, collectMultiAnswers(node, values, textInputs), nextId)
+  }
 
-    if (values.length === 0) return
-
-    const nodeIndex = history.indexOf(nodeId)
-
-    if (nodeIndex === -1) return
-
-    const newHistory = history.slice(0, nodeIndex + 1)
-    const newAnswers = { ...answers }
-
-    history.slice(nodeIndex + 1).forEach((oldNodeId) => {
-      delete newAnswers[oldNodeId]
-    })
-
-    newAnswers[nodeId] = values
-
-    if (nextId === "complete") {
-      setAnswers(newAnswers)
-      setHistory(newHistory)
-      onComplete(newAnswers)
-      return
-    }
-
-    if (nextId) {
-      newHistory.push(nextId)
-    }
-
-    setAnswers(newAnswers)
-    setHistory(newHistory)
+  function handleCustomInput(nodeId: string, answerKey: string, value: string) {
+    if (!prepareQuestion(nodeId)) return
+    setTextInputs((prev) => ({ ...prev, [answerKey]: value }))
   }
 
   if (!flow) {
@@ -300,9 +241,31 @@ function ConsultationFlow({ onComplete }: ConsultationFlowProps) {
                   })}
                 </div>
 
+                {getSelectedCustomInputs(node, multiInputs[node.id] ?? []).map((input) => {
+                  const inputId = `custom-input-${node.id}-${input.answer_key}`
+                  return (
+                    <div className="consultation-custom-input" key={input.answer_key}>
+                      <label htmlFor={inputId}>
+                        {input.label}
+                        {input.required && <span className="consultation-input-required"> (필수)</span>}
+                      </label>
+                      <input
+                        id={inputId}
+                        className="consultation-answer-input"
+                        type="text"
+                        placeholder={input.placeholder}
+                        required={input.required}
+                        value={textInputs[input.answer_key] ?? ""}
+                        onChange={(event) => handleCustomInput(node.id, input.answer_key, event.target.value)}
+                      />
+                    </div>
+                  )
+                })}
+
                 <button
                   className="consultation-next-button"
                   type="button"
+                  disabled={!canSubmitMulti(node, multiInputs[node.id] ?? [], textInputs)}
                   onClick={() =>
                     handleMultiAnswer(
                       node.id,

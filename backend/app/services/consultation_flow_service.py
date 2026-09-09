@@ -35,6 +35,16 @@ def resolve_guided_answers(
 
         options = node.get("options", [])
 
+        def resolve_option_label(option):
+            custom_input = option.get("custom_input")
+            if custom_input:
+                answer_key = custom_input["answer_key"]
+                custom_value = answers.get(answer_key)
+                if isinstance(custom_value, str) and custom_value.strip():
+                    resolved_answers[answer_key] = custom_value.strip()
+                    return custom_value.strip()
+            return option["label"]
+
         # single
         if isinstance(answer, str):
             matched_option = next(
@@ -47,12 +57,12 @@ def resolve_guided_answers(
             )
 
             if matched_option:
-                resolved_answers[node_id] = matched_option["label"]
+                resolved_answers[node_id] = resolve_option_label(matched_option)
 
         # multi
         elif isinstance(answer, list):
             labels = [
-                option["label"]
+                resolve_option_label(option)
                 for option in options
                 if option["value"] in answer
             ]
@@ -147,6 +157,13 @@ def build_guided_consultation_sentences(
     if styling_method:
         sentences.append(
             f"평소에는 {styling_method}"
+        )
+
+    tools = answers.get("cut_styling_tools")
+
+    if isinstance(tools, list) and tools:
+        sentences.append(
+            f"주로 사용하는 도구는 {', '.join(tools)}예요."
         )
 
     products = answers.get("cut_styling_products")

@@ -110,8 +110,12 @@
   cursor: pointer;
   transition: background 160ms ease, transform 160ms ease;
 }
-.consultation-next-button:hover { background: var(--primary-dark); transform: translateY(-1px); }
+.consultation-next-button:hover:not(:disabled) { background: var(--primary-dark); transform: translateY(-1px); }
+.consultation-next-button:disabled { opacity: .45; cursor: not-allowed; }
 .consultation-multi-answer > .consultation-next-button { display: flex; margin: 18px 0 0 auto; align-items: center; justify-content: center; }
+.consultation-custom-input { display: grid; gap: 8px; margin-top: 16px; }
+.consultation-custom-input label { color: var(--text); font-size: .9rem; font-weight: 650; }
+.consultation-input-required { color: var(--muted); font-size: .8rem; font-weight: 400; }
 
 /* Consultation mode selection */
 .consultation-mode-backdrop { padding: 20px; }
