@@ -10,6 +10,7 @@ export type QuestionOption = {
   label: string
   next?: string
   custom_input?: CustomInput
+  exclusive?: boolean
 }
 
 export type QuestionNode = {
@@ -50,6 +51,17 @@ export function getSelectedCustomInputs(node: QuestionNode, selected: string[]):
   return (node.options ?? []).flatMap((option) =>
     selected.includes(option.value) && option.custom_input ? [option.custom_input] : [],
   )
+}
+
+export function toggleMultiSelection(node: QuestionNode, selected: string[], value: string): string[] {
+  if (selected.includes(value)) return selected.filter((item) => item !== value)
+  const option = node.options?.find((item) => item.value === value)
+  if (!option) return selected
+  if (option.exclusive) return [value]
+  return [
+    ...selected.filter((item) => !node.options?.find((candidate) => candidate.value === item)?.exclusive),
+    value,
+  ]
 }
 
 export function canSubmitMulti(

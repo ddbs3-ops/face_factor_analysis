@@ -4,6 +4,7 @@ import {
   clearNodeAnswers,
   collectMultiAnswers,
   getSelectedCustomInputs,
+  toggleMultiSelection,
 } from "../utils/consultationFlow"
 import type { AnswerValue, FlowDefinition } from "../utils/consultationFlow"
 
@@ -110,19 +111,15 @@ function ConsultationFlow({ onComplete }: ConsultationFlowProps) {
   }
 
   function toggleMultiAnswer(nodeId: string, value: string) {
+    const node = flow?.nodes[nodeId]
+    if (!node) return
     if (!prepareQuestion(nodeId)) return
     setMultiInputs((prev) => {
       const currentValues = prev[nodeId] ?? []
 
-      const exists = currentValues.includes(value)
-
-      const nextValues = exists
-        ? currentValues.filter((item) => item !== value)
-        : [...currentValues, value]
-
       return {
         ...prev,
-        [nodeId]: nextValues,
+        [nodeId]: toggleMultiSelection(node, currentValues, value),
       }
     })
   }

@@ -16,7 +16,346 @@
                 {
                     "value": "perm",
                     "label": "펌",
-                    "next": "complete"
+                    "next": "perm_style_knowledge"
+                }
+            ]
+        },
+
+        "perm_style_knowledge": {
+            "id": "perm_style_knowledge",
+            "type": "single",
+            "text": "원하는 펌 스타일이 정해져 있나요?",
+            "options": [
+                {
+                    "value": "know_name",
+                    "label": "네, 원하는 스타일의 이름을 알고 있어요",
+                    "next": "perm_style_select"
+                },
+                {
+                    "value": "know_feeling",
+                    "label": "이름은 모르지만 원하는 느낌은 있어요",
+                    "next": "perm_part_preference"
+                },
+                {
+                    "value": "dont_know",
+                    "label": "잘 모르겠어요",
+                    "next": "perm_avoid_styles_undecided"
+                }
+            ]
+        },
+
+        "perm_style_select": {
+            "id": "perm_style_select",
+            "type": "single",
+            "text": "원하는 펌 스타일을 선택해 주세요",
+            "options": [
+                {
+                    "value": "other",
+                    "label": "여기에 없어요",
+                    "next": "perm_style_custom"
+                },
+                {
+                    "value": "hippie_perm",
+                    "label": "히피펌",
+                    "next": "perm_part_preference"
+                },
+                {
+                    "value": "volume_perm",
+                    "label": "볼륨펌",
+                    "next": "perm_part_preference"
+                },
+                {
+                    "value": "shadow_perm",
+                    "label": "쉐도우펌",
+                    "next": "perm_curl_intensity"
+                },
+                {
+                    "value": "leaf_perm",
+                    "label": "리프펌",
+                    "next": "perm_curl_intensity"
+                },
+                {
+                    "value": "gail_perm",
+                    "label": "가일펌",
+                    "next": "perm_curl_intensity"
+                },
+                {
+                    "value": "aez_perm",
+                    "label": "애즈펌",
+                    "next": "perm_curl_intensity"
+                },
+                {
+                    "value": "parted_perm",
+                    "label": "가르마펌",
+                    "next": "perm_curl_intensity"
+                }
+            ]
+        },
+        "perm_style_custom": {
+            "id": "perm_style_custom",
+            "type": "text",
+            "text": "원하는 펌 스타일의 이름을 입력해 주세요",
+            "next": "perm_part_preference"
+        },
+        "perm_part_preference": {
+            "id": "perm_part_preference",
+            "type": "single",
+            "text": "가르마는 어떻게 하고 싶으세요?",
+            "options": [
+                {
+                    "value": "parted",
+                    "label": "가르마를 타고 싶어요",
+                    "next": "perm_curl_intensity"
+                },
+                {
+                    "value": "no_part",
+                    "label": "가르마 없이 내린 머리를 하고 싶어요",
+                    "next": "perm_curl_intensity"
+                },
+                {
+                    "value": "dont_know",
+                    "label": "잘 모르겠어요",
+                    "next": "perm_curl_intensity"
+                }
+            ]
+        },
+
+        "perm_curl_intensity": {
+            "id": "perm_curl_intensity",
+            "type": "single",
+            "text": "펌 느낌은 어느 정도가 좋으세요?",
+            "options": [
+                {
+                    "value": "subtle",
+                    "label": "거의 자연스럽게",
+                    "next": "perm_down_perm"
+                },
+                {
+                    "value": "natural",
+                    "label": "펌한 느낌이 자연스럽게 보이게",
+                    "next": "perm_down_perm"
+                },
+                {
+                    "value": "defined",
+                    "label": "컬이 확실히 보이게",
+                    "next": "perm_down_perm"
+                }
+            ]
+        },
+        "perm_down_perm": {
+            "id": "perm_down_perm",
+            "type": "single",
+            "text": "다운펌도 함께 고려하시나요?",
+            "options": [
+                {
+                    "value": "stylist_recommendation",
+                    "label": "다운펌이 필요할지는 미용사님과 상의하고 싶어요",
+                    "next": "perm_avoid_styles"
+                },
+                {
+                    "value": "yes",
+                    "label": "다운펌도 함께 하고 싶어요",
+                    "next": "perm_avoid_styles"
+                },
+                {
+                    "value": "no",
+                    "label": "다운펌은 하지 않을게요",
+                    "next": "perm_avoid_styles"
+                }
+            ]
+        },
+
+        "perm_avoid_styles": {
+            "id": "perm_avoid_styles",
+            "type": "multi",
+            "text": "피하고 싶은 느낌을 선택해 주세요 (여러 개 선택 가능)",
+            "options": [
+                {
+                    "value": "other",
+                    "label": "직접 입력",
+                    "custom_input": {
+                        "answer_key": "perm_avoid_styles_custom",
+                        "label": "피하고 싶은 느낌",
+                        "placeholder": "피하고 싶은 스타일이나 느낌을 입력해 주세요",
+                        "required": true
+                    }
+                },
+                {
+                    "value": "high_maintenance",
+                    "label": "손질이 너무 어려운 스타일"
+                },
+                {
+                    "value": "overcurled_bangs",
+                    "label": "앞머리가 너무 말리는 것"
+                },
+                {
+                    "value": "strong_curls",
+                    "label": "컬이 너무 강하게 나오는 것"
+                },
+                {
+                    "value": "too_bulky",
+                    "label": "너무 부풀어 보이는 것"
+                },
+                {
+                    "value": "sides_stick_out",
+                    "label": "옆머리가 너무 뜨는 것"
+                },
+                {
+                    "value": "long_lasting_strong_perm",
+                    "label": "너무 오래 유지되는 강한 펌 느낌"
+                }
+            ],
+            "next": "styling_method"
+        },
+
+        "perm_avoid_styles_undecided": {
+            "id": "perm_avoid_styles_undecided",
+            "type": "multi",
+            "text": "어떤 느낌은 피하고 싶으세요? (여러 개 선택 가능)",
+            "options": [
+                {
+                    "value": "strong_curls",
+                    "label": "컬이 너무 강한 것"
+                },
+                {
+                    "value": "too_bulky",
+                    "label": "너무 부해 보이는 것"
+                },
+                {
+                    "value": "overcurled_bangs",
+                    "label": "앞머리가 많이 말리는 것"
+                },
+                {
+                    "value": "overstyled",
+                    "label": "너무 꾸민 느낌"
+                },
+                {
+                    "value": "high_maintenance",
+                    "label": "손질이 어려운 것"
+                },
+                {
+                    "value": "none",
+                    "label": "특별히 없음",
+                    "exclusive": true
+                },
+                {
+                    "value": "other",
+                    "label": "직접 입력",
+                    "custom_input": {
+                        "answer_key": "perm_avoid_styles_undecided_custom",
+                        "label": "피하고 싶은 느낌",
+                        "placeholder": "피하고 싶은 스타일이나 느낌을 입력해 주세요",
+                        "required": true
+                    }
+                }
+            ],
+            "next": "perm_reason"
+        },
+        "perm_reason": {
+            "id": "perm_reason",
+            "type": "single",
+            "text": "펌을 하고 싶은 가장 큰 이유는 뭔가요?",
+            "options": [
+                {
+                    "value": "natural_movement",
+                    "label": "머리가 너무 직모라 자연스러운 움직임을 주고 싶어요",
+                    "next": "perm_part_preference_undecided"
+                },
+                {
+                    "value": "add_volume",
+                    "label": "볼륨이 부족해서 볼륨을 살리고 싶어요",
+                    "next": "perm_part_preference_undecided"
+                },
+                {
+                    "value": "shape_bangs",
+                    "label": "가르마나 앞머리가 잘 잡혔으면 좋겠어요",
+                    "next": "perm_part_preference_undecided"
+                },
+                {
+                    "value": "easy_styling",
+                    "label": "손질을 더 쉽게 하고 싶어요",
+                    "next": "perm_part_preference_undecided"
+                },
+                {
+                    "value": "change_mood",
+                    "label": "분위기를 확 바꾸고 싶어요",
+                    "next": "perm_part_preference_undecided"
+                },
+                {
+                    "value": "stylist_recommendation",
+                    "label": "저한테 어울리는 방향으로 추천받고 싶어요",
+                    "next": "perm_part_preference_undecided"
+                }
+            ]
+        },
+        "perm_part_preference_undecided": {
+            "id": "perm_part_preference_undecided",
+            "type": "single",
+            "text": "가르마가 있는 스타일은 괜찮으세요?",
+            "options": [
+                {
+                    "value": "yes",
+                    "label": "좋아요",
+                    "next": "perm_down_perm_undecided"
+                },
+                {
+                    "value": "no",
+                    "label": "없는 쪽이 좋아요",
+                    "next": "perm_down_perm_undecided"
+                },
+                {
+                    "value": "either",
+                    "label": "상관없어요",
+                    "next": "perm_down_perm_undecided"
+                }
+            ]
+        },
+        "perm_down_perm_undecided": {
+            "id": "perm_down_perm_undecided",
+            "type": "single",
+            "text": "다운펌도 함께 고려하시나요?",
+            "options": [
+                {
+                    "value": "yes",
+                    "label": "네",
+                    "next": "perm_change_level"
+                },
+                {
+                    "value": "no",
+                    "label": "아니요",
+                    "next": "perm_change_level"
+                },
+                {
+                    "value": "stylist_recommendation",
+                    "label": "미용사님 추천에 맡길게요",
+                    "next": "perm_change_level"
+                }
+            ]
+        },
+        "perm_change_level": {
+            "id": "perm_change_level",
+            "type": "single",
+            "text": "지금 머리에서 어느 정도까지 바뀌어도 괜찮으세요?",
+            "options": [
+                {
+                    "value": "subtle",
+                    "label": "거의 티 나지 않게 자연스럽게",
+                    "next": "styling_method"
+                },
+                {
+                    "value": "small_change",
+                    "label": "조금은 새로운 느낌이 나게",
+                    "next": "styling_method"
+                },
+                {
+                    "value": "defined",
+                    "label": "펌한 느낌이 확실히 나게",
+                    "next": "styling_method"
+                },
+                {
+                    "value": "big_change",
+                    "label": "크게 바뀌어도 괜찮아요",
+                    "next": "styling_method"
                 }
             ]
         },
@@ -40,6 +379,184 @@
                     "value": "dont_know",
                     "label": "아직 잘 모르겠어요",
                     "next": "cut_dont_know"
+                }
+            ]
+        },
+        "cut_dont_know": {
+            "id": "cut_dont_know",
+            "type": "single",
+            "text": "현재 머리에서 가장 불편한 점이 있나요?",
+            "options": [
+                {
+                    "value": "bangs_uncomfortable",
+                    "label": "앞머리가 답답해요",
+                    "next": "cut_avoid_styles"
+                },
+                {
+                    "value": "sides_stick_out",
+                    "label": "옆머리가 너무 떠요",
+                    "next": "cut_avoid_styles"
+                },
+                {
+                    "value": "too_bulky",
+                    "label": "머리가 너무 부해 보여요",
+                    "next": "cut_avoid_styles"
+                },
+                {
+                    "value": "face_looks_long_or_wide",
+                    "label": "얼굴이 길거나 넓어 보여요",
+                    "next": "cut_avoid_styles"
+                },
+                {
+                    "value": "hard_to_style",
+                    "label": "손질이 어려워요",
+                    "next": "cut_avoid_styles"
+                },
+                {
+                    "value": "want_change",
+                    "label": "지금 머리가 너무 평범해서 변화를 주고 싶어요",
+                    "next": "cut_avoid_styles"
+                },
+                {
+                    "value": "dont_know",
+                    "label": "딱히 없어요",
+                    "next": "cut_avoid_styles"
+                }
+            ]
+        },
+        "cut_avoid_styles": {
+            "id": "cut_avoid_styles",
+            "type": "multi",
+            "text": "이런 느낌은 피하고 싶어요 (여러 개 선택 가능)",
+            "options": [
+                {
+                    "value": "too_short",
+                    "label": "너무 짧은 머리"
+                },
+                {
+                    "value": "exposed_forehead",
+                    "label": "이마가 많이 보이는 스타일"
+                },
+                {
+                    "value": "heavy_bangs",
+                    "label": "너무 무거운 앞머리"
+                },
+                {
+                    "value": "light_bangs",
+                    "label": "너무 가벼운 앞머리"
+                },
+                {
+                    "value": "shaved_sides",
+                    "label": "옆머리가 짧게 밀려 두피가 보이는 스타일"
+                },
+                {
+                    "value": "high_maintenance",
+                    "label": "손질이 많이 필요한 스타일"
+                },
+                {
+                    "value": "too_flashy",
+                    "label": "너무 튀는 스타일"
+                },
+                {
+                    "value": "other",
+                    "label": "직접 입력",
+                    "custom_input": {
+                        "answer_key": "cut_avoid_styles_custom",
+                        "label": "피하고 싶은 느낌",
+                        "placeholder": "피하고 싶은 스타일이나 느낌을 입력해 주세요",
+                        "required": true
+                    }
+                }
+            ],
+            "next": "cut_growing_hair_undecided"
+        },
+        "cut_growing_hair_undecided": {
+            "id": "cut_growing_hair_undecided",
+            "type": "single",
+            "text": "현재 머리를 기르는 중인가요?",
+            "options": [
+                {
+                    "value": "yes",
+                    "label": "네, 머리를 기르고 있어요",
+                    "next": "cut_hair_considerations"
+                },
+                {
+                    "value": "no",
+                    "label": "딱히 기르고 있지는 않아요",
+                    "next": "cut_hair_considerations"
+                }
+            ]
+        },
+        "cut_hair_considerations": {
+            "id": "cut_hair_considerations",
+            "type": "multi",
+            "text": "미용사님께 제 머리의 어떤 특징을 꼭 고려해 달라고 하고 싶으신가요? (여러 개 선택 가능)",
+            "options": [
+                {
+                    "value": "head_shape",
+                    "label": "두상"
+                },
+                {
+                    "value": "hair_lift",
+                    "label": "모발이 뜨는 정도"
+                },
+                {
+                    "value": "hair_texture",
+                    "label": "직모 / 곱슬 등 모질"
+                },
+                {
+                    "value": "hair_density",
+                    "label": "머리숱"
+                },
+                {
+                    "value": "hair_thickness",
+                    "label": "모발의 굵기"
+                },
+                {
+                    "value": "growth_direction",
+                    "label": "가마, 모발 방향"
+                },
+                {
+                    "value": "hairline",
+                    "label": "헤어라인 / M자 / 이마 라인"
+                },
+                {
+                    "value": "none",
+                    "label": "특별히 없어요",
+                    "exclusive": true
+                },
+                {
+                    "value": "other",
+                    "label": "직접 입력",
+                    "custom_input": {
+                        "answer_key": "cut_hair_considerations_custom",
+                        "label": "고려해 주셨으면 하는 특징",
+                        "placeholder": "미용사님께 전달할 특징을 입력해주세요",
+                        "required": true
+                    }
+                }
+            ],
+            "next": "cut_change_level"
+        },
+        "cut_change_level": {
+            "id": "cut_change_level",
+            "type": "single",
+            "text": "변화는 어느 정도까지 괜찮으세요?",
+            "options": [
+                {
+                    "value": "big_change",
+                    "label": "지금과 확실히 다른 스타일도 괜찮아요",
+                    "next": "styling_method"
+                },
+                {
+                    "value": "keep_current",
+                    "label": "지금 머리에서 크게 바꾸고 싶지 않아요",
+                    "next": "styling_method"
+                },
+                {
+                    "value": "small_change",
+                    "label": "지금 스타일에서 조금 새로운 느낌을 주는 정도는 괜찮아요",
+                    "next": "styling_method"
                 }
             ]
         },
@@ -307,17 +824,17 @@
             "options": [
                 {
                 "value": "stylist_recommendation",
-                "label": "미용사님에게 추천 받을래요",
+                "label": "다운펌이 필요할지는 미용사님과 상의하고 싶어요",
                 "next": "cut_back_length_style"
                 },
                 {
                 "value": "yes",
-                "label": "다운펌 할게요",
+                "label": "다운펌도 함께 하고 싶어요",
                 "next": "cut_back_length_style"
                 },
                 {
                 "value": "no",
-                "label": "다운펌 안 할게요",
+                "label": "다운펌은 하지 않을게요",
                 "next": "cut_back_length_style"
                 }
             ]
@@ -349,12 +866,12 @@
                 {
                 "value": "curved_toward_ears",
                 "label": "귀 쪽으로 자연스럽게 말리는 스타일",
-                "next": "cut_styling_method"
+                "next": "styling_method"
                 },
                 {
                 "value": "long_down_perm",
                 "label": "길게 내려서 다운펌하는 스타일",
-                "next": "cut_styling_method"
+                "next": "styling_method"
                 }
             ]
         },
@@ -366,13 +883,13 @@
             "options": [
                 {
                 "value": "match_side_length",
-                "label": "옆머리와 같은 길이로 정리",
-                "next": "cut_styling_method"
+                "label": "옆머리와 길이를 맞춘 스타일",
+                "next": "styling_method"
                 },
                 {
                 "value": "fade",
                 "label": "페이드 스타일",
-                "next": "cut_styling_method"
+                "next": "styling_method"
                 }
             ]
         },
@@ -403,18 +920,18 @@
                 {
                 "value": "shaved",
                 "label": "가르마 라인을 굵게 파주세요",
-                "next": "cut_styling_method"
+                "next": "styling_method"
                 },
                 {
                 "value": "not_shaved",
                 "label": "가르마 라인은 파지 말아주세요",
-                "next": "cut_styling_method"
+                "next": "styling_method"
                 }
             ]
         },
 
-        "cut_styling_method": {
-            "id": "cut_styling_method",
+        "styling_method": {
+            "id": "styling_method",
             "type": "single",
             "text": "평소에는 머리를 어떻게 스타일링하시나요?",
             "options": [
@@ -430,19 +947,19 @@
                 },
                 {
                 "value": "blow_dry_and_product",
-                "label": "드라이 + 제품까지 사용해요",
-                "next": "cut_styling_products"
+                "label": "드라이로 모양을 잡고 헤어 제품도 사용해요",
+                "next": "styling_products"
                 },
                 {
                 "value": "active_styling",
                 "label": "고데기나 여러 제품을 써서 적극적으로 스타일링해요",
-                "next": "cut_styling_tools"
+                "next": "styling_tools"
                 }
             ]
             },
 
-            "cut_styling_tools": {
-            "id": "cut_styling_tools",
+            "styling_tools": {
+            "id": "styling_tools",
             "type": "multi",
             "text": "평소 어떤 스타일링 도구를 사용하시나요?",
             "options": [
@@ -466,18 +983,18 @@
                 "value": "other",
                 "label": "기타",
                 "custom_input": {
-                    "answer_key": "cut_styling_tools_custom",
+                    "answer_key": "styling_tools_custom",
                     "label": "기타 도구",
                     "placeholder": "사용하는 도구를 입력해주세요",
                     "required": true
                 }
                 }
             ],
-            "next": "cut_styling_products"
+            "next": "styling_products"
             },
 
-            "cut_styling_products": {
-            "id": "cut_styling_products",
+            "styling_products": {
+            "id": "styling_products",
             "type": "multi",
             "text": "평소 어떤 스타일링 제품을 사용하시나요?",
             "options": [
@@ -505,7 +1022,7 @@
                 "value": "other",
                 "label": "기타",
                 "custom_input": {
-                    "answer_key": "cut_styling_products_custom",
+                    "answer_key": "styling_products_custom",
                     "label": "기타 제품",
                     "placeholder": "사용하는 제품을 입력해주세요",
                     "required": true
