@@ -11,6 +11,8 @@ create_consultation_tables()
 ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "https://icy-beach-065dc0000.7.azurestaticapps.net",
+    "https://hedap.kr",
+    "https://www.hedap.kr",
 ]
 
 app.add_middleware(
