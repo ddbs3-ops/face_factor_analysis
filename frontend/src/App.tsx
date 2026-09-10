@@ -119,7 +119,7 @@ function App() {
         element = {
           <main className="app-shell">
             <section className="hero" aria-labelledby="page-title">
-              <p className="eyebrow">모답 · MODAP</p>
+              <p className="eyebrow">헤답 · HE:DAP</p>
               <h1 id="page-title">나만의 헤어 스타일 찾기</h1>
               <p className="hero-description">
                 얼굴의 비율과 윤곽을 분석해
