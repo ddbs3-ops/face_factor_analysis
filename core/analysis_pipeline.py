@@ -1,6 +1,7 @@
 
 import cv2
 import numpy as np
+import time
 
 from config import landmark_indices as landmark
 from core.face_features import (
@@ -78,13 +79,20 @@ def analyze_image(
     )
 
 def measure_image(image_path, face_landmarker, selfie_segmenter):
+    load_start = time.perf_counter()
     img, mp_image, img_height, img_width = load_image(image_path)
+    load_time = time.perf_counter() - load_start
+
+    detect_start = time.perf_counter()
     detection_result = detect_face(mp_image, face_landmarker, selfie_segmenter)
+    detect_time = time.perf_counter() - detect_start
+
 
     if detection_result is None:
         return None
     
     face_landmarker_result, segmented_masks_result = detection_result
+    rest_start = time.perf_counter()
 
     # 정면성 검사 시작
     frontality_result = check_frontality(face_landmarker_result) #일단 쓰이지 않으므로 함수 호출만 함 return도 없음
@@ -98,6 +106,15 @@ def measure_image(image_path, face_landmarker, selfie_segmenter):
         raw_face=raw_face,
         vertical_facepoints=vertical_facepoints
         )
+
+    rest_time = time.perf_counter() - rest_start
+
+    print(
+        f"[PERF measure_image] "
+        f"load={load_time:.3f}s | "
+        f"detect={detect_time:.3f}s | "
+        f"rest={rest_time:.3f}s"
+    )
 
     return ImageMeasurementResult(
         frontality_result=frontality_result,
@@ -146,13 +163,36 @@ def load_image(
 def detect_face(
         mp_image,
         face_landmarker,
-        selfie_segmenter):
-    face_landmarker_result = launch_facelandmark(face_landmarker, mp_image)
-    segmented_masks_result = launch_segment_selfie(selfie_segmenter, mp_image)
+        selfie_segmenter,
+):
+    face_start = time.perf_counter()
 
+    face_landmarker_result = launch_facelandmark(
+        face_landmarker,
+        mp_image,
+    )
 
-    face_count = len(face_landmarker_result.face_landmarks) 
-    
+    face_time = time.perf_counter() - face_start
+
+    segment_start = time.perf_counter()
+
+    segmented_masks_result = launch_segment_selfie(
+        selfie_segmenter,
+        mp_image,
+    )
+
+    segment_time = time.perf_counter() - segment_start
+
+    print(
+        f"[PERF inference] "
+        f"face={face_time:.3f}s | "
+        f"segment={segment_time:.3f}s"
+    )
+
+    face_count = len(
+        face_landmarker_result.face_landmarks
+    )
+
     if face_count > 1:
         print("2명 이상의 사람이 검출되었습니다.")
         return None
@@ -160,7 +200,7 @@ def detect_face(
     elif face_count == 0:
         print("사진에서 사람을 검출하지 못했습니다.")
         return None
-    
+
     return face_landmarker_result, segmented_masks_result
 
 
