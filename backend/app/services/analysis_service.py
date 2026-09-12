@@ -20,7 +20,12 @@ from config.settings import (
 async def analyze_uploaded_image(
         file: UploadFile,
         hairline_y_ratio: float):
+
+    total_start = time.perf_counter()
+
     suffix = os.path.splitext(file.filename)[1]
+
+    save_start = time.perf_counter()
 
     with tempfile.NamedTemporaryFile(
         delete=False,
@@ -29,8 +34,14 @@ async def analyze_uploaded_image(
         temp_file.write(await file.read())
         temp_path = temp_file.name
 
+    save_time = time.perf_counter() - save_start
+
     try:
+        analyze_start = time.perf_counter()
+
         result = analyze_user_image(temp_path, hairline_y_ratio)
+
+        analyze_time = time.perf_counter() - analyze_start
 
         if result is None:
             return None
@@ -54,8 +65,7 @@ async def analyze_uploaded_image(
         frontality = result["frontality_result"]
 
 
-        return {
-            
+        response = {
             "frontality_result": {
                 "is_frontal": frontality.is_frontal,
                 "pose": {
@@ -175,6 +185,17 @@ async def analyze_uploaded_image(
                 },
             },
         }
+
+        total_time = time.perf_counter() - total_start
+
+        print(
+            f"[PERF /analyze] "
+            f"save={save_time:.3f}s | "
+            f"analyze_user={analyze_time:.3f}s | "
+            f"total={total_time:.3f}s"
+        )
+
+        return response
 
     finally:
         os.remove(temp_path)

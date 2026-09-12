@@ -20,26 +20,40 @@ from core.face_features import (
 
 import sqlite3
 import pandas as pd
-
+import time
 
 
 def analyze_user_image(
         image_path,
         hairline_y_ratio=None):
+
+    total_start = time.perf_counter()
+    face_start = time.perf_counter()
     face_landmarker = create_face_landmarker(
         FACE_LANDMARKER_MODEL_PATH
     )
 
+    face_model_time = time.perf_counter() - face_start
+
+    segment_start = time.perf_counter()
     selfie_segmenter = create_selfie_segmenter(
         SELFIE_MODEL_PATH
     )
 
+    segment_model_time = time.perf_counter() - segment_start
+
     try:
+        image_start = time.perf_counter()
+
         image_analysis = analyze_image(
             image_path,
             face_landmarker,
             selfie_segmenter,
             hairline_y_ratio=hairline_y_ratio,
+        )
+
+        image_analysis_time = (
+            time.perf_counter() - image_start
         )
 
         if image_analysis is None:
@@ -49,7 +63,12 @@ def analyze_user_image(
         face_landmarker.close()
         selfie_segmenter.close()
 
+    db_start = time.perf_counter()
     reference_data = load_reference_db()
+
+    db_time = time.perf_counter() - db_start
+
+    post_start = time.perf_counter()
 
     measurement_top_percentiles = calculate_measurement_top_percentiles(
         reference_data,
@@ -82,7 +101,19 @@ def analyze_user_image(
             image_analysis.effective_hairline_y,
             image_analysis.raw_face,
         )
-    
+
+    post_time = time.perf_counter() - post_start
+    total_time = time.perf_counter() - total_start
+
+    print(
+        f"[PERF analyze_user] "
+        f"face_model={face_model_time:.3f}s | "
+        f"segment_model={segment_model_time:.3f}s | "
+        f"image_analysis={image_analysis_time:.3f}s | "
+        f"reference_db={db_time:.3f}s | "
+        f"postprocess={post_time:.3f}s | "
+        f"total={total_time:.3f}s"
+    )
 
     final_result = {
         "frontality_result": image_analysis.frontality_result,
