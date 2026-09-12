@@ -22,46 +22,31 @@ import sqlite3
 import pandas as pd
 import time
 
+from contextlib import ExitStack
+
 
 def analyze_user_image(
         image_path,
+        face_landmarker,
+        selfie_segmenter,
         hairline_y_ratio=None):
 
     total_start = time.perf_counter()
-    face_start = time.perf_counter()
-    face_landmarker = create_face_landmarker(
-        FACE_LANDMARKER_MODEL_PATH
+
+    image_start = time.perf_counter()
+
+    image_analysis = analyze_image(
+        image_path,
+        face_landmarker,
+        selfie_segmenter,
+        hairline_y_ratio=hairline_y_ratio,
+    )
+    image_analysis_time = (
+        time.perf_counter() - image_start   
     )
 
-    face_model_time = time.perf_counter() - face_start
-
-    segment_start = time.perf_counter()
-    selfie_segmenter = create_selfie_segmenter(
-        SELFIE_MODEL_PATH
-    )
-
-    segment_model_time = time.perf_counter() - segment_start
-
-    try:
-        image_start = time.perf_counter()
-
-        image_analysis = analyze_image(
-            image_path,
-            face_landmarker,
-            selfie_segmenter,
-            hairline_y_ratio=hairline_y_ratio,
-        )
-
-        image_analysis_time = (
-            time.perf_counter() - image_start
-        )
-
-        if image_analysis is None:
-            return None
-
-    finally:
-        face_landmarker.close()
-        selfie_segmenter.close()
+    if image_analysis is None:
+        return None
 
     db_start = time.perf_counter()
     reference_data = load_reference_db()
@@ -107,8 +92,6 @@ def analyze_user_image(
 
     print(
         f"[PERF analyze_user] "
-        f"face_model={face_model_time:.3f}s | "
-        f"segment_model={segment_model_time:.3f}s | "
         f"image_analysis={image_analysis_time:.3f}s | "
         f"reference_db={db_time:.3f}s | "
         f"postprocess={post_time:.3f}s | "
@@ -374,7 +357,22 @@ def main():
         r"C:\Users\eun\Downloads\sp_data\20220930_ID0161_C_02_N00002.png"
     )
 
-    result = analyze_user_image(image_path)
+    with ExitStack() as stack:
+        face_landmarker = create_face_landmarker(
+            FACE_LANDMARKER_MODEL_PATH
+        )
+        stack.callback(face_landmarker.close)
+
+        selfie_segmenter = create_selfie_segmenter(
+            SELFIE_MODEL_PATH
+        )
+        stack.callback(selfie_segmenter.close)
+
+        result = analyze_user_image(
+            image_path,
+            face_landmarker,
+            selfie_segmenter,
+        )
 
     if result is None:
         print("얼굴 분석 실패")

@@ -6,20 +6,13 @@ from fastapi import UploadFile
 
 from analyze_user import analyze_user_image
 from core.analysis_pipeline import measure_image
-from core.mediapipe_tasks import (
-    create_face_landmarker,
-    create_selfie_segmenter,
-)
-
-from config.settings import (
-    SELFIE_MODEL_PATH,
-    FACE_LANDMARKER_MODEL_PATH,
-)
 
 
 async def analyze_uploaded_image(
         file: UploadFile,
-        hairline_y_ratio: float):
+        hairline_y_ratio: float,
+        face_landmarker,
+        selfie_segmenter):
 
     total_start = time.perf_counter()
 
@@ -39,7 +32,12 @@ async def analyze_uploaded_image(
     try:
         analyze_start = time.perf_counter()
 
-        result = analyze_user_image(temp_path, hairline_y_ratio)
+        result = analyze_user_image(
+            temp_path,
+            face_landmarker,
+            selfie_segmenter,
+            hairline_y_ratio=hairline_y_ratio,
+        )
 
         analyze_time = time.perf_counter() - analyze_start
 
@@ -201,7 +199,10 @@ async def analyze_uploaded_image(
         os.remove(temp_path)
 
 
-async def measure_uploaded_image(file: UploadFile):
+async def measure_uploaded_image(
+        file: UploadFile,
+        face_landmarker,
+        selfie_segmenter):
     total_start = time.perf_counter()
     suffix = os.path.splitext(file.filename)[1]
     save_start = time.perf_counter()
@@ -215,17 +216,7 @@ async def measure_uploaded_image(file: UploadFile):
 
     save_time = time.perf_counter() - save_start
 
-    face_start = time.perf_counter()
-    face_landmarker = create_face_landmarker(
-        FACE_LANDMARKER_MODEL_PATH
-    )
-    face_model_time = time.perf_counter() - face_start
-
-    segment_start = time.perf_counter()
-    selfie_segmenter = create_selfie_segmenter(
-        SELFIE_MODEL_PATH
-    )
-    segment_model_time = time.perf_counter() - segment_start
+    
     try:
         analysis_start = time.perf_counter()
         measurement = measure_image(
@@ -247,8 +238,6 @@ async def measure_uploaded_image(file: UploadFile):
         print(
             f"[PERF /measure] "
             f"save={save_time:.3f}s | "
-            f"face_model={face_model_time:.3f}s | "
-            f"segment_model={segment_model_time:.3f}s | "
             f"analysis={analysis_time:.3f}s | "
             f"total={total_time:.3f}s"
         )
@@ -258,6 +247,4 @@ async def measure_uploaded_image(file: UploadFile):
         }
 
     finally:
-        face_landmarker.close()
-        selfie_segmenter.close()
         os.remove(temp_path)
