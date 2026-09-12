@@ -153,9 +153,14 @@ def create_raw_face(
 def load_image(
     path : str,
 ):
-    img_path = path
-    img = cv2.imread(img_path)
-    mp_image, img_height, img_width = prepare_mp_image(img_path)    #image 불러오기 type(img) == numpy.ndarray
+    img = cv2.imread(path)
+
+    if img is None:
+        raise FileNotFoundError(
+            f"사진을 불러오지 못했습니다: {path}"
+        )
+
+    mp_image, img_height, img_width = prepare_mp_image(img)    #image 불러오기 type(img) == numpy.ndarray
 
     return img, mp_image, img_height, img_width
 
