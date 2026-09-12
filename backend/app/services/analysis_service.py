@@ -1,6 +1,6 @@
 import os
 import tempfile
-from time import time
+import time
 
 from fastapi import UploadFile
 
@@ -231,7 +231,7 @@ async def measure_uploaded_image(file: UploadFile):
             f"analysis={analysis_time:.3f}s | "
             f"total={total_time:.3f}s"
         )
-        
+
         return {
             "hairline_y_ratio": hairline_y_ratio
         }
