@@ -15,8 +15,7 @@ async def analyze(
     result = await analyze_uploaded_image(
         file,
         hairline_y_ratio,
-        request.app.state.face_landmarker,
-        request.app.state.selfie_segmenter,
+        request.app.state.face_landmarker
     )
 
     if result is None:

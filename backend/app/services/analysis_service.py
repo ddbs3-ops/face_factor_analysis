@@ -11,8 +11,8 @@ from core.analysis_pipeline import measure_image
 async def analyze_uploaded_image(
         file: UploadFile,
         hairline_y_ratio: float,
-        face_landmarker,
-        selfie_segmenter):
+        face_landmarker
+        ):
 
     total_start = time.perf_counter()
 
@@ -35,7 +35,6 @@ async def analyze_uploaded_image(
         result = analyze_user_image(
             temp_path,
             face_landmarker,
-            selfie_segmenter,
             hairline_y_ratio=hairline_y_ratio,
         )
 

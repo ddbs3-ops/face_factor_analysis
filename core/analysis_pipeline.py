@@ -38,44 +38,96 @@ from core.schemas import (
 def analyze_image(
     image_path,
     face_landmarker,
-    selfie_segmenter,
-    hairline_y_ratio=None,
+    hairline_y_ratio,
 ):
-    measurement = measure_image(
-        image_path,
-        face_landmarker,
-        selfie_segmenter,
+    load_start = time.perf_counter()
+
+    _, mp_image, img_height, img_width = load_image(
+        image_path
     )
 
-    if measurement is None:
+    load_time = time.perf_counter() - load_start
+
+
+    face_start = time.perf_counter()
+
+    face_landmarker_result = launch_facelandmark(
+        face_landmarker,
+        mp_image,
+    )
+
+    face_time = time.perf_counter() - face_start
+
+
+    face_count = len(
+        face_landmarker_result.face_landmarks
+    )
+
+    if face_count > 1:
+        print("2명 이상의 사람이 검출되었습니다.")
         return None
 
-    if hairline_y_ratio is not None:
-        hairline_y = (
-            hairline_y_ratio
-            * measurement.image_height
-        )
-    else:
-        hairline_y = (
-            measurement.hairline_result.final_y
-        )
+    if face_count == 0:
+        print("사진에서 사람을 검출하지 못했습니다.")
+        return None
+
+
+    rest_start = time.perf_counter()
+
+    frontality_result = check_frontality(
+        face_landmarker_result
+    )
+
+    raw_face = create_raw_face(
+        face_landmarker_result,
+        img_width,
+        img_height,
+    )
+
+    vertical_facepoints = get_vertical_landmark_y(
+        raw_face
+    )
+
+    hairline_y = (
+        hairline_y_ratio
+        * img_height
+    )
 
     face_measurements = analyze_face_measurements(
-        raw_face=measurement.raw_face,
-        vertical_facepoints=measurement.vertical_facepoints,
+        raw_face=raw_face,
+        vertical_facepoints=vertical_facepoints,
         hairline_y=hairline_y,
     )
 
+    estimated_hairline_y = estimate_hairline_y(
+        vertical_facepoints
+    )
+
+    hairline_result = HairlineResult(
+        detected_y=None,
+        estimated_y=estimated_hairline_y,
+        final_y=hairline_y,
+    )
+
+    rest_time = time.perf_counter() - rest_start
+
+    print(
+        f"[PERF analyze_image] "
+        f"load={load_time:.3f}s | "
+        f"face={face_time:.3f}s | "
+        f"segment=skipped | "
+        f"rest={rest_time:.3f}s"
+    )
 
     return ImageAnalysisResult(
-        frontality_result=measurement.frontality_result,
-        raw_face=measurement.raw_face,
+        frontality_result=frontality_result,
+        raw_face=raw_face,
         face_measurements=face_measurements,
-        vertical_facepoints=measurement.vertical_facepoints,
-        hairline_result=measurement.hairline_result,
+        vertical_facepoints=vertical_facepoints,
+        hairline_result=hairline_result,
         effective_hairline_y=hairline_y,
-        image_width=measurement.image_width,
-        image_height=measurement.image_height,
+        image_width=img_width,
+        image_height=img_height,
     )
 
 def measure_image(image_path, face_landmarker, selfie_segmenter):

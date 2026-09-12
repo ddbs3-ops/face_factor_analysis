@@ -1,4 +1,4 @@
-from core.analysis_pipeline import analyze_image
+from core.analysis_pipeline import analyze_image, measure_image
 from core.mediapipe_tasks import (
     create_face_landmarker,
     create_selfie_segmenter,
@@ -28,8 +28,7 @@ from contextlib import ExitStack
 def analyze_user_image(
         image_path,
         face_landmarker,
-        selfie_segmenter,
-        hairline_y_ratio=None):
+        hairline_y_ratio : float):
 
     total_start = time.perf_counter()
 
@@ -38,7 +37,6 @@ def analyze_user_image(
     image_analysis = analyze_image(
         image_path,
         face_landmarker,
-        selfie_segmenter,
         hairline_y_ratio=hairline_y_ratio,
     )
     image_analysis_time = (
@@ -368,10 +366,25 @@ def main():
         )
         stack.callback(selfie_segmenter.close)
 
-        result = analyze_user_image(
+        measurement = measure_image(
             image_path,
             face_landmarker,
             selfie_segmenter,
+        )
+
+        if measurement is None:
+            print("얼굴 측정 실패")
+            return
+
+        hairline_y_ratio = (
+            measurement.hairline_result.final_y
+            / measurement.image_height
+        )
+
+        result = analyze_user_image(
+            image_path,
+            face_landmarker,
+            hairline_y_ratio,
         )
 
     if result is None:

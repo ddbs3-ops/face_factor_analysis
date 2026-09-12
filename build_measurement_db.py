@@ -1,5 +1,5 @@
 
-from core.analysis_pipeline import analyze_image
+from core.analysis_pipeline import measure_image, analyze_face_measurements
 from core.mediapipe_tasks import (
     create_face_landmarker,
     create_selfie_segmenter,
@@ -47,15 +47,19 @@ def main():
                 print(f"이미 분석됨: {sample.image_path.name}")
                 continue
 
-            result = analyze_image(
+            measurement = measure_image(
                 image_path_string,
                 face_landmarker,
                 selfie_segmenter,
             )
-            if result is None:
+            if measurement is None:
                 continue
 
-            
+            face_measurements = analyze_face_measurements(
+                raw_face=measurement.raw_face,
+                vertical_facepoints=measurement.vertical_facepoints,
+                hairline_y=measurement.hairline_result.final_y,
+            )
 
             save_face_measurement(
                 image_path=image_path_string,
@@ -63,8 +67,8 @@ def main():
                 gt_yaw=sample.gt_yaw,
                 gt_pitch=sample.gt_pitch,
                 gt_roll=sample.gt_roll,
-                frontality_result=result.frontality_result,
-                face_measurements=result.face_measurements,
+                frontality_result=measurement.frontality_result,
+                face_measurements=face_measurements,
             )
 
     finally:
